@@ -1,0 +1,19 @@
+name: image_quantification
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - jupyterlab
+  - pip
+  - numpy
+  - matplotlib
+  - pandas
+  - scipy
+  - scikit-image
+  - tifffile
+  - scikit-learn
+  - seaborn
+  - pip:
+    - roifile
+
