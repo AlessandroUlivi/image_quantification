@@ -1,7 +1,7 @@
 import os
 import tifffile
 import numpy as np
-import random
+from random import sample
 import pandas as pd
 from utils import listdirNHF
 from scipy.stats import spearmanr
@@ -162,11 +162,11 @@ def analyse_spearman_3Darray(arr_1, arr_2, shuffle_times=5, smooth_image=False, 
                 #Only consider roi pixels if roi_mask is provided
                 if hasattr(roi_mask, "__len__"):
                     #Shuffle the arrays of the dirrefent channels. The output of the shuffling is a list
-                    shff_list1 = random.sample(list(smooth_arr_1_image[roi_mask_image>0]), k=len(list(smooth_arr_1_image[roi_mask_image>0])))
-                    shff_list2 = random.sample(list(smooth_arr_2_image[roi_mask_image>0]), k=len(list(smooth_arr_2_image[roi_mask_image>0])))
+                    shff_list1 = sample(list(smooth_arr_1_image[roi_mask_image>0]), k=len(list(smooth_arr_1_image[roi_mask_image>0])))
+                    shff_list2 = sample(list(smooth_arr_2_image[roi_mask_image>0]), k=len(list(smooth_arr_2_image[roi_mask_image>0])))
                 else:
-                    shff_list1 = random.sample(list(smooth_arr_1_image.flatten()), k=len(list(smooth_arr_1_image.flatten())))
-                    shff_list2 = random.sample(list(smooth_arr_2_image.flatten()), k=len(list(smooth_arr_2_image.flatten())))
+                    shff_list1 = sample(list(smooth_arr_1_image.flatten()), k=len(list(smooth_arr_1_image.flatten())))
+                    shff_list2 = sample(list(smooth_arr_2_image.flatten()), k=len(list(smooth_arr_2_image.flatten())))
 
                 #Transform shuffled lists into numpy arrays
                 shff_arr1 = np.asarray(shff_list1)
