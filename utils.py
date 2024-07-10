@@ -2,6 +2,7 @@ import os
 import numpy as np
 from skimage.draw import polygon
 from roifile import ImagejRoi
+from scipy.spatial import distance
 
 
 def listdirNHF(input_directory):
@@ -112,3 +113,15 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
     else:
         return rescaled_out_img
 
+def get_distances(coords_1, coords_2, desired_distance='min'):
+    """
+    only tested on 2D arrays
+    """
+    #Get distances
+    coords_distances = distance.cdist(coords_1, coords_2, 'euclidean')
+
+    if desired_distance=='min':
+        min_dist_axis_0 = np.argmin(coords_distances, axis=0)[0]
+        min_dist_axis_1 = np.argmin(coords_distances, axis=1)[0]
+
+    return
