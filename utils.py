@@ -161,8 +161,8 @@ def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
     #Get the minimum distance and relative pixels if desired_distance is set to 'max'
     elif desired_distance=='max':
         #Get indexes of maximum distance in the coords_distances matrix
-        max_dist_axis_0 = np.argmax(coords_distances, axis=0)[0]
-        max_dist_axis_1 = np.argmax(coords_distances, axis=1)[0]
+        max_dist_axis_0 = np.argmax(coords_distances, axis=0)
+        max_dist_axis_1 = np.argmax(coords_distances, axis=1)
 
         #Initialize the output variables: the max_distance between coords_1 and coords_2, the coordinates of the pixel in coords_1 furthest to pixels in coords_2 and the
         #the coordinates of the pixel in coords_2 furthest to pixels in coords_1
