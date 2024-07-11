@@ -1,6 +1,7 @@
 import numpy as np
 from random import sample
 from skimage.measure import label, regionprops
+from utils import get_euclidean_distances
 
 def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0, n_px_thr_1=1, n_px_thr_2=0, val_threshold_arr_1=0, val_threshold_arr_2=0):
     """
@@ -124,7 +125,7 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
             return fract_double_target_on_target_1, shuffling_results
 
 
-def measure_regions_distances(label_img_1, binary_mask_target, roi__mask=None, desired_distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
+def measure_regions_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
     assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
     assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
     assert len(np.unique(binary_mask_target))==2, 'binary_mask_target must be a binary mask'
@@ -151,13 +152,45 @@ def measure_regions_distances(label_img_1, binary_mask_target, roi__mask=None, d
     #get regionproperties of label_img_1 and binary_mask_target
     regprops_img_1 = regionprops(img_1)
     regionprops_target_mask = regionprops(target_mask)
-    print("img_1", type(regprops_img_1), len(regprops_img_1))
-    print("target", type(regionprops_target_mask), len(regionprops_target_mask))
+    # print("img_1", type(regprops_img_1), len(regprops_img_1))
+    # print("target", type(regionprops_target_mask), len(regionprops_target_mask))
 
     #Get the coordinates of the pixels in binary_mask_target
-    # target_mask_coords = regionprops_target_mask[0].coords()
+    target_mask_coords_i = regionprops_target_mask[0].coords
+    # print(target_mask_coords_i)
+    # # transform coordinates of the pixels in the binary_mask_target in a list of tuples
+    # target_mask_coords = [tuple(tc) for tc in target_mask_coords_i]
+    # print(target_mask_coords)
 
-    return img_1, target_mask
+    #Initialize an output list
+    output_list = []
+
+    #If desired__distance is min or max, initialize an output dictionary, linking per each region of img_1, the coordinates of the pixels for which the distance was calculated.
+    if desired__distance=='min' or desired__distance=='max':
+        output_coords_dict = {}
+
+    #Iterate through the regions of img_1:
+    for r1 in regprops_img_1:
+
+        #Get the coordinates of the pixels of r1 and transform them in a list of tuples
+        r1_coords_i = r1.coords
+        # r1_coords = [tuple(r1c) for r1c in r1_coords_i]
+
+        #Get the min/max/mean distance of r1 to pixels of target_mask, and the coordinates of the pixel pair
+        wanted_distance, pixels_coords = get_euclidean_distances(r1_coords_i, target_mask_coords_i, desired_distance=desired__distance)
+
+        #Add measured distance to output list
+        output_list.append(wanted_distance)
+
+        #If desired__distance is min or max,link the coordinates of the pixels for which the distance was calculated in output_coords_dict
+        if desired__distance=='min' or desired__distance=='max':
+            output_coords_dict[tuple(pixels_coords[0])]=tuple(pixels_coords[1])
+
+    #If desired__distance is min or max, return distances list and dictionary of paired pixels coordinates. Return the distances list and None if  desired__distance is mean
+    if desired__distance=='min' or desired__distance=='max':
+        return output_list, output_coords_dict
+    else:
+        return output_list, None
 
 
 
