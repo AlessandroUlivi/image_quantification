@@ -113,21 +113,20 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
     else:
         return rescaled_out_img
 
-def get_distances(coords_1, coords_2, desired_distance='min'):
+def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
     """
     Given the coordinates of the pixels of non-overlapping regions (lists of tuples, each tuple corresponding to one pixel), the function returns:
-    - if desired_distance = 'min', a tuple with in position 0 the maximum distance between the two regions (a.u., float) and in position 1
+    - if desired_distance = 'min', a tuple with in position 0 the maximum euclidean distance between the two regions (a.u., float) and in position 1
     the coordinates of the two pixels for which the distance is calculated (list of tuples, position 0 are the coordinates of pixel in coords_1, position 1 the coordinates of pixel in 
     coords_2).
-    - if desired_distance = 'max', a tuple with in position 0 the maximum distance between the two regions (a.u., float) and in position 1
+    - if desired_distance = 'max', a tuple with in position 0 the maximum euclidean distance between the two regions (a.u., float) and in position 1
     the coordinates of the two pixels for which the distance is calculated (list of tuples, position 0 are the coordinates of pixel in coords_1, position 1 the coordinates of pixel in 
     coords_2).
-    - if desired_distance = 'mean', a tuple with in position 0 the mean distance between the pixels of the two regions (a.g., float) and None in position 1.
+    - if desired_distance = 'mean', a tuple with in position 0 the mean euclidean distance between the pixels of the two regions (a.g., float) and None in position 1.
 
     desired_distance is set to 'min' as default.
 
-    If multiple pixels have the same min or max distance, only one is returned (see https://numpy.org/doc/stable/reference/generated/numpy.argmin.html,
-    https://numpy.org/doc/stable/reference/generated/numpy.argmax.html) for additional documentation.
+    If multiple pixels have the same min or max distance, only one is returned. It is the first value found when iterating along the coordinates list.
     """
     #Double check that desired_distance is either 'min', or 'max', or 'mean'
     assert desired_distance in ['min', 'max', 'mean'], "desired_distance must be either 'min', or 'max', or 'mean'"
@@ -137,18 +136,25 @@ def get_distances(coords_1, coords_2, desired_distance='min'):
 
     #Get the minimum distance and relative pixels if desired_distance is set to 'min'
     if desired_distance=='min':
-        #Get indexes of minimum distance in the coords_distances matrix
-        min_dist_axis_0 = np.argmin(coords_distances, axis=0)[0]
-        min_dist_axis_1 = np.argmin(coords_distances, axis=1)[0]
+        #Get indexes of minimum distance in the coords_distances matrix for each axis
+        min_dist_axis_0 = np.argmin(coords_distances, axis=0)
+        min_dist_axis_1 = np.argmin(coords_distances, axis=1)
 
-        #Get the minimum distance in the coords_distances matrix
-        min_distance = coords_distances[min_dist_axis_0][min_dist_axis_1]
+        #Initialize the output variables: the min_distance between coords_1 and coords_2, the coordinates of the pixel in coords_1 closest to pixels in coords_2 and the
+        #the coordinates of the pixel in coords_2 closest to pixels in coords_1
+        min_distance = np.max(coords_distances) #to guarantee that the next loop will lead to the identification of a the min value, despite potential missmatches between np.min calculation and distance.cdist calculation, initialize the variable as the max in the distance matrix
+        closest_px_1 = tuple(0 for c1 in range(len(coords_1[0]))) #initialize as a series of 0 coordinates per each dimension of coords_1
+        closest_px_2 = tuple(0 for c2 in range(len(coords_2[0]))) #initialize as a series of 0 coordinates per each dimension of coords_2
 
-        #Get the coordinates of the pixel in coords_1 closest to coords_2
-        closest_px_1 = coords_1[min_dist_axis_1]
-
-        #Get the coordinates of the pixel in coords_2 closest to coords_1
-        closest_px_2 = coords_2[min_dist_axis_0]
+        #Iterate through the indexes of the minima found along each axis, get the corresponding value and update min_distance if the found value is smaller than the current
+        #Also update the pixels coordinates when a min value is found
+        for i in min_dist_axis_0:
+            for j in min_dist_axis_1:
+                ij_val = coords_distances[i][j]
+                if ij_val < min_distance:
+                    min_distance = ij_val
+                    closest_px_1 = coords_1[i]
+                    closest_px_2 = coords_2[j]
 
         return min_distance, [closest_px_1, closest_px_2]
 
@@ -158,14 +164,21 @@ def get_distances(coords_1, coords_2, desired_distance='min'):
         max_dist_axis_0 = np.argmax(coords_distances, axis=0)[0]
         max_dist_axis_1 = np.argmax(coords_distances, axis=1)[0]
 
-        #Get the maximum distance in the coords_distances matrix
-        max_distance = coords_distances[max_dist_axis_0][max_dist_axis_1]
+        #Initialize the output variables: the max_distance between coords_1 and coords_2, the coordinates of the pixel in coords_1 furthest to pixels in coords_2 and the
+        #the coordinates of the pixel in coords_2 furthest to pixels in coords_1
+        max_distance = np.min(coords_distances) #to guarantee that the next loop will lead to the identification of a the max value, despite potential missmatches between np.max calculation and distance.cdist calculation, initialize the variable as the min in the distance matrix
+        furthest_px_1 = tuple(0 for c1 in range(len(coords_1[0]))) #initialize as a series of 0 coordinates per each dimension of coords_1
+        furthest_px_2 = tuple(0 for c2 in range(len(coords_2[0]))) #initialize as a series of 0 coordinates per each dimension of coords_2
 
-        #Get the coordinates of the pixel in coords_1 closest to coords_2
-        furthest_px_1 = coords_1[max_dist_axis_1]
-
-        #Get the coordinates of the pixel in coords_2 closest to coords_1
-        furthest_px_2 = coords_2[max_dist_axis_0]
+        #Iterate through the indexes of the minima found along each axis, get the corresponding value and update min_distance if the found value is smaller than the current
+        #Also update the pixels coordinates when a min value is found
+        for k in max_dist_axis_0:
+            for w in max_dist_axis_1:
+                kw_val = coords_distances[k][w]
+                if kw_val > max_distance:
+                    max_distance = kw_val
+                    furthest_px_1 = coords_1[k]
+                    furthest_px_2 = coords_2[w]
 
         return max_distance, [furthest_px_1, furthest_px_2]
 
