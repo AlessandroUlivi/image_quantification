@@ -125,7 +125,7 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
             return fract_double_target_on_target_1, shuffling_results
 
 
-def measure_regions_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
+def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
     assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
     assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
     assert len(np.unique(binary_mask_target))==2, 'binary_mask_target must be a binary mask'
