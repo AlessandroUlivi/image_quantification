@@ -115,13 +115,64 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
 
 def get_distances(coords_1, coords_2, desired_distance='min'):
     """
-    only tested on 2D arrays
+    Given the coordinates of the pixels of non-overlapping regions (lists of tuples, each tuple corresponding to one pixel), the function returns:
+    - if desired_distance = 'min', a tuple with in position 0 the maximum distance between the two regions (a.u., float) and in position 1
+    the coordinates of the two pixels for which the distance is calculated (list of tuples, position 0 are the coordinates of pixel in coords_1, position 1 the coordinates of pixel in 
+    coords_2).
+    - if desired_distance = 'max', a tuple with in position 0 the maximum distance between the two regions (a.u., float) and in position 1
+    the coordinates of the two pixels for which the distance is calculated (list of tuples, position 0 are the coordinates of pixel in coords_1, position 1 the coordinates of pixel in 
+    coords_2).
+    - if desired_distance = 'mean', a tuple with in position 0 the mean distance between the pixels of the two regions (a.g., float) and None in position 1.
+
+    desired_distance is set to 'min' as default.
+
+    If multiple pixels have the same min or max distance, only one is returned (see https://numpy.org/doc/stable/reference/generated/numpy.argmin.html,
+    https://numpy.org/doc/stable/reference/generated/numpy.argmax.html) for additional documentation.
     """
-    #Get distances
+    #Double check that desired_distance is either 'min', or 'max', or 'mean'
+    assert desired_distance in ['min', 'max', 'mean'], "desired_distance must be either 'min', or 'max', or 'mean'"
+
+    #Get distance matrix between input coordinates
     coords_distances = distance.cdist(coords_1, coords_2, 'euclidean')
 
+    #Get the minimum distance and relative pixels if desired_distance is set to 'min'
     if desired_distance=='min':
+        #Get indexes of minimum distance in the coords_distances matrix
         min_dist_axis_0 = np.argmin(coords_distances, axis=0)[0]
         min_dist_axis_1 = np.argmin(coords_distances, axis=1)[0]
 
-    return
+        #Get the minimum distance in the coords_distances matrix
+        min_distance = coords_distances[min_dist_axis_0][min_dist_axis_1]
+
+        #Get the coordinates of the pixel in coords_1 closest to coords_2
+        closest_px_1 = coords_1[min_dist_axis_1]
+
+        #Get the coordinates of the pixel in coords_2 closest to coords_1
+        closest_px_2 = coords_2[min_dist_axis_0]
+
+        return min_distance, [closest_px_1, closest_px_2]
+
+    #Get the minimum distance and relative pixels if desired_distance is set to 'max'
+    elif desired_distance=='max':
+        #Get indexes of maximum distance in the coords_distances matrix
+        max_dist_axis_0 = np.argmax(coords_distances, axis=0)[0]
+        max_dist_axis_1 = np.argmax(coords_distances, axis=1)[0]
+
+        #Get the maximum distance in the coords_distances matrix
+        max_distance = coords_distances[max_dist_axis_0][max_dist_axis_1]
+
+        #Get the coordinates of the pixel in coords_1 closest to coords_2
+        furthest_px_1 = coords_1[max_dist_axis_1]
+
+        #Get the coordinates of the pixel in coords_2 closest to coords_1
+        furthest_px_2 = coords_2[max_dist_axis_0]
+
+        return max_distance, [furthest_px_1, furthest_px_2]
+
+    #Get the average distance if desired_distance is set to 'mean'
+    else:
+        #Get the average distance in the coords_distances matrix
+        mean_distance = np.mean(coords_distances)
+
+        return mean_distance, None
+
