@@ -1,5 +1,6 @@
 import numpy as np
 from random import sample
+from skimage.measure import label, regionprops
 
 def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0, n_px_thr_1=1, n_px_thr_2=0, val_threshold_arr_1=0, val_threshold_arr_2=0):
     """
@@ -122,6 +123,41 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
             
             return fract_double_target_on_target_1, shuffling_results
 
+
+def measure_regions_distances(label_img_1, binary_mask_target, roi__mask=None, desired_distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
+    assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
+    assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
+    assert len(np.unique(binary_mask_target))==2, 'binary_mask_target must be a binary mask'
+
+    #Copy the input images - make sure that binary_mask_target has values 1 and 0, where 1s are assumed to be the pixels of interest
+    label_img_1_copy = label_img_1.copy()
+    binary_mask_target_copy = np.where(binary_mask_target>binary_mask_target_thres, 1,0)
+
+    #Transform input images to label images if transform_to_label_img is set to True
+    if transform_to_label_img:
+        img_1_i = label(label_img_1_copy)
+    else:
+        img_1_i = label_img_1_copy
+
+    #Set values outside roi to 0 (background) if roi__mask is provided
+    if hasattr(roi__mask, "__len__"):
+        roi__mask_copy = roi__mask.copy()
+        img_1 = np.where(roi__mask>0, img_1_i, 0)
+        target_mask = np.where(roi__mask>0, binary_mask_target_copy, 0)
+    else:
+        img_1 = img_1_i
+        target_mask = binary_mask_target_copy
+    
+    #get regionproperties of label_img_1 and binary_mask_target
+    regprops_img_1 = regionprops(img_1)
+    regionprops_target_mask = regionprops(target_mask)
+    print("img_1", type(regprops_img_1), len(regprops_img_1))
+    print("target", type(regionprops_target_mask), len(regionprops_target_mask))
+
+    #Get the coordinates of the pixels in binary_mask_target
+    # target_mask_coords = regionprops_target_mask[0].coords()
+
+    return img_1, target_mask
 
 
 
