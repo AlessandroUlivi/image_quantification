@@ -31,7 +31,7 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
     is None.
     Else:
         If shuffle times is set to 0, the output is a tuple, with, in position 0, the fraction of the pixels>val_threshold_1 of arr_1 which are concomitantly >val_threshold_2
-        in arr_2_against for the input arr_1 and arr_2_against arrays.
+        in arr_2_against for the input arr_1 and arr_2_against arrays. In position 1 is None.
         If shuffle times is > 0, the output is a tuple, with, in position 0, the fraction of the pixels>val_threshold_1 of arr_1 which are concomitantly >val_threshold_2
         in arr_2_against for the input arr_1 and arr_2_against arrays. In position 1 is a list. Inside the list the same measurement is done per each of the shuffle_times.
 
@@ -89,7 +89,7 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
         # print(fract_double_target_on_target_1)
 
         if shuffle_times==0:
-            return fract_double_target_on_target_1,
+            return fract_double_target_on_target_1, None
         else:
 
             #Initialize a list to collect shuffling results
