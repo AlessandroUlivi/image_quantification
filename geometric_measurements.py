@@ -2,6 +2,14 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 
+def get_mask_area():
+    return
+
+
+def get_areas_of_regions_in_mask():
+    return
+
+
 def get_covex_hull_coordinates_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
     """
     Given:
