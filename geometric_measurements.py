@@ -37,17 +37,39 @@ def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0):
     
     #Get the area of the input_array region of interest number of pixels scaled by pixel-area
     area_from_props = array_to_process_props.area
-    
+
     return area_as_poi_number, area_from_props
 
 
 def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_img=False, binarization_threshold=0):
+    """
+    Returns a list of the areas of each separate region of input_array. The area is measured as pixels scaled by pixel-area. Refer to
+    https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops for further documentation.
+
+    Inputs:
+    - label_img. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
+    or a binary image. If a label image is provided, the values must be >=0 and pixels of value 0 are assumed to correspond to the background. If a binary image is given,
+    the parameter transform_to_label_img must be set to True in order for the function to transfom it in a label image using skimage.measure.label method
+    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). If a binary mask is provided it will be firstly rescaled in the 0-1 range using the
+    binarization_threshold parameter. Pixels with intensity values >binarization_threshold will be set to 1 and considered pixels of interest, while the rest will be
+    set to 0 and considered background. The default value for binarization_threshold is 0. NOTE: a binary mask can be considered a label image if only a single
+    region is present.
+    - roi__mask. Optional. ndarray of the same size of input_array. Binary mask. If provided, restricts the analysis to a region of interest. The region of interest is assumed to
+    the positive pixels in roi_mas_k.
+    - binarization_threshold. Int or float. Default 0. Defines the highpass threshold to distinguish pixels of interest from background in input_array when . Pixels whose value
+    is >binarization_threshold are considered pixels of interest. The rest of the pixels are considered background.
+
+    Outputs: list.
+    
+    """
     #Copy label image and rescale it in the 0 and 1 value range
-    label_img_copy = np.where(label_img>binarization_threshold, 1, 0)
+    label_img_copy = label_img.copy()
 
     #Transform the image in a label image, if transform_to_label is True
     if transform_to_label_img:
-        label_img_i = label(label_img_copy)
+        #Use binarization_threshold to rescale label_img_copy in the 0 and 1 value range
+        rescaled_label_img_copy = np.where(label_img_copy>binarization_threshold, 1,0)
+        label_img_i = label(rescaled_label_img_copy)
     else:
         label_img_i = label_img_copy
     
