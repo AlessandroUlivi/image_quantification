@@ -133,7 +133,8 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     - label_img_1. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
     or a binary image. If a label image is provided, the values must be >=0 and pixels of value 0 are assumed to correspond to the background. If a binary image is given,
     the parameter transform_to_label_img must be set to True in order for the function to transfom it in a label image using skimage.measure.label method
-    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label).
+    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). NOTE: a binary mask can be considered a label image if only a single
+    region is present.
     - binary_mask_target. ndarray of the same shape of label_img_1. Pixels of interest are assumed to be pixels whose value is >binary_mask_target_thres (default 0).
     - roi_mask. Optional parameter. ndarray of the same shape of label_img_1. Binary mask. When provided, the analysis will be restricted to the region of interest indicated by roi_mask.
     It is assumed that the region of interest corresponds to pixels in roi_mask with value>0.
