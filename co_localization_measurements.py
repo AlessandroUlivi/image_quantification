@@ -145,6 +145,8 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     the minimum distances between regions of label_img_1 and regions of binary_mask_target are measured. If 'max' the maximum distances between regions of label_img_1
     and regions of binary_mask_target are measured. If 'mean' the mean distance between between regions of label_img_1 and regions of binary_mask_target is measured.
     - transform_to_label_img. Bool (defaul False). Specifies if label_img_1 should be transformed to a label image. It must be True if label_img_1 is not a label image.
+    - label_img_1_thres. Int or float. Only applies when transform_to_label_img is True. Default 0. Defines the highpass threshold to distinguish pixels of interest from background
+    in label_img_1. Pixels whose value is >label_img_1_thres are considered pixels of interest. The rest of the pixels are considered background.
     - binary_mask_target_thre. Int or float. Pixels whose value is >binary_mask_target_thre are considered pixels of interest in binary_mask_target.
 
     Outputs:
