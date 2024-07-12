@@ -189,8 +189,35 @@ def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
 
         return mean_distance, None
 
-def combine_rois():
+def combine_rois(input_rois, i_axis=None, thresholds=0, output_low_val=0, output_highval=255, output_dtype=np.uint8):
+    """
+    threshold could allow for a list of thresholds
+    """
+    if isinstance(input_rois, list):
+        iteration_list = input_rois
+    
+    elif hasattr(input_rois, "__len__"):
+        assert i_axis!=None, "provide a value for i_axis if input_roi is an array"
+        iteration_list = [np.squeeze(a) for a in np.split(input_rois, indices_or_sections=input_rois.shape[i_axis], axis=i_axis)]
+        
+    
+    #Initialize an output array
+    output_array = np.zeros(iteration_list[0].shape)
+    
+    #Iterate along the iteration list
+    for pos, arr in enumerate(iteration_list):
+        
+        if isinstance(thresholds, list):
+            t = thresholds[pos]
+        else:
+            t = thresholds
+
+    return
+
+
+def mantain_exclude_image_rois():
     """
     given an roi to maintain and an roi to exclude, it combines them in the segmentation of an image.
     """
     return
+
