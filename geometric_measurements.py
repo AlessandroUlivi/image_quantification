@@ -13,7 +13,7 @@ def get_areas_of_regions_in_mask():
 def get_covex_hull_coordinates_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
     """
     Given:
-    - a binary mask defining a region of interst.
+    - a binary mask defining a region of interst. It is assumed that the region of intest are pixels whose value is >threshold_4mask (default 0).
     
     It returns:
     - position 0, the minimum convex hull for the region of interest. Refer to https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html for the output.
