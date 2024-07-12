@@ -19,7 +19,7 @@ def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0):
     - position-1. The area of the region of interest in input_array as number of pixels scaled by pixel-area. Refer to
     https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops for further documentation.
     """
-    #Copy input_array and binarize it in the 0 and 1 range
+    #Copy input_array, binarize it using binarization_threshold and set the values to 1 and 0, where 1 are assumed to be the pixels of interest
     input_array_01 = np.where(input_array>binarization_threshold, 1, 0)
     
     #If roi_mas_k is provided, copy it and use it to set to 0 pixels in input_array corresponded by background values in roi_mas_k
@@ -50,7 +50,7 @@ def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_i
     - label_img. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
     or a binary image. If a label image is provided, the values must be >=0 and pixels of value 0 are assumed to correspond to the background. If a binary image is given,
     the parameter transform_to_label_img must be set to True in order for the function to transfom it in a label image using skimage.measure.label method
-    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). If a binary mask is provided it will be firstly rescaled in the 0-1 range using the
+    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). If a binary mask is provided it will be firstly binarized and set in the 0-1 range using the
     binarization_threshold parameter. Pixels with intensity values >binarization_threshold will be set to 1 and considered pixels of interest, while the rest will be
     set to 0 and considered background. The default value for binarization_threshold is 0. NOTE: a binary mask can be considered a label image if only a single
     region is present.
@@ -67,14 +67,14 @@ def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_i
         assert np.min(label_img)==0, 'label_img must have background values set to 0 if a label image is provided'
         assert np.max(label_img)>0, 'label_img must have label region values >0 if a label image is provided'
 
-    #Copy label image and rescale it in the 0 and 1 value range
+    #Copy label image
     label_img_copy = label_img.copy()
 
     #Transform the image in a label image, if transform_to_label is True
     if transform_to_label_img:
-        #Use binarization_threshold to rescale label_img_copy in the 0 and 1 value range
-        rescaled_label_img_copy = np.where(label_img_copy>binarization_threshold, 1,0)
-        label_img_i = label(rescaled_label_img_copy)
+        #Threshold label_img_copy using binarization_threshold. Set the values to 1 and 0, where 1s are assumed to be the pixels of interest
+        label_img_copy_01 = np.where(label_img_copy>binarization_threshold, 1,0)
+        label_img_i = label(label_img_copy_01)
     else:
         label_img_i = label_img_copy
     
@@ -120,19 +120,18 @@ def get_covex_hull_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
     If roi_mask is provided (binary array of the same shape of input_mask), the analysis is restricted to the region of interest. The region of interst is
     assumed to correspond to the positive pixels in roi_mask.
     """
-    #Copy input_mask and rescale the values in the 1, 0 range where 1 are pixels of interest, 0 the background. Pixels whose value is >threshold_4mask are assumed to
-    # be the pixels of interes
-    rescaled_input_mask = np.where(input_mask>threshold_4mask, 1,0)
+    #Copy input_mask, threshold it using threshold_4mask. Set its values to 1 and 0, where 1 are pixels of interest, 0 the background.
+    input_mask_01 = np.where(input_mask>threshold_4mask, 1,0)
 
-    #If roi_mask is provided, copy it and use it to set to 0 pixels in rescaled_input_mask which are corresponded by background pixels in roi_mask
+    #If roi_mask is provided, copy it and use it to set to 0 pixels in input_mask_01 which are corresponded by background pixels in roi_mask
     if hasattr(roi_mask, "__len__"):
         #Copy roi_mask
         roi_mask_copy = roi_mask.copy()
 
-        #Set to 0 pixels in rescaled_input_mask which are corresponded by background pixels in roi_mask
-        segmented_input_mask = np.where(roi_mask_copy>0,rescaled_input_mask,0)
+        #Set to 0 pixels in binary input mask which are corresponded by background pixels in roi_mask
+        segmented_input_mask = np.where(roi_mask_copy>0,input_mask_01,0)
     else:
-        segmented_input_mask = rescaled_input_mask
+        segmented_input_mask = input_mask_01
     
     #Get the coordinates of the pixels of interest in segmented_input_mask
     mask_pixels_coords = np.argwhere(segmented_input_mask>0)
