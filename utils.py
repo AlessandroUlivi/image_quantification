@@ -189,3 +189,8 @@ def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
 
         return mean_distance, None
 
+def combine_rois():
+    """
+    given an roi to maintain and an roi to exclude, it combines them in the segmentation of an image.
+    """
+    return
