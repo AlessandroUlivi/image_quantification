@@ -224,4 +224,6 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
         return output_list, None
 
 
+def count_number_of_overlapping_regions():
+    return
 
