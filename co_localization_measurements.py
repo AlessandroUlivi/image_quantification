@@ -174,8 +174,8 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
 
     #Transform input images to label images if transform_to_label_img is set to True
     if transform_to_label_img:
-        rescaled_label_img_1_copy = np.where(label_img_1_copy>label_img_1_thres, 1,0)
-        img_1_i = label(rescaled_label_img_1_copy)
+        label_img_1_copy_01 = np.where(label_img_1_copy>label_img_1_thres, 1,0)
+        img_1_i = label(label_img_1_copy_01)
     else:
         img_1_i = label_img_1_copy
 
