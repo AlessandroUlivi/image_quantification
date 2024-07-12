@@ -126,6 +126,36 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
 
 
 def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
+    """
+    Returns the eucledean distance between the regions of an input image (label_img_1) and the regions of a target image (binary_mask_target).
+
+    Inputs:
+    - label_img_1. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
+    or a binary image. If a label image is provided, the values must be >=0 and pixels of value 0 are assumed to correspond to the background. If a binary image is given,
+    the parameter transform_to_label_img must be set to True in order for the function to transfom it in a label image using skimage.measure.label method
+    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label).
+    - binary_mask_target. ndarray of the same shape of label_img_1. Pixels of interest are assumed to be pixels whose value is >binary_mask_target_thres (default 0).
+    - roi_mask. Optional parameter. ndarray of the same shape of label_img_1. Binary mask. When provided, the analysis will be restricted to the region of interest indicated by roi_mask.
+    It is assumed that the region of interest corresponds to pixels in roi_mask with value>0.
+    - desired_distance. String. Three choices are possible: 'min' (default), 'max', 'mean'. The parameter is passed to the function get_euclidean_distances (within utils.py). If 'min'
+    the minimum distances between regions of label_img_1 and regions of binary_mask_target are measured. If 'max' the maximum distances between regions of label_img_1
+    and regions of binary_mask_target are measured. If 'mean' the mean distance between between regions of label_img_1 and regions of binary_mask_target is measured.
+    - transform_to_label_img. Bool (defaul False). Specifies if label_img_1 should be transformed to a label image. It must be True if label_img_1 is not a label image.
+    - binary_mask_target_thre. Int or float. Pixels whose value is >binary_mask_target_thre are considered pixels of interest in binary_mask_target.
+
+    Outputs:
+    I will use i to refer to the i-th region of label_img_1. n is the total number of separate regions in label_img_1.
+    - if desired__distance=='min', the output is a tuple. Position-0 is a list of length n collecting, per each i region, the minimum euclidean distance with regions of
+    binary_mask_target. Position-1 is a dictionary with n entries, each entry corresponding to a i region. Each entry links the coordinates of the pixel pair
+    (key is the pixel in the i region and value is the pixel among the pixels of interest of binary_mask_target) for which the minimum distance between region i and regions of
+    binary_mask_target have been calculated.
+    - if desired__distance=='max', the output is a tuple. Position-0 is a list of length n collecting, per each i region, the maximum euclidean distance with regions of
+    binary_mask_target. Position-1 is a dictionary with n entries, each entry corresponding to a i region. Each entry links the coordinates of the pixel pair
+    (key is the pixel in the i region and value is the pixel among the pixels of interest of binary_mask_target) for which the maximum distance between region i and regions of
+    binary_mask_target have been calculated.
+    - if desired__distance=='meam', the output is a tuple. Position-0 is a float value indicating the average distance between regions of label_img_1 and regions of binary_mask_target.
+    Position-1 is None.
+    """
     assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
     assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
     assert len(np.unique(binary_mask_target))==2, 'binary_mask_target must be a binary mask'
