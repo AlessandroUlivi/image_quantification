@@ -33,16 +33,47 @@ def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0):
     area_as_poi_number = np.sum(array_to_process)
 
     #Use regionprops to calculate the area of the binary mask
-    array_to_process_props = regionprops(array_to_process)
-
+    array_to_process_props = regionprops(array_to_process)[0]
+    
     #Get the area of the input_array region of interest number of pixels scaled by pixel-area
-    area_from_props = array_to_process.area
-
+    area_from_props = array_to_process_props.area
+    
     return area_as_poi_number, area_from_props
 
 
-def get_areas_of_regions_in_mask():
-    return
+def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_img=False, binarization_threshold=0):
+    #Copy label image and rescale it in the 0 and 1 value range
+    label_img_copy = np.where(label_img>binarization_threshold, 1, 0)
+
+    #Transform the image in a label image, if transform_to_label is True
+    if transform_to_label_img:
+        label_img_i = label(label_img_copy)
+    else:
+        label_img_i = label_img_copy
+    
+    #If roi_mask is provided, copy it and use it to set to 0 pixels in label_img_i corresponded by background pixels in roi__mask
+    if hasattr(roi__mask, "__len__"):
+        roi__mask_copy = roi__mask.copy()
+        img_to_pro_cess = np.where(roi__mask_copy>0, label_img_i, 0)
+    else:
+        img_to_pro_cess = label_img_i
+
+    #Get regions properties
+    img_to_pro_cess_regionprops = regionprops(img_to_pro_cess)
+
+    #Initialize the output list
+    output_list = []
+
+    #Iterate through the measurements of each region
+    for reg_mes in img_to_pro_cess_regionprops:
+
+        #Get the area of the region
+        region_area = reg_mes.area
+
+        #Append the area to the output list
+        output_list.append(region_area)
+
+    return output_list
 
 
 def get_covex_hull_coordinates_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
