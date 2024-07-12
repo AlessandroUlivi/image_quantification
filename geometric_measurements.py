@@ -62,6 +62,10 @@ def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_i
     Outputs: list.
     
     """
+    if not transform_to_label_img:
+        assert np.min(label_img)==0, 'label_img must have background values set to 0 if a label image is provided'
+        assert np.max(label_img)>0, 'label_img must have label region values >0 if a label image is provided'
+
     #Copy label image and rescale it in the 0 and 1 value range
     label_img_copy = label_img.copy()
 
