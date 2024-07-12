@@ -125,7 +125,8 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
             return fract_double_target_on_target_1, shuffling_results
 
 
-def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, binary_mask_target_thres=0):
+def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, label_img_1_thres=0,
+                                        binary_mask_target_thres=0):
     """
     Returns the eucledean distance between the regions of an input image (label_img_1) and the regions of a target image (binary_mask_target).
 
@@ -133,7 +134,9 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     - label_img_1. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
     or a binary image. If a label image is provided, the values must be >=0 and pixels of value 0 are assumed to correspond to the background. If a binary image is given,
     the parameter transform_to_label_img must be set to True in order for the function to transfom it in a label image using skimage.measure.label method
-    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). NOTE: a binary mask can be considered a label image if only a single
+    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). If a binary mask is provided it will be firstly rescaled in the 0-1 range using the
+    label_img_1_thres parameter. Pixels with intensity values >label_img_1_thres will be set to 1 and considered pixels of interest, while the rest will be
+    set to 0 and considered background. The default value for label_img_1_thres is 0. NOTE: a binary mask can be considered a label image if only a single
     region is present.
     - binary_mask_target. ndarray of the same shape of label_img_1. Pixels of interest are assumed to be pixels whose value is >binary_mask_target_thres (default 0).
     - roi_mask. Optional parameter. ndarray of the same shape of label_img_1. Binary mask. When provided, the analysis will be restricted to the region of interest indicated by roi_mask.
@@ -160,6 +163,9 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
     assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
     assert len(np.unique(binary_mask_target))==2, 'binary_mask_target must be a binary mask'
+    # if not transform_to_label_img:
+    #     assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
+    #     assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
 
     #Copy the input images - make sure that binary_mask_target has values 1 and 0, where 1s are assumed to be the pixels of interest
     label_img_1_copy = label_img_1.copy()
@@ -167,7 +173,8 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
 
     #Transform input images to label images if transform_to_label_img is set to True
     if transform_to_label_img:
-        img_1_i = label(label_img_1_copy)
+        rescaled_label_img_1_copy = np.where(label_img_1_copy>label_img_1_thres, 1,0)
+        img_1_i = label(rescaled_label_img_1_copy)
     else:
         img_1_i = label_img_1_copy
 
