@@ -63,7 +63,7 @@ def analyse_spearman_3Darray(arr_1, arr_2, shuffle_times=5, smooth_image=False, 
     arr_1_copy = arr_1.copy()
     arr_2_copy = arr_2.copy()
 
-    #Copy roi_mask if it is provided and transform it to values 1 and 0
+    #Copy roi_mask if it is provided, threshold it so that pixels with positive values are set to 1 and background pixels are set to 0
     if hasattr(roi_mask, "__len__"):
         roi_mask_copy = np.where(roi_mask>0, 1, 0)
 
