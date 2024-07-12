@@ -160,12 +160,11 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     - if desired__distance=='meam', the output is a tuple. Position-0 is a float value indicating the average distance between regions of label_img_1 and regions of binary_mask_target.
     Position-1 is None.
     """
-    assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
-    assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
+    
     assert len(np.unique(binary_mask_target))==2, 'binary_mask_target must be a binary mask'
-    # if not transform_to_label_img:
-    #     assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
-    #     assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
+    if not transform_to_label_img:
+        assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0'
+        assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0'
 
     #Copy the input images - make sure that binary_mask_target has values 1 and 0, where 1s are assumed to be the pixels of interest
     label_img_1_copy = label_img_1.copy()
