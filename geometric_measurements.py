@@ -103,7 +103,7 @@ def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_i
     return output_list
 
 
-def get_covex_hull_coordinates_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
+def get_covex_hull_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
     """
     Given:
     - a binary mask defining a region of interst. It is assumed that the region of intest are pixels whose value is >threshold_4mask (default 0).
