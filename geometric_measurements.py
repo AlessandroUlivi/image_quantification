@@ -56,10 +56,11 @@ def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_i
     region is present.
     - roi__mask. Optional. ndarray of the same size of input_array. Binary mask. If provided, restricts the analysis to a region of interest. The region of interest is assumed to
     the positive pixels in roi_mas_k.
-    - binarization_threshold. Int or float. Default 0. Defines the highpass threshold to distinguish pixels of interest from background in input_array when . Pixels whose value
-    is >binarization_threshold are considered pixels of interest. The rest of the pixels are considered background.
+    - binarization_threshold. Int or float. Only applies when transform_to_label_img is True. Default 0. Defines the highpass threshold to distinguish pixels of interest from background
+    in label_img. Pixels whose value is >binarization_threshold are considered pixels of interest. The rest of the pixels are considered background.
 
-    Outputs: list.
+    Output: list. The area in number of pixels scaled by pixel-area. Refer to https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops of each separate
+    region of label_img.
     
     """
     if not transform_to_label_img:
