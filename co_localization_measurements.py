@@ -168,12 +168,13 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
         assert np.min(label_img_1)==0, 'label_img_1 must have background values set to 0 if a label image is provided'
         assert np.max(label_img_1)>0, 'label_img_1 must have label region values >0 if a label image is provided'
 
-    #Copy the input images - make sure that binary_mask_target has values 1 and 0, where 1s are assumed to be the pixels of interest
+    #Copy the input images - threshold that binary_mask_target using binary_mask_target_thres set it to values 1 and 0, where 1s are assumed to be the pixels of interest
     label_img_1_copy = label_img_1.copy()
     binary_mask_target_copy = np.where(binary_mask_target>binary_mask_target_thres, 1,0)
 
     #Transform input images to label images if transform_to_label_img is set to True
     if transform_to_label_img:
+        #Theshold the input image using label_img_1_thres and set it to values 1 and 0, where 1s are assumed to be the pixels of interest
         label_img_1_copy_01 = np.where(label_img_1_copy>label_img_1_thres, 1,0)
         img_1_i = label(label_img_1_copy_01)
     else:
