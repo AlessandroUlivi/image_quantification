@@ -258,7 +258,7 @@ def combine_rois(input_rois, thresholds=0, i_axis=None, binarize_output=True, ou
         return output_array
 
 
-def mantain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_mask_to_exclude=None, thresholds_maintain=0,
+def maintain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_mask_to_exclude=None, thresholds_maintain=0,
                                thresholds_exclude=0, output_lowval=None, output_highval=None, output_dtype=None, common_pixels='exclude'):
     """
     Maintain, exclude or maintain and exclude regions of an input array.
@@ -284,7 +284,7 @@ def mantain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_m
     in the input_array. Background pixels in the output array are set to output_lowval if output_lowval is provided. When output_lowval is not provided (default), background
     pixels are set to the minimum value in input_array.
     """
-    
+
     #Copy the input_array
     input_array_copy = input_array.copy()
 
