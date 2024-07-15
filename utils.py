@@ -189,15 +189,36 @@ def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
 
         return mean_distance, None
 
-def combine_rois(input_rois, i_axis=None, thresholds=0, output_low_val=0, output_highval=255, output_dtype=np.uint8):
+def combine_rois(input_rois, thresholds=0, i_axis=None, binarize_output=True, output_lowval=0, output_highval=255, output_dtype=np.uint8):
     """
-    threshold could allow for a list of thresholds
+    Given:
+    - input_rois, list of ndarrays or ndarray. If list of ndarrays each ndarray must have the same shape. If single ndarray, i_axis must be provided.
+    - thresholds, float, int or list of floats/int. If list, the len of the list must match the len of input_rois (if input_rois is a list) or the size of ndarray's i_axis
+    (if input_rois is an ndarray).
+
+    The function:
+    1) if input_rois is an ndarray, it is splat in m ndarrays along the i_axis, where m correspond to the size of the i_axis. If input_rois is already a list, nothing is done.
+    Output list-1.
+    2) iterates through the individual ndarrays (arr[i]) of list-1.
+    3) Binarizes each arr[i] using a highpass threshold (thre[i]). If thresholds is an int or a float, thre[i]=thresholds and it is applied, identical, to all arr[i].
+    If thresholds is a list. thre[i] corresponds to the float/int in thresholds which has the same index of arr[i]. When binarizing, it is assumed that pixels of arr[i] whose value is
+    >thre[i] are the pixels of interest (set to 1) and the rest the background (set to 0).
+    4) Joins all arr[i] in a single output array (out_arr) of the same shape of arr[i], by summing their values.
+    5) If binarize_output==True (default), out_arr is binarized by setting all positive pixels to output_highval and all non positive pixels to output_low_val. If binarize_output==False,
+    out_arr is returned.
     """
+
+    #Use input_rois as it is if a list is provided
     if isinstance(input_rois, list):
         iteration_list = input_rois
     
+    #If input_rois is a ndarray
     elif hasattr(input_rois, "__len__"):
+
+        #Make sure that i_axis is provided
         assert i_axis!=None, "provide a value for i_axis if input_roi is an array"
+
+        #Split input_rois in m ndarray along i_axis, where m equals to the size of i_axis in input_rois
         iteration_list = [np.squeeze(a) for a in np.split(input_rois, indices_or_sections=input_rois.shape[i_axis], axis=i_axis)]
         
     
@@ -207,12 +228,26 @@ def combine_rois(input_rois, i_axis=None, thresholds=0, output_low_val=0, output
     #Iterate along the iteration list
     for pos, arr in enumerate(iteration_list):
         
+        #If thresholds is a list, get the thresholding value from the list, taking the value at the same index of the array under iteration
         if isinstance(thresholds, list):
             t = thresholds[pos]
+        #If thresholds is a single number, use it as a threshold
         else:
             t = thresholds
 
-    return
+        #Binarize the array under iteration by setting pixels whose value is >threshold to 1 and the rest to 0
+        bin_arr = np.where(arr>t, 1, 0)
+
+        #Update the output array
+        output_array += bin_arr
+
+    #Binarize the output_array and set the values in the wanted range, if binarize_output is True. Return it as is otherwise
+    if binarize_output:
+
+        final_output_array = np.where(output_array>0, output_highval, output_lowval).astype(output_dtype)
+        return final_output_array
+    else:
+        return output_array
 
 
 def mantain_exclude_image_rois():
