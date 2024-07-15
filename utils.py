@@ -258,9 +258,116 @@ def combine_rois(input_rois, thresholds=0, i_axis=None, binarize_output=True, ou
         return output_array
 
 
-def mantain_exclude_image_rois():
+def mantain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_mask_to_exclude=None, thresholds_maintain=0,
+                               thresholds_exclude=0, output_lowval=None, output_highval=None, output_dtype=None, common_pixels='exclude'):
     """
-    given an roi to maintain and an roi to exclude, it combines them in the segmentation of an image.
+    Maintain, exclude or maintain and exclude regions of an input array.
+
+    Inputs:
+    - input_array, ndarray.
+    - array_mask_to_maintain. ndarray of the same shape of input_array. Optional. If provided, pixels in array_mask_to_maintain whose value is >thresholds_maintain (default 0)
+    are considered pixels of interest. The pixels in input_array corresponded by pixels of interest in array_mask_to_maintain are set to pixels of interest in the output array.
+    - array_mask_to_exclude. ndarray of the same shape of input_array. Optional. If provided, pixels in array_mask_to_exclude whose value is >thresholds_exclude (default 0)
+    are considered pixels of interest. The pixels in input_array corresponded by pixels of interest in array_mask_to_exclude are set to background pixels in the output array.
+    - thresholds_maintain. int or float.
+    - thresholds_exclude. int or float.
+    - output_lowval. int or float. Optional. If provided, sets the value of the background pixels in the output array. Background pixels are all pixels in input_array which are not
+    pixels of interest.
+    - output_highval. int or float. Optional. If provided, sets the value of the pixels of interest in the output array.
+    - output_dtype. dtype. Optiona. If provided, sets the data type of the output array.
+    - common_pixels. string. 'exclude' or 'maintain'. Default 'exclude'. It must be provided if both array_mask_to_maintain and array_mask_to_exclude are provided. Indicates the
+    logic to use in case some pixels are both among the pixels to maintain and the pixels to exclude. If 'exclude' (default), they will be set to background in the output array. If
+    'maintain' they will be set to pixels of interest in the output array.
+
+    Outputs: ndarray of the same shape of input_array. Pixels of interst in the output array are set to output_highval if output_highval is provided.
+    This procedure effectively binarizes the output. When output_highval is not provided (default), pixels of interest in the output array get their corresponding values
+    in the input_array. Background pixels in the output array are set to output_lowval if output_lowval is provided. When output_lowval is not provided (default), background
+    pixels are set to the minimum value in input_array.
     """
-    return
+    
+    #Copy the input_array
+    input_array_copy = input_array.copy()
+
+    #Define the background value for the output of image - use output_lowval, if provided, alternatively use the minimum value found in input_array_copy
+    if output_lowval!=None:
+        background_val = output_lowval
+    else:
+        background_val = np.amin(input_array_copy)
+            
+    #Define the dtype value for the output of image - use output_dtype, if provided, alternatively use the dtype of input_array_copy
+    if output_dtype!=None:
+        dtype_to_use = output_dtype
+    else:
+        dtype_to_use = input_array_copy.dtype
+
+    #If only array_mask_to_maintain is provided
+    if ((hasattr(array_mask_to_maintain, "__len__")) and not (hasattr(array_mask_to_exclude, "__len__"))):
+        print("only maintain")
+        #Consider pixels of interest as the pixels in array_mask_to_maintain whose value is >thresholds_maintain, and the rest as background values
+        #Set to background value pixels of input_array_copy correspondend by background pixels in array_mask_to_maintain.
+        #With regards to the value of the pixels of interest, if output_highval is provided, set them to output_highval val (NOTE: this will binarize the output),
+        #Otherwise use their values in input_array_copy
+        if output_highval != None:
+            output_array_maintain = np.where(array_mask_to_maintain>thresholds_maintain, output_highval, background_val).astype(dtype_to_use)
+            return output_array_maintain
+        else:
+            output_array_maintain_1 = np.where(array_mask_to_maintain>thresholds_maintain, input_array_copy, background_val).astype(dtype_to_use)
+            return output_array_maintain_1
+
+    #If only array_mask_to_exclude if provided
+    elif ((hasattr(array_mask_to_exclude, "__len__")) and not (hasattr(array_mask_to_maintain, "__len__"))):
+        print("only exclude")
+        #Consider pixels in array_mask_to_axclude whose value is >thresholds_exclude as background pixels, and the rest as pixels of interest
+        #Set to background value pixels of input_array_copy correspondend by background pixels in array_mask_to_maintain.
+        #With regards to the value of the pixels of interest, if output_highval is provided, set them to output_highval val (NOTE: this will binarize the output),
+        #Otherwise use their values in input_array_copy
+        if output_highval != None:
+            output_array_exclude = np.where(array_mask_to_exclude>thresholds_exclude, background_val, output_highval).astype(dtype_to_use)
+            return output_array_exclude
+        else:
+            output_array_exclude_1 = np.where(array_mask_to_exclude>thresholds_exclude, background_val, input_array_copy).astype(dtype_to_use)
+            return output_array_exclude_1
+    
+    #If both array_mask_to_maintain and array_mask_to_exclude are provided
+    elif ((hasattr(array_mask_to_maintain, "__len__")) and (hasattr(array_mask_to_exclude, "__len__"))):
+        print('maintain and exclude')
+        #Make sure that it is specified how to handle common pixels
+        assert common_pixels in ['exclude', 'maintain'], "common_pixels must be either 'maintain' or 'exclude' when both an array to maintain and an array to exclude are provided"
+
+        #If common_pixels is set to "exclude", first perform the maintain operation and then the exclude operation. In this way in case of pixels which are both in the roi to
+        #to maintain and to exclude will be excluded
+        if common_pixels=='exclude':
+            
+            #Consider pixels of interest as the pixels in array_mask_to_maintain whose value is >thresholds_maintain, and the rest as background values
+            #Set to background value pixels of input_array_copy correspondend by background pixels in array_mask_to_maintain.
+            #With regards to the value of the pixels of interest, if output_highval is provided, set them to output_highval val (NOTE: this will binarize the output),
+            #Otherwise use their values in input_array_copy
+            if output_highval != None:
+                output_array_maintain_2 = np.where(array_mask_to_maintain>thresholds_maintain, output_highval, background_val)
+            else:
+                output_array_maintain_2 = np.where(array_mask_to_maintain>thresholds_maintain, input_array_copy, background_val)
+            
+            output_array_exclude_2 = np.where(array_mask_to_exclude>thresholds_exclude, background_val, output_array_maintain_2).astype(dtype_to_use)
+            return output_array_exclude_2
+        
+        #If common_pixels is set to "exclude", first perform the maintain operation and then the exclude operation. In this way in case of pixels which are both in the roi to
+        #to maintain and to exclude will be excluded
+        else:
+            
+            #Consider pixels of interest as the pixels in array_mask_to_maintain whose value is >thresholds_maintain, and the rest as background values
+            #Set to background value pixels of input_array_copy correspondend by background pixels in array_mask_to_maintain.
+            #With regards to the value of the pixels of interest, if output_highval is provided, set them to output_highval val (NOTE: this will binarize the output),
+            #Otherwise use their values in input_array_copy
+            if output_highval != None:
+                output_array_exclude_3 = np.where(array_mask_to_exclude>thresholds_exclude, background_val, output_highval)
+            else:
+                output_array_exclude_3 = np.where(array_mask_to_exclude>thresholds_exclude, background_val, input_array_copy)
+            
+            output_array_maintain_3 = np.where(array_mask_to_maintain>thresholds_maintain, output_array_exclude_3, background_val).astype(dtype_to_use)
+            return output_array_maintain_3
+    
+    else:
+        print("WARNING. Neither an roi to maintain nor one to exclude are provided, the input array is returned")
+
+        return input_array_copy
 
