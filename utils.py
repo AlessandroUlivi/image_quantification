@@ -211,12 +211,20 @@ def combine_rois(input_rois, thresholds=0, i_axis=None, binarize_output=True, ou
     #Use input_rois as it is if a list is provided
     if isinstance(input_rois, list):
         iteration_list = input_rois
+
+        #Make sure that the length of thresholds matches the length of input_list, if thresholds is also a list
+        if isinstance(thresholds, list):
+            assert len(input_rois)==len(thresholds), "if input_rois is list and thresholds is also list, their lenght must match"
     
     #If input_rois is a ndarray
     elif hasattr(input_rois, "__len__"):
 
         #Make sure that i_axis is provided
         assert i_axis!=None, "provide a value for i_axis if input_roi is an array"
+
+        #Make sure that the length of thresholds matches the size input_rois's i_axis, if thresholds is a list
+        if isinstance(thresholds, list):
+            assert len(thresholds)==input_rois.shape[i_axis], "if input_rois is array and thresholds is a list, the length of thresholds must match the size of input_rois's i_axis"
 
         #Split input_rois in m ndarray along i_axis, where m equals to the size of i_axis in input_rois
         iteration_list = [np.squeeze(a) for a in np.split(input_rois, indices_or_sections=input_rois.shape[i_axis], axis=i_axis)]
