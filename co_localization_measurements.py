@@ -233,6 +233,118 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
         return output_list, None
 
 
-def count_number_of_overlapping_regions():
-    return
+def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_threshold=0, ro_i__mask=None, transform__to_label_img=False, arr_1_tot_thres=0,
+                                        arr_2_part_thres=0, return_regions=False, return_intersection_arrays=False, output_arr_loval=0, output_arr_highval=255,
+                                        output_arr_dtype=np.uint8):
+    
+    assert isinstance(return_regions, bool), "return_region is boolean. Must't be either True or False"
+    assert isinstance(return_intersection_arrays, bool), "return_intersection_arrays is boolean. Must't be either True or False"
 
+    #Make sure that if a label image is provided, the background pixels are set to 0 and the label pixels have positive values
+    if not transform__to_label_img:
+        assert np.min(arr_1_tot)==0, 'arr_1_tot must have background values set to 0 if a label image is provided'
+        assert np.max(arr_1_tot)>0, 'arr_1_tot must have label region values >0 if a label image is provided'
+        assert np.min(arr_2_part)==0, 'arr_2_part must have background values set to 0 if a label image is provided'
+        assert np.max(arr_2_part)>0, 'arr_2_part must have label region values >0 if a label image is provided'
+
+    #Transform input images to label images if transform__to_label_img is set to True
+    if transform__to_label_img:
+        #Copy the input images - threshold them using arr_1_tot_thres and arr_2_part_thres, set their values 1 and 0, where 1s are assumed to be the pixels of interest
+        arr_1_tot_01 = np.where(arr_1_tot>arr_1_tot_thres, 1,0)
+        arr_2_part_01 = np.where(arr_2_part>arr_2_part_thres, 1,0)
+        label_arr_1_tot = label(arr_1_tot_01)
+        label_arr_2_part = label(arr_2_part_01)
+    else:
+        label_arr_1_tot = arr_1_tot.copy()
+        label_arr_2_part = arr_2_part.copy()
+
+    #Set values outside roi to 0 (background) if ro_i__mask is provided
+    if hasattr(ro_i__mask, "__len__"):
+        ro_i__mask_copy = ro_i__mask.copy()
+        arr_1_tot_to_proc = np.where(ro_i__mask_copy>0, label_arr_1_tot, 0)
+        arr_2_part_to_proc = np.where(ro_i__mask_copy>0, label_arr_2_part, 0)
+    else:
+        arr_1_tot_to_proc = label_arr_1_tot
+        arr_2_part_to_proc = label_arr_2_part
+    
+    #Get regionprops for the regions of arr_1 and arr_2
+    arr_1_tot_regionprops = regionprops(arr_1_tot_to_proc)
+    arr_2_part_regionprops = regionprops(arr_2_part_to_proc)
+
+    #If return_intersection_arrays is True, initialize zero arrays to be modified as outputs. These can be used to verify the porcess
+    if return_intersection_arrays:
+        output_arr_1_tot = np.zeros(arr_1_tot_to_proc.shape)
+        output_arr_2_part = np.zeros(arr_2_part_to_proc.shape)
+    
+    #If return_regions is True, initialize a dictionary to link per each region of arr_1_tot, its properties and the properties of the intersecting regions in arr_2_part
+    if return_regions:
+        output_regions_intersection_dict = {}
+
+    #Initialize the output dictionary where keys are number of intersected regions in arr_2_part, and values are the number of times such number of intersection has been observed
+    output_dict = {}
+
+    #Iterate through the regions of arr_1_tot
+    for counter, r1 in enumerate(list(arr_1_tot_regionprops)):
+
+        #If return_regions is True, update output_regions_intersection_dict by linking the counter of the region, to the coordinates of the region and to a
+        # sub-dictionary eventually containg the coordinates of intersecting regions in arr_2_part
+        if return_regions:
+            output_regions_intersection_dict['arr_1_reg_'+str(counter)]={'arr_1':[r1], 'arr_2':[]}
+
+        #Get the coordinates of the region - organize them in a list of tuples
+        r1_coords = r1.coords
+        r1_coords_as_listoftupl = [(cr1[0], cr1[1]) for cr1 in list(r1_coords)]
+
+        #Initialize the counter of the number of regions in arr_2_part intersecting r1 in arr_1_tot
+        r2_intersected = 0
+
+        #Iterate through the regions of arr_2_part
+        for r2 in arr_2_part_regionprops:
+
+            #Get the coordinates of the arr_2_part's region - transform them in a list of tuples
+            r2_coords = r2.coords
+            r2_coords_as_listoftupl = [(cr2[0], cr2[1]) for cr2 in list(r2_coords)]
+
+            #Get intersection of region coordinates and mask_2 positive-pixels coordinates
+            r1_on_interescion_r2 = list(set(r1_coords_as_listoftupl).intersection(set(r2_coords_as_listoftupl)))
+
+            #If there is an intersection (number of of coordinates matching higher than >intersection_threshold)
+            if len(r1_on_interescion_r2)>intersection_threshold:
+
+                #Update the intersection counting
+                r2_intersected = r2_intersected+1
+
+                #If return_intersection_arrays is True, unzip the coordinates of r1 and r2 and modify the output arrays by setting the r1 and r2 pixels to 255
+                if return_intersection_arrays:
+                    # Unzip the coordinates in individual lists for r1
+                    unzipped_r1_coords = [list(tt33) for tt33 in zip(*r1_coords)]
+                    output_arr_1_tot[unzipped_r1_coords[0], unzipped_r1_coords[1]] = 255
+
+                    # #Unzip the coordinates in individual lists for r2
+                    unzipped_r2_coords = [list(tt333) for tt333 in zip(*r2_coords)]
+                    output_arr_2_part[unzipped_r2_coords[0], unzipped_r2_coords[1]] = 255
+                
+                #If return_regions is True, update output_regions_intersection_dict by adding the properties of the r2
+                if return_regions:
+                    output_regions_intersection_dict['arr_1_reg_'+str(counter)]["arr_2"].append(r2)
+
+        #Update the output_dict
+        if r2_intersected in output_dict:
+            output_dict[r2_intersected] += 1
+        else:
+            output_dict[r2_intersected] = 1
+
+    #If return_intersection_arrays is True, set the value range and dtype according to the desired output values
+    if return_intersection_arrays:
+        final_output_arr_1_tot = np.where(output_arr_1_tot>0, output_arr_highval, output_arr_loval).astype(output_arr_dtype)
+        final_output_arr_2_part = np.where(output_arr_2_part>0, output_arr_highval, output_arr_loval).astype(output_arr_dtype)
+    
+    #Return what wanted
+    if return_intersection_arrays==True and return_regions==True:
+        return output_dict, output_regions_intersection_dict, final_output_arr_1_tot, final_output_arr_2_part
+    elif return_intersection_arrays==True and return_regions==False:
+        return output_dict, None, final_output_arr_1_tot, final_output_arr_2_part
+    elif return_intersection_arrays==False and return_regions==True:
+        return output_dict, output_regions_intersection_dict, None, None
+    else:
+        return output_dict, None, None, None
