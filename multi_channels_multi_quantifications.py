@@ -12,7 +12,7 @@ from topological_measurement import get_convex_hull_fractions
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
-                      channels_binarization_thresholds=None):
+                      channels_binarization_thresholds=None, min_px_over_thresh=None):
     """
     """
 
@@ -69,6 +69,12 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     else:
         ch_bin_thresh_2use = channels_binarization_thresholds
 
+    #Set to 1 and 0 the min number of pixels for calculating masks overlap if min_px_over_thresh=None. Use the provided thresholds otherwise
+    if min_px_over_thresh==None:
+        min_px_over_thresh_2use = [(1,0) for mpt in range(channels_array_copy.shape[channels_axis])]
+    else:
+        min_px_over_thresh_2use = min_px_over_thresh
+
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
 
@@ -120,8 +126,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                        cchh_nn_array,
                                                                        roi_mask=ch_n_roi_mask_array,
                                                                        shuffle_times=shuffle_times,
-                                                                       n_px_thr_1=1,
-                                                                       n_px_thr_2=0,
+                                                                       n_px_thr_1=min_px_over_thresh_2use[ch_n][0],
+                                                                       n_px_thr_2=min_px_over_thresh_2use[ch_n][1],
                                                                        val_threshold_arr_1=ch_bin_thresh_2use[ch_n],
                                                                        val_threshold_arr_2=ch_bin_thresh_2use[cchh_nn])
                         if isinstance(ch_n__cchh_nn_overlap_i, tuple):
