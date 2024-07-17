@@ -237,7 +237,7 @@ def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_thre
                                         transform__to_label_img_arr_2=False, arr_1_tot_thres=0, arr_2_part_thres=0, return_regions=False,
                                         return_intersection_arrays=False, output_arr_loval=0, output_arr_highval=255, output_arr_dtype=np.uint8):
     """
-    Returns the counts of regions of arr_1_tot which overlap with regions of arr_2_part. If return_regions is set to True, the regions properties are returns in a dictionary linking
+    Returns the counts of regions of arr_1_tot which overlap with regions of arr_2_part. If return_regions is set to True, the regions properties are returned in a dictionary linking
     arr_1_tot regions with their overlapping regions in arr_2_part. If return_intersection_arrays is True, the an array is return per arr_1_tot and arr_2_parts containing all the regions
     share some overlap as binary masks.
 
