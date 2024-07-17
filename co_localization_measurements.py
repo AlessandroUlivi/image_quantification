@@ -233,29 +233,51 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
         return output_list, None
 
 
-def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_threshold=0, ro_i__mask=None, transform__to_label_img=False, arr_1_tot_thres=0,
-                                        arr_2_part_thres=0, return_regions=False, return_intersection_arrays=False, output_arr_loval=0, output_arr_highval=255,
-                                        output_arr_dtype=np.uint8):
+def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_threshold=0, ro_i__mask=None, transform__to_label_img_arr_1=False,
+                                        transform__to_label_img_arr_2=False, arr_1_tot_thres=0, arr_2_part_thres=0, return_regions=False,
+                                        return_intersection_arrays=False, output_arr_loval=0, output_arr_highval=255, output_arr_dtype=np.uint8):
+    """
+    Returns the counts of regions of arr_1_tot which overlap with regions of arr_2_part. If return_regions is set to True, the regions properties are returns in a dictionary linking
+    arr_1_tot regions with their overlapping regions in arr_2_part. If return_intersection_arrays is True, the an array is return per arr_1_tot and arr_2_parts containing all the regions
+    share some overlap as binary masks.
+
+    Inputs:
+    - arr_1_tot. ndarray. Binary mask or label image. The array whose regions are analysed for their overlap with regions of arr_2_part. If label image, background pixels must be
+    set to value 0 and pixels of interst to positve values. If binary mask, the array will be applied a highpass filtering process where pixels whose values is
+    >arr_1_tot_thres (default 0) are set to 1 and the remaining pixels are set to 0. NOTE: a binary mask can be considered a label image is a single region is present.
+    For this reason it is not mandatory to set transform__to_label_img=True when a binary mask is passed.
+    - arr_2_part. ndarray. Binary mask or label image. If arr_1_tot is 
+
+
+    """
     
     assert isinstance(return_regions, bool), "return_region is boolean. Must't be either True or False"
     assert isinstance(return_intersection_arrays, bool), "return_intersection_arrays is boolean. Must't be either True or False"
 
     #Make sure that if a label image is provided, the background pixels are set to 0 and the label pixels have positive values
-    if not transform__to_label_img:
+    if not transform__to_label_img_arr_1:
         assert np.min(arr_1_tot)==0, 'arr_1_tot must have background values set to 0 if a label image is provided'
         assert np.max(arr_1_tot)>0, 'arr_1_tot must have label region values >0 if a label image is provided'
+    
+    #Make sure that if a label image is provided, the background pixels are set to 0 and the label pixels have positive values
+    if not transform__to_label_img_arr_2:
         assert np.min(arr_2_part)==0, 'arr_2_part must have background values set to 0 if a label image is provided'
         assert np.max(arr_2_part)>0, 'arr_2_part must have label region values >0 if a label image is provided'
 
     #Transform input images to label images if transform__to_label_img is set to True
-    if transform__to_label_img:
+    if transform__to_label_img_arr_1:
         #Copy the input images - threshold them using arr_1_tot_thres and arr_2_part_thres, set their values 1 and 0, where 1s are assumed to be the pixels of interest
         arr_1_tot_01 = np.where(arr_1_tot>arr_1_tot_thres, 1,0)
-        arr_2_part_01 = np.where(arr_2_part>arr_2_part_thres, 1,0)
         label_arr_1_tot = label(arr_1_tot_01)
-        label_arr_2_part = label(arr_2_part_01)
     else:
         label_arr_1_tot = arr_1_tot.copy()
+    
+    #Transform input images to label images if transform__to_label_img is set to True
+    if transform__to_label_img_arr_2:
+        #Copy the input images - threshold them using arr_1_tot_thres and arr_2_part_thres, set their values 1 and 0, where 1s are assumed to be the pixels of interest
+        arr_2_part_01 = np.where(arr_2_part>arr_2_part_thres, 1,0)
+        label_arr_2_part = label(arr_2_part_01)
+    else:
         label_arr_2_part = arr_2_part.copy()
 
     #Set values outside roi to 0 (background) if ro_i__mask is provided
