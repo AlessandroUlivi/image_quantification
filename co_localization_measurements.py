@@ -334,11 +334,20 @@ def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_thre
     if not transform__to_label_img_arr_1:
         assert np.min(arr_1_tot)==0, 'arr_1_tot must have background values set to 0 if a label image is provided'
         assert np.max(arr_1_tot)>0, 'arr_1_tot must have label region values >0 if a label image is provided'
-    
+    #Add a warning if transform__to_label_img_arr_1 is True but a non-binary input is provided
+    else:
+        if len(np.unique(arr_1_tot))>2:
+            print("warning, trasforming arr_1_tot in a label image, but arr_1_tot is a non-binary mask")
+
+
     #Make sure that if a label image is provided, the background pixels are set to 0 and the label pixels have positive values
     if not transform__to_label_img_arr_2:
         assert np.min(arr_2_part)==0, 'arr_2_part must have background values set to 0 if a label image is provided'
         assert np.max(arr_2_part)>0, 'arr_2_part must have label region values >0 if a label image is provided'
+    #Add a warning if transform__to_label_img_arr_1 is True but a non-binary input is provided
+    else:
+        if len(np.unique(arr_2_part))>2:
+            print("warning, trasforming arr_2_part in a label image, but arr_2_part is a non-binary mask")
 
     #Transform input images to label images if transform__to_label_img is set to True
     if transform__to_label_img_arr_1:
