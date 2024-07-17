@@ -3,7 +3,7 @@ from scipy.spatial import ConvexHull
 from skimage.measure import label, regionprops
 
 
-def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0):
+def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0, value_4_zero_regionprops=0.0):
     """
     Returns the area of the region of interest in a binary mask both in terms of number of pixels of the mask and in terms of number of pixels scaled by pixel-area.
 
@@ -13,11 +13,14 @@ def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0):
     the positive pixels in roi_mas_k.
     - binarization_threshold. Int or float. Default 0. Defines the highpass threshold to distinguish pixels of interest from background in input_array. Pixels whose value
     is >binarization_threshold are considered pixels of interest. The rest of the pixels are considered background.
+    - value_4_zero_regionprops. Default 0.0 . The value to return is no region is present in the the input_array, in which case the area as number of pixels scaled by pixel-area
+    can't be calculated.
 
     Outputs: tuple.
     - position-0. The area of the region of interest in input_array as total number of its pixels (the pixels of interest).
     - position-1. The area of the region of interest in input_array as number of pixels scaled by pixel-area. Refer to
-    https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops for further documentation.
+    https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops for further documentation. NOTE: the calculation can be made only if
+    at least 1 positive pixels is present. If this is not the case, value_4_zero_regionprops will be returned. Default is 0.0.
     """
     #Copy input_array, binarize it using binarization_threshold and set the values to 1 and 0, where 1 are assumed to be the pixels of interest
     input_array_01 = np.where(input_array>binarization_threshold, 1, 0)
@@ -32,14 +35,19 @@ def get_mask_area(input_array, roi_mas_k=None, binarization_threshold=0):
     #Get the area of the input_array region of interest as number of pixels of interest
     area_as_poi_number = np.sum(array_to_process)
 
-    #Use regionprops to calculate the area of the binary mask
-    array_to_process_props = regionprops(array_to_process)[0]
+    #Calculate the area also as number of pixels scaled by pixel-area only if at least a region is identified
+    if area_as_poi_number>0:
+        #Use regionprops to calculate the area of the binary mask
+        array_to_process_props = regionprops(array_to_process)[0]
     
-    #Get the area of the input_array region of interest number of pixels scaled by pixel-area
-    area_from_props = array_to_process_props.area
+        #Get the area of the input_array region of interest number of pixels scaled by pixel-area
+        area_from_props = array_to_process_props.area
 
-    return area_as_poi_number, area_from_props
-
+        return area_as_poi_number, area_from_props
+    
+    else:
+        return area_as_poi_number, value_4_zero_regionprops
+    
 
 def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_img=False, binarization_threshold=0):
     """
