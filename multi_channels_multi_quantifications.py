@@ -16,7 +16,8 @@ from topological_measurement import get_convex_hull_fractions
 # get_convex_hull_fractions
 
 
-def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None):
+def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
+                      channels_binarization_thresholds=None):
     """
     """
 
@@ -66,16 +67,21 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             else:
                 roi_mask_analysis_axis_2use = roi_mask_analysis_axis
             roi_mask_list = [np.squeeze(d) for d in np.split(roi_mask_array_copy, indices_or_sections=roi_mask_array_copy.shape[roi_mask_analysis_axis_2use], axis=roi_mask_analysis_axis_2use)]
-            
+    
+    #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
+    if channels_binarization_thresholds==None:
+        ch_bin_thresh_2use = [0 for bin_t in range(channels_array_copy.shape[channels_axis])]
+    else:
+        ch_bin_thresh_2use = channels_binarization_thresholds
 
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
 
     #If analysis axis is provided:
     if analysis_axis != None:
-        print("==="*10)
-        print("---analyze a specific axis---")
-        print("==="*10)
+        # print("==="*10)
+        # print("---analyze a specific axis---")
+        # print("==="*10)
         # Iterate through the analysis axis
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
@@ -94,7 +100,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
 
                 #Get mask area
-                ch_n_area = get_mask_area(ch_array, roi_mas_k=ch_n_roi_mask_array, binarization_threshold=0)
+                ch_n_area = get_mask_area(ch_array, roi_mas_k=ch_n_roi_mask_array, binarization_threshold=ch_bin_thresh_2use[ch_n])
 
 
     #If the analysis axis is not provided          
