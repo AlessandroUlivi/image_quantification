@@ -242,13 +242,89 @@ def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_thre
     share some overlap as binary masks.
 
     Inputs:
-    - arr_1_tot. ndarray. Binary mask or label image. The array whose regions are analysed for their overlap with regions of arr_2_part. If label image, background pixels must be
-    set to value 0 and pixels of interst to positve values. If binary mask, the array will be applied a highpass filtering process where pixels whose values is
-    >arr_1_tot_thres (default 0) are set to 1 and the remaining pixels are set to 0. NOTE: a binary mask can be considered a label image is a single region is present.
-    For this reason it is not mandatory to set transform__to_label_img=True when a binary mask is passed.
-    - arr_2_part. ndarray. Binary mask or label image. If arr_1_tot is 
+    - arr_1_tot. ndarray. Binary mask or label image. The regions of this array are analysed for their overlap with regions of arr_2_part. The function returns the number of the
+    regions of this array which have 0, 1, 2, 3, 4 or more overlapping regions in arr_2_part.
+    If label image, background pixels must be set to value 0 and pixels of interst to positve values.
+    Note that the function relies on the use of skimage.measure.regionprops (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops)
+    which relies on the use of label images. It is possible to transform a binary mask to a label image by setting transform__to_label_img_arr_1=True. If
+    transform__to_label_img_arr_1=True, the array will be applied a highpass filtering process where pixels whose values is >arr_1_tot_thres (default 0) are set to 1
+    and the remaining pixels are set to 0. The output array will then be transformed into a label image
+    (refer to https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label).
+    NOTE: Because a binary mask can be considered a label image if a single region is present, it is not mandatory to set transform__to_label_img_arr_1=True when a binary mask is passed.
+    - arr_2_part. ndarray of the same shape of arr_1_tot. Binary mask or label image.
+    The function returns how many regions of arr_1_tot have 0, 1, 2, 3, 4 or more overlapping regions in this array.
+    If label image, background pixels must be set to value 0 and pixels of interst to positve values.
+    Note that the function relies on the use of skimage.measure.regionprops (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops)
+    which relies on the use of label images. It is possible to transform a binary mask to a label image by setting transform__to_label_img_arr_2=True. If
+    transform__to_label_img_arr_2=True, the array will be applied a highpass filtering process where pixels whose values is >arr_2_part_thres (default 0) are set to 1
+    and the remaining pixels are set to 0. The output array will then be transformed into a label image
+    (refer to https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label).
+    - ro_i__mask. ndarray of the same shape of arr_1_tot. Optional. If provided, restricts the analysis to a region of interest. The region of interest is defined by the
+    pixels whose intensity value is >0. NOTE: although not strictly required, the function was conceptualized for the use of binary masks for ro_i__mask.
+    - transform__to_label_img_arr_1. Bool. Optional. If True, transforms arr_1_tot to a label image where pixels of interest are pixels whose intensity value is >arr_1_tot_thres.
+    Default False.
+    - transform__to_label_img_arr_2. Bool. Optional. If True, transforms arr_2_part to a label image where pixels of interest are pixels whose intensity value is >arr_2_part_thres.
+    Default False.
+    - arr_1_tot_thres. int or float. Optional, only applies if transform__to_label_img_arr_1=True. Default 0. Sets the highpass filter threshold to destinguish pixels of interest
+    from background pixels when transforming arr_1_tot into a label image.
+    - arr_2_part_thres. int or float. Optional. Default 0, only applies if transform__to_label_img_arr_2=True. Sets the highpass filter threshold to destinguish pixels of interest
+    from background pixels when transforming arr_2_part into a label image.
+    - return_regions. Bool. Optional. Default False. If True, a dictionary linking region-properties of regions of arr_1_tot to the region-properties of their overlapping regions in
+    arr_2_part, if overlapping regions are present. Refer to outputs for a detailed description.
+    - return_intersection_arrays. Bool. Optional.  Default False. If True, returns 2 arrays of the same shape of arr_1_tot. Both arrays are binary masks. The contain, respectively, the
+    regions of arr_1_tot which have at lest an overlapping region in arr_2_part, and the regions of arr_2_part which have at least an overlapping region in arr_1_tot.
+    The low and high values of the arrays can be specificed using, respectively, output_arr_loval and output_arr_highval. The data type can be specified using output_arr_dtype.
+    - output_arr_loval. float or int. Optional, only applies if return_intersection_arrays=True. Default 0. Speficies the low value of the binary masks returned if
+    return_intersection_arrays=True.
+    - output_arr_highval. float or int. Optional, only applies if return_intersection_arrays=True.  Default 255. Speficies the high value of the binary masks returned if
+    return_intersection_arrays=True.
+     - output_arr_dtype. data-type. Optional, only applies if return_intersection_arrays=True. Default np.uint8. Speficies the data type of the binary masks returned if
+     return_intersection_arrays=True.
 
 
+    Outputs. tuple.
+    I will call the individual regions in arr_1_tot as reg_1[i] and individual regions in arr_2_part as reg_2[j].
+    - if return_regions=False and return_intersection_arrays=False.
+        - position 0. dict. Keys are the number of overlapping reg_2[j] found per each individual reg_1[i]. Values are the number of times is observed such number of reg_2[j] overlapping
+        to reg_1[i].
+        - position 1. None.
+        - position 2. None.
+        - position 3. None.
+    
+     - if return_regions=True and return_intersection_arrays=False.
+        - position 0. dict. Keys are the number of overlapping reg_2[j] found per each individual reg_1[i]. Values are the number of times is observed such number of reg_2[j] overlapping
+        to reg_1[i].
+        - position 1. dict. Keys are individual reg_1[i] of arr_1_tot as strings with progressive numbering (I call them string[i]). The number of keys correspond to the
+        number of regions in arr_1_tot. Values are sub-dictionaries. Keys of sub-dictionaries are either 'arr_1' (string) or 'arr_2' (string) to define it the associated values refer to,
+        respectively, arr_1_tot or arr_2_part. Values of sub-dictionaries are lists. The list linked to 'arr_1' contains 1 single element, which corresponds to the region-properties
+        (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops) of reg_1[i]. The list of linked to 'arr_2' contains one element per each reg_2[i]
+        which is found to overlap with reg_1[i]. Each element corresponds to the region-properties (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops)
+        of reg_2[j].
+        - position 2. None.
+        - position 3. None.
+    
+     - if return_regions=False and return_intersection_arrays=True.
+        - position 0. dict. Keys are the number of overlapping reg_2[j] found per each individual reg_1[i]. Values are the number of times is observed such number of reg_2[j] overlapping
+        to reg_1[i].
+        - position 1. None.
+        - position 2. ndarry of same shape of arr_1_tot. Binary array. Per each reg_1[i], the pixels of the region are set to output_arr_highval if the region has at least one
+        overlappy reg_2[j], to output_arr_lowval otherwise. The data type of the array is set by output_arr_dtype.
+        - position 3. ndarry of same shape of arr_1_tot. Binary array. Per each reg_2[j], the pixels of the region are set to output_arr_highval if the region has at least one
+        overlappy reg_1[i], to output_arr_lowval otherwise. The data type of the array is set by output_arr_dtype.
+        
+    - if return_regions=True and return_intersection_arrays=True.
+        - position 0. dict. Keys are the number of overlapping reg_2[j] found per each individual reg_1[i]. Values are the number of times is observed such number of reg_2[j] overlapping
+        to reg_1[i].
+        - position 1. dict. Keys are individual reg_1[i] of arr_1_tot as strings with progressive numbering (I call them string[i]). The number of keys correspond to the
+        number of regions in arr_1_tot. Values are sub-dictionaries. Keys of sub-dictionaries are either 'arr_1' (string) or 'arr_2' (string) to define it the associated values refer to,
+        respectively, arr_1_tot or arr_2_part. Values of sub-dictionaries are lists. The list linked to 'arr_1' contains 1 single element, which corresponds to the region-properties
+        (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops) of reg_1[i]. The list of linked to 'arr_2' contains one element per each reg_2[i]
+        which is found to overlap with reg_1[i]. Each element corresponds to the region-properties (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.regionprops)
+        of reg_2[j].
+        - position 2. ndarry of same shape of arr_1_tot. Binary array. Per each reg_1[i], the pixels of the region are set to output_arr_highval if the region has at least one
+        overlappy reg_2[j], to output_arr_lowval otherwise. The data type of the array is set by output_arr_dtype.
+        - position 3. ndarry of same shape of arr_1_tot. Binary array. Per each reg_2[j], the pixels of the region are set to output_arr_highval if the region has at least one
+        overlappy reg_1[i], to output_arr_lowval otherwise. The data type of the array is set by output_arr_dtype.
     """
     
     assert isinstance(return_regions, bool), "return_region is boolean. Must't be either True or False"
