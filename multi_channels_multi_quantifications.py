@@ -3,7 +3,7 @@ import pandas as pd
 from co_localization_measurements import measure_pixels_overlap, measure_regions_euclidean_distances, count_number_of_overlapping_regions
 from counting_measurements import count_regions_number
 from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask
-from topological_measurement import get_convex_hull_fractions
+from topological_measurement import get_convex_hull_fraction
 
 # measure_pixels_overlap,
 # measure_regions_euclidean_distances,
@@ -12,8 +12,10 @@ from topological_measurement import get_convex_hull_fractions
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
-                      channels_binarization_thresholds=None, min_px_over_thresh=None):
+                      channels_binarization_thresholds=None, min_px_over_thresh_common=None):
     """
+    for the moment the main limitation is that thresholds can be provided for individual channels
+    - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
     """
 
     def modify_dictionary(dict2modify, key_name, valu_e=None, interations_times=1):
@@ -34,6 +36,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 else:
                     print("WARNING! ", key_name_1, "'s value is updated by no value is provided for the update. None will be used instead")
                     dict2modify[key_name_1].append(valu_e)
+    
+    def set_thresholds_2use(input_thresholds, default_value, range_2use):
+        if input_thresholds==None:
+            return [input_thresholds for th in range(range_2use)]
+        elif isinstance(input_thresholds, int) or isinstance(input_thresholds, float) or isinstance(input_thresholds, tuple):
+            return [input_thresholds for th1 in range(range_2use)]
+        else:
+            return input_thresholds
 
     #Make sure that channels_axis and analysis axis are not the same axis
     assert channels_axis != analysis_axis, "channels_axis can't be the same of analysis_axis"
@@ -46,8 +56,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             channels_axis_2use = channels_axis
     else:
         channels_axis_2use = channels_axis
-
-
+    
     #Copy input arrays
     channels_array_copy = channels_array.copy()
     roi_mask_array_copy = roi_mask_array.copy()
@@ -64,16 +73,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             roi_mask_list = [np.squeeze(d) for d in np.split(roi_mask_array_copy, indices_or_sections=roi_mask_array_copy.shape[roi_mask_analysis_axis_2use], axis=roi_mask_analysis_axis_2use)]
     
     #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
-    if channels_binarization_thresholds==None:
-        ch_bin_thresh_2use = [0 for bin_t in range(channels_array_copy.shape[channels_axis])]
-    else:
-        ch_bin_thresh_2use = channels_binarization_thresholds
+    ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
 
-    #Set to 1 and 0 the min number of pixels for calculating masks overlap if min_px_over_thresh=None. Use the provided thresholds otherwise
-    if min_px_over_thresh==None:
-        min_px_over_thresh_2use = [(1,0) for mpt in range(channels_array_copy.shape[channels_axis])]
-    else:
-        min_px_over_thresh_2use = min_px_over_thresh
+    #Set to 1 and 0 the min number of pixels for calculating masks overlap if min_px_over_thresh_common=None. Use the provided thresholds otherwise
+    min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, default_value=(1,0), range_2use=channels_array_copy.shape[channels_axis])
 
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
@@ -103,55 +106,58 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
 
                 #Get mask area
-                ch_n_area_px, ch_n_area_props = get_mask_area(ch_array, roi_mas_k=ch_n_roi_mask_array, binarization_threshold=ch_bin_thresh_2use[ch_n])
+                ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
+                                                              roi_mas_k=ch_n_roi_mask_array,
+                                                              binarization_threshold=ch_bin_thresh_2use[ch_n],
+                                                              value_4_zero_regionprops=0.0)
 
-                #Count region number
-                ch_n_regions_number = count_regions_number(ch_array, roi_mask=ch_n_roi_mask_array, threshold_input_arr=ch_bin_thresh_2use[ch_n], threshold_roi_mask=0)
+    #             #Count region number
+    #             ch_n_regions_number = count_regions_number(ch_array, roi_mask=ch_n_roi_mask_array, threshold_input_arr=ch_bin_thresh_2use[ch_n], threshold_roi_mask=0)
 
-                #Get the areas of the regions within the channel
-                ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array, roi__mask=ch_n_roi_mask_array, transform_to_label_img=True, binarization_threshold=ch_bin_thresh_2use[ch_n])
-                ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
-                ch_n_regions_median_area = np.median(ch_n_regions_areas)
-                ch_n_regions_max_area = np.amax(ch_n_regions_areas)
-                ch_n_regions_min_area = np.amin(ch_n_regions_areas)
+    #             #Get the areas of the regions within the channel
+    #             ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array, roi__mask=ch_n_roi_mask_array, transform_to_label_img=True, binarization_threshold=ch_bin_thresh_2use[ch_n])
+    #             ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
+    #             ch_n_regions_median_area = np.median(ch_n_regions_areas)
+    #             ch_n_regions_max_area = np.amax(ch_n_regions_areas)
+    #             ch_n_regions_min_area = np.amin(ch_n_regions_areas)
 
-                #Iterate trough the channels a second time, to get the relative measurements
-                for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
+    #             #Iterate trough the channels a second time, to get the relative measurements
+    #             for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
                     
-                    #Avoid measuring the channel angainst itself
-                    if ch_n != cchh_nn:
+    #                 #Avoid measuring the channel angainst itself
+    #                 if ch_n != cchh_nn:
                         
-                        #Measure pixels' overlap
-                        ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
-                                                                       cchh_nn_array,
-                                                                       roi_mask=ch_n_roi_mask_array,
-                                                                       shuffle_times=shuffle_times,
-                                                                       n_px_thr_1=min_px_over_thresh_2use[ch_n][0],
-                                                                       n_px_thr_2=min_px_over_thresh_2use[ch_n][1],
-                                                                       val_threshold_arr_1=ch_bin_thresh_2use[ch_n],
-                                                                       val_threshold_arr_2=ch_bin_thresh_2use[cchh_nn])
-                        if isinstance(ch_n__cchh_nn_overlap_i, tuple):
-                            ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
-                            ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap[1]
-                        else:
-                            ch_n__cchh_nn_overlap = np.NaN
-                            ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
+    #                     #Measure pixels' overlap
+    #                     ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
+    #                                                                    cchh_nn_array,
+    #                                                                    roi_mask=ch_n_roi_mask_array,
+    #                                                                    shuffle_times=shuffle_times,
+    #                                                                    n_px_thr_1=min_px_over_thresh_2use[ch_n][0],
+    #                                                                    n_px_thr_2=min_px_over_thresh_2use[ch_n][1],
+    #                                                                    val_threshold_arr_1=ch_bin_thresh_2use[ch_n],
+    #                                                                    val_threshold_arr_2=ch_bin_thresh_2use[cchh_nn])
+    #                     if isinstance(ch_n__cchh_nn_overlap_i, tuple):
+    #                         ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
+    #                         ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
+    #                     else:
+    #                         ch_n__cchh_nn_overlap = np.NaN
+    #                         ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
 
 
 
-    #If the analysis axis is not provided          
-    else:
-        print("==="*10)
-        print("---NO analysis of a specific axis---")
-        print("==="*10)
+    # #If the analysis axis is not provided          
+    # else:
+    #     print("==="*10)
+    #     print("---NO analysis of a specific axis---")
+    #     print("==="*10)
 
-        # Iterate through the channels
-        for ch_n1, ch_array1 in enumerate([np.squeeze(c) for c in np.split(channels_array_copy,
-                                                                             indices_or_sections=channels_array_copy.shape[channels_axis_2use],
-                                                                             axis=channels_axis_2use)]):
-            # print("ch ", ch_n1, ch_array1.shape)
-            if hasattr(roi_mask_array, "__len__"):
-                print("shape roi mask", roi_mask_array_copy.shape)
-            else:
-                print(roi_mask_array_copy)
+    #     # Iterate through the channels
+    #     for ch_n1, ch_array1 in enumerate([np.squeeze(c) for c in np.split(channels_array_copy,
+    #                                                                          indices_or_sections=channels_array_copy.shape[channels_axis_2use],
+    #                                                                          axis=channels_axis_2use)]):
+    #         # print("ch ", ch_n1, ch_array1.shape)
+    #         if hasattr(roi_mask_array, "__len__"):
+    #             print("shape roi mask", roi_mask_array_copy.shape)
+    #         else:
+    #             print(roi_mask_array_copy)
     return
