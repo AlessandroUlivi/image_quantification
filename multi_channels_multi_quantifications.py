@@ -12,7 +12,7 @@ from topological_measurement import get_convex_hull_fraction
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
-                      channels_binarization_thresholds=None, min_px_over_thresh_common=None):
+                      channels_binarization_thresholds=None, get_mask_area_val_4zero_regionprops=None, min_px_over_thresh_common=None):
     """
     for the moment the main limitation is that thresholds can be provided for individual channels
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
@@ -39,7 +39,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     
     def set_thresholds_2use(input_thresholds, default_value, range_2use):
         if input_thresholds==None:
-            return [input_thresholds for th in range(range_2use)]
+            return [default_value for th in range(range_2use)]
         elif isinstance(input_thresholds, int) or isinstance(input_thresholds, float) or isinstance(input_thresholds, tuple):
             return [input_thresholds for th1 in range(range_2use)]
         else:
@@ -56,7 +56,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             channels_axis_2use = channels_axis
     else:
         channels_axis_2use = channels_axis
-    
+
     #Copy input arrays
     channels_array_copy = channels_array.copy()
     roi_mask_array_copy = roi_mask_array.copy()
@@ -74,42 +74,45 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     
     #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
+    print(ch_bin_thresh_2use)
+    # #Set val_4zero_regionprops in get_mask_area as 0 by defaut, if None is provided as input. Use the provided value otherwise.
+    # val_4zero_regionprops_2use = set_thresholds_2use(get_mask_area_val_4zero_regionprops, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
 
-    #Set to 1 and 0 the min number of pixels for calculating masks overlap if min_px_over_thresh_common=None. Use the provided thresholds otherwise
-    min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, default_value=(1,0), range_2use=channels_array_copy.shape[channels_axis])
+    # #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
+    # min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, default_value=(0,0), range_2use=channels_array_copy.shape[channels_axis])
 
-    #Initialize a dictionary to be used to be used to form the output datafram
-    measurements_dict = {}
+    # #Initialize a dictionary to be used to be used to form the output datafram
+    # measurements_dict = {}
 
-    #If analysis axis is provided:
-    if analysis_axis != None:
-        # print("==="*10)
-        # print("---analyze a specific axis---")
-        # print("==="*10)
-        # Iterate through the analysis axis
-        for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
-                                                                         indices_or_sections=channels_array_copy.shape[analysis_axis],
-                                                                         axis=analysis_axis)]):
-            # print("---", ixd, idx_array.shape)
+    # #If analysis axis is provided:
+    # if analysis_axis != None:
+    #     # print("==="*10)
+    #     # print("---analyze a specific axis---")
+    #     # print("==="*10)
+    #     # Iterate through the analysis axis
+    #     for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
+    #                                                                      indices_or_sections=channels_array_copy.shape[analysis_axis],
+    #                                                                      axis=analysis_axis)]):
+    #         # print("---", ixd, idx_array.shape)
 
-            #Get the individual channels array as a list
-            ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
+    #         #Get the individual channels array as a list
+    #         ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
 
-            # Iterate through the channels
-            for ch_n, ch_array in enumerate(ch_arrays_list):
-                # print("ch ", ch_n, ch_array.shape)
-                #Get the region_to_quantify, if it is provided
-                if hasattr(roi_mask_array, "__len__"):
-                    ch_n_roi_mask_array = roi_mask_list[ch_n]
-                    # print("shape roi mask", ch_n_roi_mask_array.shape)
-                else:
-                    ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
+    #         # Iterate through the channels
+    #         for ch_n, ch_array in enumerate(ch_arrays_list):
+    #             # print("ch ", ch_n, ch_array.shape)
+    #             #Get the region_to_quantify, if it is provided
+    #             if hasattr(roi_mask_array, "__len__"):
+    #                 ch_n_roi_mask_array = roi_mask_list[ch_n]
+    #                 # print("shape roi mask", ch_n_roi_mask_array.shape)
+    #             else:
+    #                 ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
 
-                #Get mask area
-                ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
-                                                              roi_mas_k=ch_n_roi_mask_array,
-                                                              binarization_threshold=ch_bin_thresh_2use[ch_n],
-                                                              value_4_zero_regionprops=0.0)
+    #             #Get mask area
+    #             ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
+    #                                                           roi_mas_k=ch_n_roi_mask_array,
+    #                                                           binarization_threshold=ch_bin_thresh_2use[ch_n],
+    #                                                           value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
 
     #             #Count region number
     #             ch_n_regions_number = count_regions_number(ch_array, roi_mask=ch_n_roi_mask_array, threshold_input_arr=ch_bin_thresh_2use[ch_n], threshold_roi_mask=0)
