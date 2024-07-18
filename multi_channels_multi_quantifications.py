@@ -142,10 +142,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_regions_max_area = np.amax(ch_n_regions_areas)
                     ch_n_regions_min_area = np.amin(ch_n_regions_areas)
                 else:
-                    ch_n_regions_mean_area = np.NaN
-                    ch_n_regions_median_area = np.NaN
-                    ch_n_regions_max_area = np.NaN
-                    ch_n_regions_min_area = np.NaN
+                    ch_n_regions_mean_area = np.nan
+                    ch_n_regions_median_area = np.nan
+                    ch_n_regions_max_area = np.nan
+                    ch_n_regions_min_area = np.nan
 
     #             #Iterate trough the channels a second time, to get the relative measurements
     #             for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
