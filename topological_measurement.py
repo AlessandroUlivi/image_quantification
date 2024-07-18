@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 
-def get_convex_hull_fractions(arr_1, arr_2, roi__mask=None, threshold_arr_1=0, threshold_arr_2=0, threshold_roi_mask=0, px_thre_arr_1=3, px_thre_arr_2=3,
+def get_convex_hull_fraction(arr_1, arr_2, roi__mask=None, threshold_arr_1=0, threshold_arr_2=0, threshold_roi_mask=0, px_thre_arr_1=3, px_thre_arr_2=3,
                               val_4_arr1_NOpassthres_arr2_passthres=0.0, val_4_arr2_NOpassthres=None):
     """
     returns the fractions of input arrays convex hulls.
