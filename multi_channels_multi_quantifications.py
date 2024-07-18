@@ -12,7 +12,7 @@ from topological_measurement import get_convex_hull_fraction
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
-                      channels_binarization_thresholds=None, get_mask_area_val_4zero_regionprops=None, min_px_over_thresh_common=None):
+                      channels_binarization_thresholds=None, get_mask_area_val_4zero_regionprops=None, count_regions_number_threshold_roi_mask=None, min_px_over_thresh_common=None):
     """
     for the moment the main limitation is that thresholds can be provided for individual channels
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
@@ -78,6 +78,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Set val_4zero_regionprops in get_mask_area as 0 by defaut, if None is provided as input. Use the provided value otherwise.
     val_4zero_regionprops_2use = set_thresholds_2use(get_mask_area_val_4zero_regionprops, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
 
+    #Set threshold_roi_mask in count_regions_number as 0 by defaut, if None is provided as input. Use the provided value otherwise.
+    threshold_roi_mask_2use = set_thresholds_2use(count_regions_number_threshold_roi_mask, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
+
     #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, default_value=(0,0), range_2use=channels_array_copy.shape[channels_axis])
 
@@ -114,8 +117,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                               binarization_threshold=ch_bin_thresh_2use[ch_n],
                                                               value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
                 
-    #             #Count region number
-    #             ch_n_regions_number = count_regions_number(ch_array, roi_mask=ch_n_roi_mask_array, threshold_input_arr=ch_bin_thresh_2use[ch_n], threshold_roi_mask=0)
+                # #Count region number
+                # ch_n_regions_number = count_regions_number(ch_array,
+                #                                            roi_mask=ch_n_roi_mask_array,
+                #                                            threshold_input_arr=ch_bin_thresh_2use[ch_n],
+                #                                            threshold_roi_mask=threshold_roi_mask_2use[ch_n])
 
     #             #Get the areas of the regions within the channel
     #             ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array, roi__mask=ch_n_roi_mask_array, transform_to_label_img=True, binarization_threshold=ch_bin_thresh_2use[ch_n])
