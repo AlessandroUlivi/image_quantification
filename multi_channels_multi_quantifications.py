@@ -117,11 +117,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                               binarization_threshold=ch_bin_thresh_2use[ch_n],
                                                               value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
                 
-                # #Count region number
-                # ch_n_regions_number = count_regions_number(ch_array,
-                #                                            roi_mask=ch_n_roi_mask_array,
-                #                                            threshold_input_arr=ch_bin_thresh_2use[ch_n],
-                #                                            threshold_roi_mask=threshold_roi_mask_2use[ch_n])
+                #Count region number
+                ch_n_regions_number = count_regions_number(ch_array,
+                                                           roi_mask=ch_n_roi_mask_array,
+                                                           threshold_input_arr=ch_bin_thresh_2use[ch_n],
+                                                           threshold_roi_mask=threshold_roi_mask_2use[ch_n])
 
     #             #Get the areas of the regions within the channel
     #             ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array, roi__mask=ch_n_roi_mask_array, transform_to_label_img=True, binarization_threshold=ch_bin_thresh_2use[ch_n])
