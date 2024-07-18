@@ -12,7 +12,8 @@ from topological_measurement import get_convex_hull_fraction
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
-                      channels_binarization_thresholds=None, get_mask_area_val_4zero_regionprops=None, count_regions_number_threshold_roi_mask=None, min_px_over_thresh_common=None):
+                      channels_binarization_thresholds=None, get_mask_area_val_4zero_regionprops=None, count_regions_number_threshold_roi_mask=None, n_of_region_4areas_measure=None,
+                      min_px_over_thresh_common=None):
     """
     for the moment the main limitation is that thresholds can be provided for individual channels
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
@@ -81,6 +82,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Set threshold_roi_mask in count_regions_number as 0 by defaut, if None is provided as input. Use the provided value otherwise.
     threshold_roi_mask_2use = set_thresholds_2use(count_regions_number_threshold_roi_mask, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
 
+    #Set to 0 the highpass threshold for calculating the mean, median, min and max area of regions within a channel, if None is provided as input. Use the provided value otherwise.
+    n_of_region_4areas_measure_2use = set_thresholds_2use(n_of_region_4areas_measure, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
+
     #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, default_value=(0,0), range_2use=channels_array_copy.shape[channels_axis])
 
@@ -122,13 +126,26 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                            roi_mask=ch_n_roi_mask_array,
                                                            threshold_input_arr=ch_bin_thresh_2use[ch_n],
                                                            threshold_roi_mask=threshold_roi_mask_2use[ch_n])
-
-    #             #Get the areas of the regions within the channel
-    #             ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array, roi__mask=ch_n_roi_mask_array, transform_to_label_img=True, binarization_threshold=ch_bin_thresh_2use[ch_n])
-    #             ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
-    #             ch_n_regions_median_area = np.median(ch_n_regions_areas)
-    #             ch_n_regions_max_area = np.amax(ch_n_regions_areas)
-    #             ch_n_regions_min_area = np.amin(ch_n_regions_areas)
+                
+                #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
+                # link mean, median, max and min variables to NaN values
+                if ch_n_regions_number>n_of_region_4areas_measure_2use[ch_n]:
+                    #Get the areas of the regions within the channel
+                    ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
+                                                                    roi__mask=ch_n_roi_mask_array,
+                                                                    transform_to_label_img=True,
+                                                                    binarization_threshold=ch_bin_thresh_2use[ch_n])
+                    
+                    #Get mean, median, max and min regions' area. Get NaN values if a minimum number of areas is not detected
+                    ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
+                    ch_n_regions_median_area = np.median(ch_n_regions_areas)
+                    ch_n_regions_max_area = np.amax(ch_n_regions_areas)
+                    ch_n_regions_min_area = np.amin(ch_n_regions_areas)
+                else:
+                    ch_n_regions_mean_area = np.NaN
+                    ch_n_regions_median_area = np.NaN
+                    ch_n_regions_max_area = np.NaN
+                    ch_n_regions_min_area = np.NaN
 
     #             #Iterate trough the channels a second time, to get the relative measurements
     #             for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
