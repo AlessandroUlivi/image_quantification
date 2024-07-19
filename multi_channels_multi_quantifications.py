@@ -110,7 +110,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 assert len(roi_mask_list)==channels_array_copy.shape[analysis_axis], "the size of roi_mask_analysis_axis must match the size of analysis_axis"
                 roi_mask_analysis_axis_2use = roi_mask_analysis_axis
             roi_mask_list = [np.squeeze(d) for d in np.split(roi_mask_array_copy, indices_or_sections=roi_mask_array_copy.shape[roi_mask_analysis_axis_2use], axis=roi_mask_analysis_axis_2use)]
-            print("length of roi_Mask list ", len(roi_mask_list))
+            # print("length of roi_Mask list ", len(roi_mask_list))
 
     # #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
     # ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
@@ -211,11 +211,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 else:
                     ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
 
-    #             #Get mask area
-    #             ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
-    #                                                           roi_mas_k=ch_n_roi_mask_array,
-    #                                                           binarization_threshold=ch_bin_thresh_2use[ch_n],
-    #                                                           value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
+                #Get mask area
+                #Get threshold value for channel ch_n and index ixd in the analysis axis
+                ch_n_ixd_binarization_threshold = ch_bin_thresh_2use_2[ch_n] #=====HERE! this will be an array. I have to define a function which gets the correct value. It should not be required a function, however it should take into account if input_threshold was a tuple/list...
+                
+                # ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
+                #                                               roi_mas_k=ch_n_roi_mask_array,
+                #                                               binarization_threshold=ch_bin_thresh_2use[ch_n],
+                #                                               value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
                 
     #             #Count region number
     #             ch_n_regions_number = count_regions_number(ch_array,
