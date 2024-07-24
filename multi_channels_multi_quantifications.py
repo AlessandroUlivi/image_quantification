@@ -14,7 +14,7 @@ from topological_measurement import get_convex_hull_fraction
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
-                      min_px_over_thresh_common=(0,0)):
+                      min_px_over_thresh_common=-1.0):
     """
     seems to work with 3 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
     be indicated using negative number indexing (for example -10). 3) If a custom array of thresholds is provided and multiple thresholds are required (e.g. for comparison
@@ -164,7 +164,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, channels_stac_k=channels_array_copy)
-
+    
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
 
@@ -179,13 +179,13 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=analysis_axis, multi_thresholds=False)
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
-        min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=True)
+        min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
 
         # Iterate through the analysis axis
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
-
+            # print("===", ixd)
             #Get the individual channels array as a list
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
 
@@ -194,12 +194,12 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
-            min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=True)
+            min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
 
 
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
-                print("===", ch_n)
+                # print("===", ch_n)
                 #Get the region_to_quantify, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_list[ixd]
@@ -260,21 +260,44 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_regions_median_area = np.nan
                     ch_n_regions_max_area = np.nan
                     ch_n_regions_min_area = np.nan
-                print(ch_n_regions_number, ch_n_regions_mean_area, ch_n_regions_median_area, ch_n_regions_max_area, ch_n_regions_min_area)
-    #             #Iterate trough the channels a second time, to get the relative measurements
-    #             for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
+
+                #Iterate trough the channels a second time, to get measurements calculated by comparing two channels
+                for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
                     
-    #                 #Avoid measuring the channel angainst itself
-    #                 if ch_n != cchh_nn:
+                    #Avoid measuring a channel angainst itself
+                    if ch_n != cchh_nn:
                         
-    #                     #Count he number of pixels in the second channel
-    #                     cchh_nn_area_px, cchh_nn_area_props = get_mask_area(cchh_nn_array,
-    #                                                                         roi_mas_k=ch_n_roi_mask_array,
-    #                                                                         binarization_threshold=ch_bin_thresh_2use[cchh_nn],
-    #                                                                         value_4_zero_regionprops=val_4zero_regionprops_2use[cchh_nn])
-
-    #                     #Do the following analyses only if both channels pass 
-
+                        #Count he number of pixels in the second channel
+                        #Get threshold value for channel cchh_nn and index ixd in the analysis axis
+                        cchh_nn_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[cchh_nn],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                        #Get threshold value for channel cchh_nn and index ixd in the analysis axis
+                        cchh_nn_ixd_value_4_zero_regionprops = get_threshold_from_list(val_4zero_regionprops_2use_2[cchh_nn],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                        cchh_nn_area_px, cchh_nn_area_props = get_mask_area(cchh_nn_array,
+                                                                            roi_mas_k=ch_n_roi_mask_array,
+                                                                            binarization_threshold=cchh_nn_ixd_binarization_threshold,
+                                                                            value_4_zero_regionprops=cchh_nn_ixd_value_4_zero_regionprops)
+                        
+                        #Do the following analyses only if both channels pass a highpass threshold of number of pixels
+                        #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                        ch_n_ixd_min_px_of_inter_n = get_threshold_from_list(min_px_over_thresh_common_2use_2[ch_n],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                        
+                        cchh_nn_ixd_min_px_of_inter_n = get_threshold_from_list(min_px_over_thresh_common_2use_2[cchh_nn],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                        print("===")
+                        print(ch_n_area_px, cchh_nn_area_px)
+                        if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
+                            print("PASS")
     # #                     #Measure pixels' overlap
     # #                     ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
     # #                                                                    cchh_nn_array,
