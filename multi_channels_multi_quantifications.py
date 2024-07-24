@@ -59,7 +59,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         - if input_thresholds is int/float. The output is an ndarray of the same shape of channels_stac_k and all values set to input_threshols.
         - if input_thresholds is tuple/list. The output is an ndarray of shape=channels_stac_k.shape+1. The extra dimension is in position -1 and its size corresponds to the
         length of input_thresholds. Each ndarray of shape=channels_stac_k.shape which is stacked along the -1 dimension, contains one of the values of input_thresholds.
-        - if input_thresholds is ndarray. The output is input_thresholds.
+        - if input_thresholds is ndarray. The output is input_thresholds. NOTE: it multiple thresholds are reported and input_thresholds is ndarray, the multiple threshold values
+        must be indicated on axis -1.
         """
         if isinstance(input_thresholds, int) or isinstance(input_thresholds, float):
             return np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds,input_thresholds)
@@ -71,7 +72,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     def split_thresholds_arrays(thr_array, split_axis, multi_thresholds=False):
         """
         Splits thr_array along split_axis. If multi_thresholds array is True, split_axis is reduced of 1 number.
-        This function works in the context of 
+        This function works in the context of set_thresholds_2use and quantify_channels. For certain quantification functions it is required to indicate multiple thresholds. These
+        thresholds must be indicated in the -1 axis of the threshold array which is either the output of set_threshold_2use or directly input to quantify_channels. For this reason,
+        when multiple thresholds are reported, the threshold array has an additional axis than channel_array (see quantify_channels inputs), in position -1. When channels_array and
+        threshold arrays have to be split, the axis along which to do the split is referring to channel array and does not take into consideration the extra dimension of
+        thresholds array. This results in a wrong indexing when the index is indicated using negative numbers. The present function compensates for this fact.
         """
         if multi_thresholds:
             if split_axis<0:
@@ -85,12 +90,26 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     
     def get_threshold_from_list(array_threshold, multi_value_array=False, multi_value_axis=-1, get_a_single_value=True):
         """
-        The whole quantify_channels function is conceptualized so that array_threshold should have the same number of dimensions of the array to threshold, apart if multiple
-        thresholds are required. If multiple thresholds are required they are passed to input_thresholds_2 as a tuple or a list and array_threshold would have the same number
-        of the array to threshold, Plus an extra dimension, at position -1, having size equal to the number of multi-thresholds.
-        Thus if input_thresholds_2 is a tuple or a list, the function first splits indivual arrays along the axis multi_value_axis (default -1). Secondly get the thresholds associated
-        to each of these individual arrays. It returns such thresholds in a list.
-        If input_thresholds_2 is not a tuple or a list, 
+        Given:
+        array_threshold. ndarray.
+
+        The function returns:
+        - if multi_value_array==False (default).
+            - if get_a_single_value==True. The function returns the average value of array_threshold, as an int or float.
+            - if get_a_single_value==False. The function returns array_threshold.
+        - if multi_value_array==True. The function splits array_threshold in sub-arrays along multi_value_axis (defaul is -1).
+            - if get_a_single_value==True. The function returns a list with the average value of the of each sub-array of array_threshold along the multi_value_axis.
+            - if get_a_single_value==True. The function return the sub-arrays obtained by splitting array_threshold along the multi_value_axis.
+        
+        This function works in the context of set_thresholds_2use and quantify_channels. For certain quantification functions it is required to indicate multiple thresholds. These
+        thresholds must be indicated in the -1 axis of the threshold array which is either the output of set_threshold_2use or directly input to quantify_channels. For this reason,
+        when multiple thresholds are reported, the threshold array has an additional axis than channel_array (see quantify_channels inputs), in position -1. When the thresholds have
+        to be retrieved, this function allows to retrieve each individual multi-threshold from the extra dimension, if required.
+        NOTE:
+        - although it is possible to change the axis where multi-thresholds are reported by changing multi_value_axis, the whole processing was conceptualize for having these
+        values in the axis -1 and it hasn't been tested for different situations.
+        - Although it is possible to retrieve an entire array instead of a single threshold value, the process is conceptualized for retrieving a single value and it hasn't been
+        tested for different situations.
         """
         if multi_value_array:
             multi_thresholds_split = [np.squeeze(y) for y in np.split()]
