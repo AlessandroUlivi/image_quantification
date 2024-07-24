@@ -120,7 +120,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Make sure that channels_axis and analysis axis are not the same axis
     assert channels_axis != analysis_axis, "channels_axis can't be the same of analysis_axis"
 
-    #If arrays are split along an axis to analyses, because channels_axis will work after the splitting, recude it of 1 unit to compensate for the recuded dimension
+    #If arrays are split along an axis to analyses, because channels_axis will work after the splitting, reduce it of 1 unit to compensate for the recuded dimension
     if analysis_axis != None:
         if channels_axis>analysis_axis:
             channels_axis_2use = channels_axis-1
@@ -150,7 +150,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             roi_mask_list = [np.squeeze(d) for d in np.split(roi_mask_array_copy, indices_or_sections=roi_mask_array_copy.shape[roi_mask_analysis_axis_2use], axis=roi_mask_analysis_axis_2use)]
             # print("length of roi_Mask list ", len(roi_mask_list))
 
-    #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
+    #Set binarization thresholds to 0 for all channels, if channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
     
     #Set val_4zero_regionprops in get_mask_area as 0 by defaut, if None is provided as input. Use the provided value otherwise.
@@ -213,10 +213,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
+                #Get threshold value for channel ch_n and index ixd in the analysis axis
+                ch_n_ixd_value_4_zero_regionprops = get_threshold_from_list(val_4zero_regionprops_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+                
                 # ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
                 #                                               roi_mas_k=ch_n_roi_mask_array,
                 #                                               binarization_threshold=ch_n_ixd_binarization_threshold,
-                #                                               value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
+                #                                               value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
                 
                 # #Count region number
                 # ch_n_regions_number = count_regions_number(ch_array,
