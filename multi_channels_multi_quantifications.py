@@ -219,10 +219,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
                 
-                # ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
-                #                                               roi_mas_k=ch_n_roi_mask_array,
-                #                                               binarization_threshold=ch_n_ixd_binarization_threshold,
-                #                                               value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
+                ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
+                                                              roi_mas_k=ch_n_roi_mask_array,
+                                                              binarization_threshold=ch_n_ixd_binarization_threshold,
+                                                              value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
                 
                 # #Count region number
                 # ch_n_regions_number = count_regions_number(ch_array,
