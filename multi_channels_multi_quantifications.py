@@ -35,8 +35,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
                       min_px_over_thresh_common=(0,0)):
     """
-    seems to work with 2 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
-    be indicated using negative number indexing (for example -10).
+    seems to work with 3 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
+    be indicated using negative number indexing (for example -10). 3) If a custom array of thresholds is provided and multiple thresholds are required (e.g. for comparison
+    functions, the multiple thresholds must be in position -1)
     - roi_mask_array is the same for all the channels. It has shape channels_array-1.
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
     """
@@ -68,8 +69,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #     else:
     #         return input_thresholds
 
-    def split_thresholds_arrays(thr_array, input_thresholds_1, split_axis):
-        if isinstance(input_thresholds_1, tuple) or isinstance(input_thresholds_1, list):
+    def split_thresholds_arrays(thr_array, split_axis, multi_thresholds=False):
+        if multi_thresholds:
             if split_axis<0:
                 split_axis_2use = split_axis-1
             else:
@@ -79,8 +80,17 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         
         return [np.squeeze(z) for z in np.split(thr_array, indices_or_sections=thr_array.shape[split_axis_2use], axis=split_axis_2use)]
     
-    def get_threshold_from_list(list_of_threshold, input_list_index, input_thresholds_2):
-        #If input_thresholds_2
+    def get_threshold_from_list(array_threshold, multi_value_array=False, multi_value_axis=-1, get_a_single_value=True):
+        """
+        The whole quantify_channels function is conceptualized so that array_threshold should have the same number of dimensions of the array to threshold, apart if multiple
+        thresholds are required. If multiple thresholds are required they are passed to input_thresholds_2 as a tuple or a list and array_threshold would have the same number
+        of the array to threshold, Plus an extra dimension, at position -1, having size equal to the number of multi-thresholds.
+        Thus if input_thresholds_2 is a tuple or a list, the function first splits indivual arrays along the axis multi_value_axis (default -1). Secondly get the thresholds associated
+        to each of these individual arrays. It returns such thresholds in a list.
+        If input_thresholds_2 is not a tuple or a list, 
+        """
+        if multi_value_array:
+            multi_thresholds_split = [np.squeeze(y) for y in np.split()]
         return
 
     #Make sure that channels_axis and analysis axis are not the same axis
@@ -165,11 +175,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         # print("==="*10)
 
         #Split threshold arrays on the analysis_axis
-        ch_bin_thresh_2use_1 = split_thresholds_arrays(ch_bin_thresh_2use, channels_binarization_thresholds, split_axis=analysis_axis)
-        val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, get_mask_area_val_4zero_regionprops, split_axis=analysis_axis)
-        threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, count_regions_number_threshold_roi_mask, split_axis=analysis_axis)
-        n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, n_of_region_4areas_measure, split_axis=analysis_axis)
-        min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, min_px_over_thresh_common, split_axis=analysis_axis)
+        ch_bin_thresh_2use_1 = split_thresholds_arrays(ch_bin_thresh_2use, split_axis=analysis_axis, multi_thresholds=False)
+        val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=analysis_axis, multi_thresholds=False)
+        threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
+        n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
+        min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=True)
         print("===== analysis axis split")
         print(len(ch_bin_thresh_2use_1),ch_bin_thresh_2use_1[0].shape)
         print(len(val_4zero_regionprops_2use_1),val_4zero_regionprops_2use_1[0].shape)
@@ -188,11 +198,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
 
             #Also split on the channel axis the thresholds' arrays corresponding to the ixd-th index along the analysis_axis
-            ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use_1[ixd], channels_binarization_thresholds, split_axis=channels_axis_2use)
-            val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], get_mask_area_val_4zero_regionprops, split_axis=channels_axis_2use)
-            threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], count_regions_number_threshold_roi_mask, split_axis=channels_axis_2use)
-            n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], n_of_region_4areas_measure, split_axis=channels_axis_2use)
-            min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], min_px_over_thresh_common, split_axis=channels_axis_2use)
+            ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=True)
 
             print("===== channels axis split")
             print("input ", len(ch_arrays_list),ch_arrays_list[0].shape)
