@@ -21,6 +21,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     functions, the multiple thresholds must be in position -1)
     - roi_mask_array is the same for all the channels. It has shape channels_array-1.
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
+    NOTE than when a tuple or a list is passed as a threshold this is interpreted as a multi-threshold, not as individual thresholds for the different channels.
     """
 
     def modify_dictionary(dict2modify, key_name, valu_e=None, interations_times=1):
