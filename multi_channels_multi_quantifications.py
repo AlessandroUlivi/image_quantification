@@ -69,7 +69,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #         return input_thresholds
 
     def split_thresholds_arrays(thr_array, input_thresholds_1, split_axis):
-        if isinstance(input_thresholds_1, tuple) or isinstance(input_thresholds_1, tuple):
+        if isinstance(input_thresholds_1, tuple) or isinstance(input_thresholds_1, list):
             if split_axis<0:
                 split_axis_2use = split_axis-1
             else:
