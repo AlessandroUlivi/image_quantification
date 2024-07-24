@@ -78,6 +78,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             split_axis_2use = split_axis
         
         return [np.squeeze(z) for z in np.split(thr_array, indices_or_sections=thr_array.shape[split_axis_2use], axis=split_axis_2use)]
+    
+    def get_threshold_from_list(list_of_threshold, input_list_index, input_thresholds_2):
+        #If input_thresholds_2
+        return
 
     #Make sure that channels_axis and analysis axis are not the same axis
     assert channels_axis != analysis_axis, "channels_axis can't be the same of analysis_axis"
