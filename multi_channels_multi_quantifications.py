@@ -42,13 +42,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     print("WARNING! ", key_name_1, "'s value is updated by no value is provided for the update. None will be used instead")
                     dict2modify[key_name_1].append(valu_e)
     
-    # def set_thresholds_2use(input_thresholds, default_value, range_2use):
-    #     if input_thresholds==None:
-    #         return [default_value for th in range(range_2use)]
-    #     elif isinstance(input_thresholds, int) or isinstance(input_thresholds, float) or isinstance(input_thresholds, tuple):
-    #         return [input_thresholds for th1 in range(range_2use)]
-    #     else:
-    #         return input_thresholds
+    
     def set_thresholds_2use(input_thresholds, channels_stac_k):
         """
         Inputs:
@@ -156,23 +150,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             roi_mask_list = [np.squeeze(d) for d in np.split(roi_mask_array_copy, indices_or_sections=roi_mask_array_copy.shape[roi_mask_analysis_axis_2use], axis=roi_mask_analysis_axis_2use)]
             # print("length of roi_Mask list ", len(roi_mask_list))
 
-    # #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
-    # ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
-    
-    # #Set val_4zero_regionprops in get_mask_area as 0 by defaut, if None is provided as input. Use the provided value otherwise.
-    # val_4zero_regionprops_2use = set_thresholds_2use(get_mask_area_val_4zero_regionprops, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
-
-    # #Set threshold_roi_mask in count_regions_number as 0 by defaut, if None is provided as input. Use the provided value otherwise.
-    # threshold_roi_mask_2use = set_thresholds_2use(count_regions_number_threshold_roi_mask, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
-
-    # #Set to 0 the highpass threshold for calculating the mean, median, min and max area of regions within a channel, if None is provided as input. Use the provided value otherwise.
-    # n_of_region_4areas_measure_2use = set_thresholds_2use(n_of_region_4areas_measure, default_value=0, range_2use=channels_array_copy.shape[channels_axis])
-
-    # #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
-    # min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, default_value=(0,0), range_2use=channels_array_copy.shape[channels_axis])
-
-
-
     #Set binarization thresholds to 0 for all channels, if channels channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
     
@@ -187,13 +164,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, channels_stac_k=channels_array_copy)
-
-    # print("===== initial")
-    # print(ch_bin_thresh_2use.shape)
-    # print(val_4zero_regionprops_2use.shape)
-    # print(threshold_roi_mask_2use.shape)
-    # print(n_of_region_4areas_measure_2use.shape)
-    # print(min_px_over_thresh_common_2use.shape)
 
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
@@ -210,19 +180,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
         min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=True)
-        # print("===== analysis axis split")
-        # print(len(ch_bin_thresh_2use_1),ch_bin_thresh_2use_1[0].shape)
-        # print(len(val_4zero_regionprops_2use_1),val_4zero_regionprops_2use_1[0].shape)
-        # print(len(threshold_roi_mask_2use_1),threshold_roi_mask_2use_1[0].shape)
-        # print(len(n_of_region_4areas_measure_2use_1),n_of_region_4areas_measure_2use_1[0].shape)
-        # print(len(min_px_over_thresh_common_2use_1),min_px_over_thresh_common_2use_1[0].shape)
 
         # Iterate through the analysis axis
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
-            # if ixd<4:
-            #     print(ixd, idx_array.shape)
 
             #Get the individual channels array as a list
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
@@ -234,19 +196,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=True)
 
-            # print("===== channels axis split")
-            # print("input ", len(ch_arrays_list),ch_arrays_list[0].shape)
-            # print(len(ch_bin_thresh_2use_2),ch_bin_thresh_2use_2[0].shape)
-            # print(len(val_4zero_regionprops_2use_2),val_4zero_regionprops_2use_2[0].shape)
-            # print(len(threshold_roi_mask_2use_2),threshold_roi_mask_2use_2[0].shape)
-            # print(len(n_of_region_4areas_measure_2use_2),n_of_region_4areas_measure_2use_2[0].shape)
-            # print(len(min_px_over_thresh_common_2use_2),min_px_over_thresh_common_2use_2[0].shape)
-
 
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
-                # if ch_n<4:
-                #     print("ch ", ch_n, ch_array.shape)
 
                 #Get the region_to_quantify, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
@@ -261,17 +213,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
-                print(ch_n_ixd_binarization_threshold)
                 # ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
                 #                                               roi_mas_k=ch_n_roi_mask_array,
-                #                                               binarization_threshold=ch_bin_thresh_2use[ch_n],
+                #                                               binarization_threshold=ch_n_ixd_binarization_threshold,
                 #                                               value_4_zero_regionprops=val_4zero_regionprops_2use[ch_n])
                 
-    #             #Count region number
-    #             ch_n_regions_number = count_regions_number(ch_array,
-    #                                                        roi_mask=ch_n_roi_mask_array,
-    #                                                        threshold_input_arr=ch_bin_thresh_2use[ch_n],
-    #                                                        threshold_roi_mask=threshold_roi_mask_2use[ch_n])
+                # #Count region number
+                # ch_n_regions_number = count_regions_number(ch_array,
+                #                                            roi_mask=ch_n_roi_mask_array,
+                #                                            threshold_input_arr=ch_bin_thresh_2use[ch_n],
+                #                                            threshold_roi_mask=threshold_roi_mask_2use[ch_n])
                 
     #             #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
     #             # link mean, median, max and min variables to NaN values
