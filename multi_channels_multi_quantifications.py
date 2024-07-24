@@ -98,8 +98,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             - if get_a_single_value==True. The function returns the average value of array_threshold, as an int or float.
             - if get_a_single_value==False. The function returns array_threshold.
         - if multi_value_array==True. The function splits array_threshold in sub-arrays along multi_value_axis (defaul is -1).
-            - if get_a_single_value==True. The function returns a list with the average value of the of each sub-array of array_threshold along the multi_value_axis.
-            - if get_a_single_value==True. The function return the sub-arrays obtained by splitting array_threshold along the multi_value_axis.
+            - if get_a_single_value==True. The function returns a tuple with the average value of the of each sub-array of array_threshold along the multi_value_axis.
+            - if get_a_single_value==True. The function return the sub-arrays obtained by splitting array_threshold along the multi_value_axis. The output dtype is a list.
         
         This function works in the context of set_thresholds_2use and quantify_channels. For certain quantification functions it is required to indicate multiple thresholds. These
         thresholds must be indicated in the -1 axis of the threshold array which is either the output of set_threshold_2use or directly input to quantify_channels. For this reason,
@@ -112,8 +112,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         tested for different situations.
         """
         if multi_value_array:
-            multi_thresholds_split = [np.squeeze(y) for y in np.split()]
-        return
+            multi_thresholds_split = [np.squeeze(y) for y in np.split(array_threshold, indices_or_sections=array_threshold.shape[multi_value_axis], axis=multi_value_axis)]
+            if get_a_single_value:
+                return tuple([np.mean(mta) for mta in multi_thresholds_split])
+            else:
+                return multi_thresholds_split
+        else:
+            if get_a_single_value:
+                return np.mean(array_threshold)
+            else:
+                return array_threshold
 
     #Make sure that channels_axis and analysis axis are not the same axis
     assert channels_axis != analysis_axis, "channels_axis can't be the same of analysis_axis"
@@ -180,12 +188,12 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, channels_stac_k=channels_array_copy)
 
-    print("===== initial")
-    print(ch_bin_thresh_2use.shape)
-    print(val_4zero_regionprops_2use.shape)
-    print(threshold_roi_mask_2use.shape)
-    print(n_of_region_4areas_measure_2use.shape)
-    print(min_px_over_thresh_common_2use.shape)
+    # print("===== initial")
+    # print(ch_bin_thresh_2use.shape)
+    # print(val_4zero_regionprops_2use.shape)
+    # print(threshold_roi_mask_2use.shape)
+    # print(n_of_region_4areas_measure_2use.shape)
+    # print(min_px_over_thresh_common_2use.shape)
 
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
@@ -202,19 +210,19 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
         min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=True)
-        print("===== analysis axis split")
-        print(len(ch_bin_thresh_2use_1),ch_bin_thresh_2use_1[0].shape)
-        print(len(val_4zero_regionprops_2use_1),val_4zero_regionprops_2use_1[0].shape)
-        print(len(threshold_roi_mask_2use_1),threshold_roi_mask_2use_1[0].shape)
-        print(len(n_of_region_4areas_measure_2use_1),n_of_region_4areas_measure_2use_1[0].shape)
-        print(len(min_px_over_thresh_common_2use_1),min_px_over_thresh_common_2use_1[0].shape)
+        # print("===== analysis axis split")
+        # print(len(ch_bin_thresh_2use_1),ch_bin_thresh_2use_1[0].shape)
+        # print(len(val_4zero_regionprops_2use_1),val_4zero_regionprops_2use_1[0].shape)
+        # print(len(threshold_roi_mask_2use_1),threshold_roi_mask_2use_1[0].shape)
+        # print(len(n_of_region_4areas_measure_2use_1),n_of_region_4areas_measure_2use_1[0].shape)
+        # print(len(min_px_over_thresh_common_2use_1),min_px_over_thresh_common_2use_1[0].shape)
 
         # Iterate through the analysis axis
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
-            if ixd<4:
-                print(ixd, idx_array.shape)
+            # if ixd<4:
+            #     print(ixd, idx_array.shape)
 
             #Get the individual channels array as a list
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
@@ -226,31 +234,34 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=True)
 
-            print("===== channels axis split")
-            print("input ", len(ch_arrays_list),ch_arrays_list[0].shape)
-            print(len(ch_bin_thresh_2use_2),ch_bin_thresh_2use_2[0].shape)
-            print(len(val_4zero_regionprops_2use_2),val_4zero_regionprops_2use_2[0].shape)
-            print(len(threshold_roi_mask_2use_2),threshold_roi_mask_2use_2[0].shape)
-            print(len(n_of_region_4areas_measure_2use_2),n_of_region_4areas_measure_2use_2[0].shape)
-            print(len(min_px_over_thresh_common_2use_2),min_px_over_thresh_common_2use_2[0].shape)
+            # print("===== channels axis split")
+            # print("input ", len(ch_arrays_list),ch_arrays_list[0].shape)
+            # print(len(ch_bin_thresh_2use_2),ch_bin_thresh_2use_2[0].shape)
+            # print(len(val_4zero_regionprops_2use_2),val_4zero_regionprops_2use_2[0].shape)
+            # print(len(threshold_roi_mask_2use_2),threshold_roi_mask_2use_2[0].shape)
+            # print(len(n_of_region_4areas_measure_2use_2),n_of_region_4areas_measure_2use_2[0].shape)
+            # print(len(min_px_over_thresh_common_2use_2),min_px_over_thresh_common_2use_2[0].shape)
 
 
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
-                if ch_n<4:
-                    print("ch ", ch_n, ch_array.shape)
+                # if ch_n<4:
+                #     print("ch ", ch_n, ch_array.shape)
 
                 #Get the region_to_quantify, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_list[ixd]
-                    print("shape roi mask", ch_n_roi_mask_array.shape)
+                    # print("shape roi mask", ch_n_roi_mask_array.shape)
                 else:
                     ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
 
                 #Get mask area
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
-                ch_n_ixd_binarization_threshold = ch_bin_thresh_2use_2[ch_n] #=====HERE! this will be an array. I have to define a function which gets the correct value. It should not be required a function, however it should take into account if input_threshold was a tuple/list...
-                
+                ch_n_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+                print(ch_n_ixd_binarization_threshold)
                 # ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
                 #                                               roi_mas_k=ch_n_roi_mask_array,
                 #                                               binarization_threshold=ch_bin_thresh_2use[ch_n],
