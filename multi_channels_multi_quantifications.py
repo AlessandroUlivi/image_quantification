@@ -224,11 +224,17 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                               binarization_threshold=ch_n_ixd_binarization_threshold,
                                                               value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
                 
-                # #Count region number
-                # ch_n_regions_number = count_regions_number(ch_array,
-                #                                            roi_mask=ch_n_roi_mask_array,
-                #                                            threshold_input_arr=ch_bin_thresh_2use[ch_n],
-                #                                            threshold_roi_mask=threshold_roi_mask_2use[ch_n])
+                #Count region number
+                #Get threshold value for channel ch_n and index ixd in the analysis axis
+                ch_n_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+                
+                ch_n_regions_number = count_regions_number(ch_array,
+                                                           roi_mask=ch_n_roi_mask_array,
+                                                           threshold_input_arr=ch_n_ixd_binarization_threshold,
+                                                           threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
                 
     #             #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
     #             # link mean, median, max and min variables to NaN values
