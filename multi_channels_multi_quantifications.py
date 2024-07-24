@@ -199,7 +199,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
-
+                print("===", ch_n)
                 #Get the region_to_quantify, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_list[ixd]
@@ -236,26 +236,31 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                            threshold_input_arr=ch_n_ixd_binarization_threshold,
                                                            threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
                 
-    #             #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
-    #             # link mean, median, max and min variables to NaN values
-    #             if ch_n_regions_number>n_of_region_4areas_measure_2use[ch_n]:
-    #                 #Get the areas of the regions within the channel
-    #                 ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
-    #                                                                 roi__mask=ch_n_roi_mask_array,
-    #                                                                 transform_to_label_img=True,
-    #                                                                 binarization_threshold=ch_bin_thresh_2use[ch_n])
+                #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
+                # link mean, median, max and min variables to NaN values
+                #Get threshold value for channel ch_n and index ixd in the analysis axis
+                ch_n_ixd_n_of_region_4areas_measure = get_threshold_from_list(n_of_region_4areas_measure_2use_2[ch_n],
+                                                                                multi_value_array=False,
+                                                                                multi_value_axis=-1,
+                                                                                get_a_single_value=True)
+                if ch_n_regions_number>ch_n_ixd_n_of_region_4areas_measure:
+                    #Get the areas of the regions within the channel
+                    ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
+                                                                    roi__mask=ch_n_roi_mask_array,
+                                                                    transform_to_label_img=True,
+                                                                    binarization_threshold=ch_n_ixd_binarization_threshold)
                     
-    #                 #Get mean, median, max and min regions' area. Get NaN values if a minimum number of areas is not detected
-    #                 ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
-    #                 ch_n_regions_median_area = np.median(ch_n_regions_areas)
-    #                 ch_n_regions_max_area = np.amax(ch_n_regions_areas)
-    #                 ch_n_regions_min_area = np.amin(ch_n_regions_areas)
-    #             else:
-    #                 ch_n_regions_mean_area = np.nan
-    #                 ch_n_regions_median_area = np.nan
-    #                 ch_n_regions_max_area = np.nan
-    #                 ch_n_regions_min_area = np.nan
-
+                    #Get mean, median, max and min regions' area. Get NaN values if a minimum number of areas is not detected
+                    ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
+                    ch_n_regions_median_area = np.median(ch_n_regions_areas)
+                    ch_n_regions_max_area = np.amax(ch_n_regions_areas)
+                    ch_n_regions_min_area = np.amin(ch_n_regions_areas)
+                else:
+                    ch_n_regions_mean_area = np.nan
+                    ch_n_regions_median_area = np.nan
+                    ch_n_regions_max_area = np.nan
+                    ch_n_regions_min_area = np.nan
+                print(ch_n_regions_number, ch_n_regions_mean_area, ch_n_regions_median_area, ch_n_regions_max_area, ch_n_regions_min_area)
     #             #Iterate trough the channels a second time, to get the relative measurements
     #             for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
                     
