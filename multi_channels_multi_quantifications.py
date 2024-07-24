@@ -11,25 +11,6 @@ from topological_measurement import get_convex_hull_fraction
 # get_convex_hull_fractions
 
 
-def set_thresholds_2use(input_thresholds, channels_stac_k):
-    """
-    Inputs:
-    - input_thresholds. None, int/float, tuple/list or ndarray.
-    - channels_stac_k. ndarray.
-
-    Outputs:
-    - if input_thresholds is int/float. The output is an ndarray of the same shape of channels_stac_k and all values set to input_threshols.
-    - if input_thresholds is tuple/list. The output is an ndarray of shape=channels_stac_k.shape+1. The extra dimension is in position -1 and its size corresponds to the
-    length of input_thresholds. Each ndarray of shape=channels_stac_k.shape which is stacked along the -1 dimension, contains one of the values of input_thresholds.
-    - if input_thresholds is ndarray. The output is input_thresholds.
-    """
-    if isinstance(input_thresholds, int) or isinstance(input_thresholds, float):
-        return np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds,input_thresholds)
-    elif isinstance(input_thresholds, tuple) or isinstance(input_thresholds, tuple):
-        return np.stack([np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds[k],input_thresholds[k]) for k in range(len(input_thresholds))], axis=-1)
-    else:
-        return input_thresholds
-
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
@@ -68,8 +49,30 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #         return [input_thresholds for th1 in range(range_2use)]
     #     else:
     #         return input_thresholds
+    def set_thresholds_2use(input_thresholds, channels_stac_k):
+        """
+        Inputs:
+        - input_thresholds. None, int/float, tuple/list or ndarray.
+        - channels_stac_k. ndarray.
+
+        Outputs:
+        - if input_thresholds is int/float. The output is an ndarray of the same shape of channels_stac_k and all values set to input_threshols.
+        - if input_thresholds is tuple/list. The output is an ndarray of shape=channels_stac_k.shape+1. The extra dimension is in position -1 and its size corresponds to the
+        length of input_thresholds. Each ndarray of shape=channels_stac_k.shape which is stacked along the -1 dimension, contains one of the values of input_thresholds.
+        - if input_thresholds is ndarray. The output is input_thresholds.
+        """
+        if isinstance(input_thresholds, int) or isinstance(input_thresholds, float):
+            return np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds,input_thresholds)
+        elif isinstance(input_thresholds, tuple) or isinstance(input_thresholds, tuple):
+            return np.stack([np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds[k],input_thresholds[k]) for k in range(len(input_thresholds))], axis=-1)
+        else:
+            return input_thresholds
 
     def split_thresholds_arrays(thr_array, split_axis, multi_thresholds=False):
+        """
+        Splits thr_array along split_axis. If multi_thresholds array is True, split_axis is reduced of 1 number.
+        This function works in the context of 
+        """
         if multi_thresholds:
             if split_axis<0:
                 split_axis_2use = split_axis-1
