@@ -430,7 +430,7 @@ def match_arrays_dimensions(input_array_1, target_array):
         #Initialize the output array by copying input_array_1
         output_array = input_array_1.copy()
         #Iterate through the dimension position (d3) and dimension size (size_dimension) of target_array 
-        for d3, size_dimension in range(len(target_array.shape)):
+        for d3, size_dimension in enumerate(target_array.shape):
             #If the dimension does not have a match in input_array_1
             if d3 not in matching_dim_trg_keys:
                 # print('I will add dimension of size ', size_dimension, ' at position ', d3, " in roi_array")
