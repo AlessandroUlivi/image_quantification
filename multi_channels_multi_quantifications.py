@@ -12,7 +12,7 @@ from utils import match_arrays_dimensions
 # get_convex_hull_fractions
 
 
-def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False,
+def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0,
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
                       min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0,
                       measure_pixels_overlap_val_threshold_arr_1=0, measure_pixels_overlap_val_threshold_arr_2=0):
