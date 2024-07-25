@@ -130,8 +130,8 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask_arr_1=None, roi_mask_a
             return fract_double_target_on_target_1, shuffling_results
 
 
-def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__mask=None, desired__distance='min', transform_to_label_img=False, label_img_1_thres=0,
-                                        binary_mask_target_thres=0):
+def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__mask_img1=None, roi__mask_targ=None, desired__distance='min', transform_to_label_img=False,
+                                        label_img_1_thres=0, binary_mask_target_thres=0):
     """
     Returns the eucledean distance between the regions of an input image (label_img_1) and the regions of a target image (binary_mask_target).
 
@@ -144,8 +144,10 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     set to 0 and considered background. The default value for label_img_1_thres is 0. NOTE: a binary mask can be considered a label image if only a single
     region is present.
     - binary_mask_target. ndarray of the same shape of label_img_1. Pixels of interest are assumed to be pixels whose value is >binary_mask_target_thres (default 0).
-    - roi_mask. Optional parameter. ndarray of the same shape of label_img_1. Binary mask. When provided, the analysis will be restricted to the region of interest indicated by roi_mask.
-    It is assumed that the region of interest corresponds to pixels in roi_mask with value>0.
+    - roi__mask_img1. Optional parameter. ndarray of the same shape of label_img_1. Binary mask. When provided, the analysis of label_img_1 will be restricted to the region of
+    interest indicated by roi__mask_img1. It is assumed that the region of interest corresponds to pixels in roi_mask with value>0.
+    - roi__mask_targ. Optional parameter. ndarray of the same shape of label_img_1. Binary mask. When provided, the analysis of binary_mask_target will be restricted to the region of
+    interest indicated by roi__mask_targ. It is assumed that the region of interest corresponds to pixels in roi_mask with value>0.
     - desired_distance. String. Three choices are possible: 'min' (default), 'max', 'mean'. The parameter is passed to the function get_euclidean_distances (within utils.py). If 'min'
     the minimum distances between regions of label_img_1 and regions of binary_mask_target are measured. If 'max' the maximum distances between regions of label_img_1
     and regions of binary_mask_target are measured. If 'mean' the mean distance between between regions of label_img_1 and regions of binary_mask_target is measured.
@@ -185,13 +187,18 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
     else:
         img_1_i = label_img_1_copy
 
-    #Set values outside roi to 0 (background) if roi__mask is provided
-    if hasattr(roi__mask, "__len__"):
-        roi__mask_copy = roi__mask.copy()
-        img_1 = np.where(roi__mask>0, img_1_i, 0)
-        target_mask = np.where(roi__mask>0, binary_mask_target_copy, 0)
+    #Set values outside roi to 0 (background) if roi__mask_img1 is provided
+    if hasattr(roi__mask_img1, "__len__"):
+        roi__mask_img1_copy = roi__mask_img1.copy()
+        img_1 = np.where(roi__mask_img1_copy>0, img_1_i, 0)
     else:
         img_1 = img_1_i
+    
+    #Set values outside roi to 0 (background) if roi__mask_targ is provided
+    if hasattr(roi__mask_targ, "__len__"):
+        roi__mask_targ_copy = roi__mask_targ.copy()
+        target_mask = np.where(roi__mask_targ_copy>0, binary_mask_target_copy, 0)
+    else:
         target_mask = binary_mask_target_copy
     
     #get regionproperties of label_img_1 and binary_mask_target
