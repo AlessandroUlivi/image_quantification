@@ -138,7 +138,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         roi_mask_array_2use = roi_mask_array.copy(roi_mask_array_copy_i, channels_array_copy)
         print("initial_roi_mask_shape: ", roi_mask_array_2use.shape)
     else:
-        roi_mask_array_2use = roi_mask_array.copy()
+        roi_mask_array_2use = roi_mask_array
 
     #Set binarization thresholds to 0 for all channels, if channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
