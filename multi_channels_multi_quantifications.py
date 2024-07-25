@@ -4,6 +4,7 @@ from co_localization_measurements import measure_pixels_overlap, measure_regions
 from counting_measurements import count_regions_number
 from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask
 from topological_measurement import get_convex_hull_fraction
+from utils import match_arrays_dimensions
 
 # measure_pixels_overlap,
 # measure_regions_euclidean_distances,
@@ -11,15 +12,14 @@ from topological_measurement import get_convex_hull_fraction
 # get_convex_hull_fractions
 
 
-
-def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False, roi_mask_analysis_axis=None,
+def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False,
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
                       min_px_over_thresh_common=-1.0):
     """
     seems to work with 3 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
     be indicated using negative number indexing (for example -10). 3) If a custom array of thresholds is provided and multiple thresholds are required (e.g. for comparison
     functions, the multiple thresholds must be in position -1)
-    - roi_mask_array is the same for all the channels. It has shape channels_array-1.
+    - roi_mask_array can be different for the channels. At least 1 axis mutch match channels_arrays. The matching axis must be in the correct position.
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
     NOTE than when a tuple or a list is passed as a threshold this is interpreted as a multi-threshold, not as individual thresholds for the different channels.
     """
@@ -42,7 +42,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 else:
                     print("WARNING! ", key_name_1, "'s value is updated by no value is provided for the update. None will be used instead")
                     dict2modify[key_name_1].append(valu_e)
-    
     
     def set_thresholds_2use(input_thresholds, channels_stac_k):
         """
@@ -132,24 +131,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     #Copy input arrays
     channels_array_copy = channels_array.copy()
-    roi_mask_array_copy = roi_mask_array.copy()
 
-    #If roi_mask_array is provided and analysis_axis is provided, transform roi_mask_array_copy into a list of sub-arrays along the axis to analyse
+    #If roi_mask_array is provided make sure it is has the same shape of channels_array, else, copy the None
     if hasattr(roi_mask_array, "__len__"):
-        if analysis_axis != None:
-
-            #Use analysis_axis as the axis along which split the sub-arrays if no specific roi_mask_analysis_axis is provided. Use the provided axis, otherwise
-            if roi_mask_analysis_axis == None:
-                if channels_axis>analysis_axis:
-                    roi_mask_analysis_axis_2use = analysis_axis
-                else:
-                    roi_mask_analysis_axis_2use = analysis_axis-1
-            else:
-                #Make sure that the number of roi_mask ndarrays along roi_mask_analysis_axis matches the number of ndarrays along the 
-                assert len(roi_mask_list)==channels_array_copy.shape[analysis_axis], "the size of roi_mask_analysis_axis must match the size of analysis_axis"
-                roi_mask_analysis_axis_2use = roi_mask_analysis_axis
-            roi_mask_list = [np.squeeze(d) for d in np.split(roi_mask_array_copy, indices_or_sections=roi_mask_array_copy.shape[roi_mask_analysis_axis_2use], axis=roi_mask_analysis_axis_2use)]
-            # print("length of roi_Mask list ", len(roi_mask_list))
+        roi_mask_array_copy_i = roi_mask_array.copy()
+        roi_mask_array_2use = roi_mask_array.copy(roi_mask_array_copy_i, channels_array_copy)
+        print("initial_roi_mask_shape: ", roi_mask_array_2use.shape)
+    else:
+        roi_mask_array_2use = roi_mask_array.copy()
 
     #Set binarization thresholds to 0 for all channels, if channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
@@ -175,6 +164,15 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         # print("---analyze a specific axis---")
         # print("==="*10)
 
+        #Split the roi_mask_array on the analysis_axis, if roi_mask_array is provided
+        if hasattr(roi_mask_array, "__len__"):
+            roi_mask_array_2use_1 = [np.squeeze(w) for w in np.split(roi_mask_array_2use,
+                                                                         indices_or_sections=channels_array_copy.shape[analysis_axis],
+                                                                         axis=analysis_axis)]
+            print("roi_mask after analysis axis split: ", len(roi_mask_array_2use_1), roi_mask_array_2use_1[0].shape)
+        else:
+            roi_mask_array_2use_1 = roi_mask_array_2use #which should be meaning None
+
         #Split threshold arrays on the analysis_axis
         ch_bin_thresh_2use_1 = split_thresholds_arrays(ch_bin_thresh_2use, split_axis=analysis_axis, multi_thresholds=False)
         val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=analysis_axis, multi_thresholds=False)
@@ -190,6 +188,13 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             #Get the individual channels array as a list
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
 
+            #Also che the individual channels arrays as a list for the roi_mask, if it is provided
+            if hasattr(roi_mask_array, "__len__"):
+                roi_mask_array_2use_2 = [np.squeeze(v) for v in np.split(roi_mask_array_2use_1[ixd], indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
+                print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
+            else:
+                roi_mask_array_2use_2 = roi_mask_array_2use_1 #which should be meaning None
+
             #Also split on the channel axis the thresholds' arrays corresponding to the ixd-th index along the analysis_axis
             ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
@@ -203,10 +208,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 # print("===", ch_n)
                 #Get the region_to_quantify, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
-                    ch_n_roi_mask_array = roi_mask_list[ixd]
-                    # print("shape roi mask", ch_n_roi_mask_array.shape)
+                    ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
+                    print("final shape roi mask", ch_n_roi_mask_array.shape)
                 else:
-                    ch_n_roi_mask_array=roi_mask_array_copy #which should be meaning None
+                    ch_n_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
 
                 #Get mask area
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
@@ -295,10 +300,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                         multi_value_array=False,
                                                                                         multi_value_axis=-1,
                                                                                         get_a_single_value=True)
-                        print("===")
-                        print(ch_n_area_px, cchh_nn_area_px)
-                        if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
-                            print("PASS")
+                        # print("===")
+                        # print(ch_n_area_px, cchh_nn_area_px)
+                        # if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
+                        #     print("I need to get the roi and thresholds")
     # #                     #Measure pixels' overlap
     # #                     ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
     # #                                                                    cchh_nn_array,
