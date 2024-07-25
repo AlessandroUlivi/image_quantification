@@ -170,6 +170,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     # Use the provided thresholds otherwise
     measure_pixels_overlap_n_px_thr_2_2use = set_thresholds_2use(measure_pixels_overlap_n_px_thr_2, channels_stac_k=channels_array_copy)
 
+    #Set to False transform_to_label_img_2use in measure_regions_euclidean_distances if reg_eucl_dist_transform_to_label_img_2use is not provided. Use the provided value otherwise
+    reg_eucl_dist_transform_to_label_img_2use = set_thresholds_2use(reg_eucl_dist_transform_to_label_img, channels_stac_k=channels_array_copy)
+
     #==========================================
     #=========  INITIALIZE THE OUTPUT =========
     #Initialize a dictionary to be used to be used to form the output datafram
@@ -202,6 +205,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         min_px_over_thresh_common_2use_1 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
+        reg_eucl_dist_transform_to_label_img_2use_1 = split_thresholds_arrays(reg_eucl_dist_transform_to_label_img_2use, split_axis=analysis_axis, multi_thresholds=False)
 
         #=================================================
         #=========  ITERATE ON THE ANALYSIS AXIS =========
@@ -230,6 +234,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            reg_eucl_dist_transform_to_label_img_2use_2 = split_thresholds_arrays(reg_eucl_dist_transform_to_label_img_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
 
             #================================================
             #=========  ITERATE ON THE CHANNEL AXIS =========
@@ -388,14 +393,38 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             
                             #========================================================
                             #=========  MEASURE REGIONS' EUCLIDEAN DISTANCE =========
-                            # ch_n__cchh_nn_min_euclid_distances = measure_regions_euclidean_distances(ch_array,
-                            #                                                                             cchh_nn_array,
-                            #                                                                             roi__mask_img1=ch_n_roi_mask_array,
-                            #                                                                             roi__mask_targ=cchh_nn_roi_mask_array,
-                            #                                                                             desired__distance='min',
-                            #                                                                             transform_to_label_img=,
-                            #                                                                             label_img_1_thres=ch_n_ixd_binarization_threshold,
-                            #                                                                             binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
+                            #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                            ch_n_ixd_transform_to_label_img = get_threshold_from_list(reg_eucl_dist_transform_to_label_img_2use_2[ch_n],
+                                                                                            multi_value_array=False,
+                                                                                            multi_value_axis=-1,
+                                                                                            get_a_single_value=True)
+                            
+                            ch_n__cchh_nn_min_euclid_distances_list = measure_regions_euclidean_distances(ch_array,
+                                                                                                        cchh_nn_array,
+                                                                                                        roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                        roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                        desired__distance='min',
+                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                        label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                        binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)[0]
+                            
+                            ch_n__cchh_nn_max_euclid_distances_list = measure_regions_euclidean_distances(ch_array,
+                                                                                                        cchh_nn_array,
+                                                                                                        roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                        roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                        desired__distance='max',
+                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                        label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                        binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)[0]
+                            
+                            ch_n__cchh_nn_mean_euclid_distance = measure_regions_euclidean_distances(ch_array,
+                                                                                                        cchh_nn_array,
+                                                                                                        roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                        roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                        desired__distance='mean',
+                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                        label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                        binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
 
     # # #If the analysis axis is not provided          
     # # else:
