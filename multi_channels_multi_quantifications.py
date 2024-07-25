@@ -6,6 +6,7 @@ from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask
 from topological_measurement import get_convex_hull_fraction
 from utils import match_arrays_dimensions
 
+
 # measure_pixels_overlap,
 # measure_regions_euclidean_distances,
 # count_number_of_overlapping_regions
@@ -24,7 +25,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
     NOTE than when a tuple or a list is passed as a threshold this is interpreted as a multi-threshold, not as individual thresholds for the different channels.
     """
-
+    #=========================================
+    #=========  SUPPORTING FUNCTIONS =========
     def modify_dictionary(dict2modify, key_name, valu_e=None, interations_times=1):
         for i in range(interations_times):
             if interations_times==1:
@@ -118,6 +120,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             else:
                 return array_threshold
 
+    #=======================================
+    #=========  PREPARE INPUT DATA =========
     #Make sure that channels_axis and analysis axis are not the same axis
     assert channels_axis != analysis_axis, "channels_axis can't be the same of analysis_axis"
 
@@ -141,6 +145,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     else:
         roi_mask_array_2use = roi_mask_array
 
+    #=========================================================
+    #=========  GET THRESHOLDS IN THE CORRECT FORMAT =========
     #Set binarization thresholds to 0 for all channels, if channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
     
@@ -172,15 +178,21 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     # Use the provided thresholds otherwise
     measure_pixels_overlap_val_threshold_arr_2_2use = set_thresholds_2use(measure_pixels_overlap_val_threshold_arr_2, channels_stac_k=channels_array_copy)
 
+    #==========================================
+    #=========  INITIALIZE THE OUTPUT =========
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
 
+    #==================================================
+    #=========  USE ANALYSIS AXIS IF PROVIDED =========
     #If analysis axis is provided:
     if analysis_axis != None:
         # print("==="*10)
         # print("---analyze a specific axis---")
         # print("==="*10)
-
+        
+        #==============================================================================
+        #=========  PREPARE ROI AND THRESHOLDS FOR ITERATION ON ANALYSIS AXIS =========
         #Split the roi_mask_array on the analysis_axis, if roi_mask_array is provided
         if hasattr(roi_mask_array, "__len__"):
             roi_mask_array_2use_1 = [np.squeeze(w) for w in np.split(roi_mask_array_2use,
@@ -200,12 +212,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_val_threshold_arr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_val_threshold_arr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
-    
+
+        #=================================================
+        #=========  ITERATE ON THE ANALYSIS AXIS =========
         # Iterate through the analysis axis
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
             # print("===", ixd)
+            #===================================================================================
+            #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
             #Get the individual channels array as a list
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
 
@@ -227,16 +243,23 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             measure_pixels_overlap_val_threshold_arr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_val_threshold_arr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
 
+            #================================================
+            #=========  ITERATE ON THE CHANNEL AXIS =========
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
                 # print("===", ch_n)
                 #Get ch_n roi_mask, if it is provided
+
+                #==================================================
+                #=========  GET ROI IN THE CORRECT FORMAT =========
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
                     # print("final shape roi mask", ch_n_roi_mask_array.shape)
                 else:
                     ch_n_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
 
+                #=================================
+                #=========  ANALYSE AREA =========
                 #Get mask area
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
                 ch_n_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[ch_n],
@@ -254,6 +277,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                               binarization_threshold=ch_n_ixd_binarization_threshold,
                                                               value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
                 
+                #==================================
+                #=========  COUNT REGIONS =========
                 #Count region number
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
                 ch_n_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[ch_n],
@@ -266,6 +291,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                            threshold_input_arr=ch_n_ixd_binarization_threshold,
                                                            threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
                 
+                #===========================================
+                #=========  MEASURE REGIONS' AREAS =========
                 #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
                 # link mean, median, max and min variables to NaN values
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
@@ -291,12 +318,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_regions_max_area = np.nan
                     ch_n_regions_min_area = np.nan
 
+                #==================================================================
+                #=========  START COMPARATIVE MEASUREMENTS AMONG CHANNELS =========
                 #Iterate trough the channels a second time, to get measurements calculated by comparing two channels
                 for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
                     
                     #Avoid measuring a channel angainst itself
                     if ch_n != cchh_nn:
-
+                        
+                        #==================================================
+                        #=========  GET ROI IN THE CORRECT FORMAT =========
                         #Get cchh_nn roi mask if it is provided
                         if hasattr(roi_mask_array, "__len__"):
                             cchh_nn_roi_mask_array = roi_mask_array_2use_2[cchh_nn]
@@ -304,6 +335,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         else:
                             cchh_nn_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
                         
+                        #===============================================================
+                        #=========  VERIFY IF COMPARATIVE ANALYSIS CAN BE DONE =========
                         #Count the number of pixels in the second channel
                         #Get threshold value for channel cchh_nn and index ixd in the analysis axis
                         cchh_nn_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[cchh_nn],
@@ -334,6 +367,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         
                         if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
                             
+                            #==============================================
+                            #=========  MEASURE CHANNELS' OVERLAP =========
                             #Measure pixels' overlap
                             #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
                             ch_n_ixd_n_px_thr_1 = get_threshold_from_list(measure_pixels_overlap_n_px_thr_1_2use_2[ch_n],
@@ -365,12 +400,15 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                 n_px_thr_2=cchh_nn_ixd_n_px_thr_2,
                                                                                 val_threshold_arr_1=ch_n_ixd_val_threshold_arr_1,
                                                                                 val_threshold_arr_2=cchh_nn_ixd_val_threshold_arr_2)
-                            # if isinstance(ch_n__cchh_nn_overlap_i, tuple):
-                            #     ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
-                            #     ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
-                            # else:
-                            #     ch_n__cchh_nn_overlap = np.NaN
-                            #     ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
+                            
+                            #The output of measure_pixels_overlap is different depending on the selected parameters (refer to its documentation).
+                            # Get the specific outputs
+                            if isinstance(ch_n__cchh_nn_overlap_i, tuple):
+                                ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
+                                ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
+                            else:
+                                ch_n__cchh_nn_overlap = np.NaN
+                                ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
 
 
 
