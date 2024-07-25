@@ -135,7 +135,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #If roi_mask_array is provided make sure it is has the same shape of channels_array, else, copy the None
     if hasattr(roi_mask_array, "__len__"):
         roi_mask_array_copy_i = roi_mask_array.copy()
-        roi_mask_array_2use = roi_mask_array.copy(roi_mask_array_copy_i, channels_array_copy)
+        roi_mask_array_2use = match_arrays_dimensions(roi_mask_array_copy_i, channels_array_copy)
         print("initial_roi_mask_shape: ", roi_mask_array_2use.shape)
     else:
         roi_mask_array_2use = roi_mask_array
