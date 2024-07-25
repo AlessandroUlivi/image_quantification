@@ -3,7 +3,7 @@ from random import sample
 from skimage.measure import label, regionprops
 from utils import get_euclidean_distances
 
-def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0, n_px_thr_1=1, n_px_thr_2=0, val_threshold_arr_1=0, val_threshold_arr_2=0):
+def measure_pixels_overlap(arr_1, arr_2_against, roi_mask_arr_1=None, roi_mask_arr_2_against=None, shuffle_times=0, n_px_thr_1=1, n_px_thr_2=0, val_threshold_arr_1=0, val_threshold_arr_2=0):
     """
     Given two arrays (arr_1, arr_2_against), the function measures the fraction of pixels>val_threshold_arr_1 of arr_1 which are concomitantily >val_threshold_arr_2 in arr_2_against.
     val_threshold_1 and val_threshold_2 are, by default, set to 0.
@@ -13,12 +13,12 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
     Inputs:
     arr_1 and arr_2_against are arrays of the same shape.
 
-    roi_mask is an optional parameter. If provided it must be a numpy array of the same shape as arr_1 and arr_2_against. It restricts the analysis only to a region of interst
-    assumed to correspond to the positive pixels of roi_mask array.
+    roi_mask_arr_1 and roi_mask_arr_2_against are an optional parameters. If provided they must be numpy arrays of the same shape of, respectively, arr_1 and arr_2_against.
+    They restricts the analysis only to a region of interst assumed to correspond to the positive pixels of the two roi_maks arrays.
 
     shuffle_times. int. >=0. Default 0. If >0, for as many times as indicated, the pixels of arr_1 and arr_2_against are randomly shuffled and the
-    fraction of pixels>val_threshold_arr_1 of arr_1 which are concomitantily >val_threshold_arr_2 in arr_2_against is re-calculared. If roi_mask is provided, the shuffling is done
-    only in the roi.
+    fraction of pixels>val_threshold_arr_1 of arr_1 which are concomitantily >val_threshold_arr_2 in arr_2_against is re-calculared. If roi_mask are provided, the shuffling is done
+    only in the rois.
 
     n_px_thr_1 (int or float, must be >0) is an optional input specifing a minum number of pixels which have to be >val_threshold_1 in in arr_1 in order
     to calculate the measurement. The default value is set to 1 as when 0 pixels are >val_threshold_2 in arr_2_against the output would imply a division by 0.
@@ -52,13 +52,18 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask=None, shuffle_times=0,
     arr_1_binary = np.where(arr_1_copy>val_threshold_arr_1, 1,0)
     arr_2_against_binary = np.where(arr_2_against_copy>val_threshold_arr_2, 1,0)
 
-    #If an roi is provided, restrict the analysis to the roi
-    if hasattr(roi_mask, "__len__"):
-        roi_mask_copy = roi_mask.copy()
-        arr_1_to_quantify = arr_1_binary[roi_mask>0]
-        arr_2_against_to_quant = arr_2_against_binary[roi_mask>0]
+    #If an roi_mask_arr_1 is provided, restrict the analysis to the roi
+    if hasattr(roi_mask_arr_1, "__len__"):
+        roi_mask_arr_1_copy = roi_mask_arr_1.copy()
+        arr_1_to_quantify = arr_1_binary[roi_mask_arr_1_copy>0]
     else:
         arr_1_to_quantify = arr_1_binary
+    
+    #If an roi_mask_arr_2_against is provided, restrict the analysis to the roi
+    if hasattr(roi_mask_arr_2_against, "__len__"):
+        roi_mask_arr_2_against_copy = roi_mask_arr_2_against.copy()
+        arr_2_against_to_quant = arr_2_against_binary[roi_mask_arr_2_against_copy>0]
+    else:
         arr_2_against_to_quant = arr_2_against_binary
     
     # print(arr_1_to_quantify.shape)
