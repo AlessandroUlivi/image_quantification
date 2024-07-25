@@ -79,9 +79,9 @@ def measure_pixels_overlap(arr_1, arr_2_against, roi_mask_arr_1=None, roi_mask_a
 
     # Continue with the measurement if the numbers of target pixels 1 and targer pixels 2 are respectively higher than n_px_thr_1 and n_px_thr_2
     if arr_1_target_n<n_px_thr_1 or arr_2_against_target_n<n_px_thr_2:
-        print("there are less than ", n_px_thr_1, " target pixels in arr_1, or less than", n_px_thr_2, " target pixels in arr_2_against")
-        print("target pixels in arr_1 are: ", arr_1_target_n)
-        print("target pixels in arr_2_against are: ", arr_2_against_target_n)
+        # print("there are less than ", n_px_thr_1, " target pixels in arr_1, or less than", n_px_thr_2, " target pixels in arr_2_against")
+        # print("target pixels in arr_1 are: ", arr_1_target_n)
+        # print("target pixels in arr_2_against are: ", arr_2_against_target_n)
         return
     else:
         #Binarize arr_2_against by setting target pixels 2 to 1 if they are corresponded by target pixels 1 in arr_1, to 0 otherwise
