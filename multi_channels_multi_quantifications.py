@@ -136,7 +136,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     if hasattr(roi_mask_array, "__len__"):
         roi_mask_array_copy_i = roi_mask_array.copy()
         roi_mask_array_2use = match_arrays_dimensions(roi_mask_array_copy_i, channels_array_copy)
-        print("initial_roi_mask_shape: ", roi_mask_array_2use.shape)
+        # print("initial_roi_mask_shape: ", roi_mask_array_2use.shape)
     else:
         roi_mask_array_2use = roi_mask_array
 
@@ -169,7 +169,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             roi_mask_array_2use_1 = [np.squeeze(w) for w in np.split(roi_mask_array_2use,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]
-            print("roi_mask after analysis axis split: ", len(roi_mask_array_2use_1), roi_mask_array_2use_1[0].shape)
+            # print("roi_mask after analysis axis split: ", len(roi_mask_array_2use_1), roi_mask_array_2use_1[0].shape)
         else:
             roi_mask_array_2use_1 = roi_mask_array_2use #which should be meaning None
 
@@ -191,7 +191,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             #Also che the individual channels arrays as a list for the roi_mask, if it is provided
             if hasattr(roi_mask_array, "__len__"):
                 roi_mask_array_2use_2 = [np.squeeze(v) for v in np.split(roi_mask_array_2use_1[ixd], indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
-                print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
+                # print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
             else:
                 roi_mask_array_2use_2 = roi_mask_array_2use_1 #which should be meaning None
 
@@ -206,10 +206,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
                 # print("===", ch_n)
-                #Get the region_to_quantify, if it is provided
+                #Get ch_n roi_mask, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
-                    print("final shape roi mask", ch_n_roi_mask_array.shape)
+                    # print("final shape roi mask", ch_n_roi_mask_array.shape)
                 else:
                     ch_n_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
 
@@ -272,8 +272,15 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     
                     #Avoid measuring a channel angainst itself
                     if ch_n != cchh_nn:
+
+                        #Get cchh_nn roi mask if it is provided
+                        if hasattr(roi_mask_array, "__len__"):
+                            cchh_nn_roi_mask_array = roi_mask_array_2use_2[cchh_nn]
+                            # print("final shape roi mask", cchh_nn_roi_mask_array.shape)
+                        else:
+                            cchh_nn_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
                         
-                        #Count he number of pixels in the second channel
+                        #Count the number of pixels in the second channel
                         #Get threshold value for channel cchh_nn and index ixd in the analysis axis
                         cchh_nn_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[cchh_nn],
                                                                                         multi_value_array=False,
@@ -285,7 +292,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                         multi_value_axis=-1,
                                                                                         get_a_single_value=True)
                         cchh_nn_area_px, cchh_nn_area_props = get_mask_area(cchh_nn_array,
-                                                                            roi_mas_k=ch_n_roi_mask_array,
+                                                                            roi_mas_k=cchh_nn_roi_mask_array,
                                                                             binarization_threshold=cchh_nn_ixd_binarization_threshold,
                                                                             value_4_zero_regionprops=cchh_nn_ixd_value_4_zero_regionprops)
                         
@@ -303,7 +310,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         # print("===")
                         # print(ch_n_area_px, cchh_nn_area_px)
                         # if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
-                        #     print("I need to get the roi and thresholds")
+                        #     print("PASS")
     # #                     #Measure pixels' overlap
     # #                     ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
     # #                                                                    cchh_nn_array,
