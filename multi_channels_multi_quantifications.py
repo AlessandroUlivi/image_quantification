@@ -14,7 +14,8 @@ from utils import match_arrays_dimensions
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, add_means_stdv=False,
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
-                      min_px_over_thresh_common=-1.0):
+                      min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0,
+                      measure_pixels_overlap_val_threshold_arr_1=0, measure_pixels_overlap_val_threshold_arr_2=0):
     """
     seems to work with 3 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
     be indicated using negative number indexing (for example -10). 3) If a custom array of thresholds is provided and multiple thresholds are required (e.g. for comparison
@@ -152,9 +153,25 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Set to 0 the highpass threshold for calculating the mean, median, min and max area of regions within a channel, if None is provided as input. Use the provided value otherwise.
     n_of_region_4areas_measure_2use = set_thresholds_2use(n_of_region_4areas_measure, channels_stac_k=channels_array_copy)
 
-    #Set to 0 and 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
+    #Set to 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, channels_stac_k=channels_array_copy)
     
+    #Set to 1 the min number of pixels of arr_1 for calculating pixels overlap in measure_pixels_overlap, if measure_pixels_overlap_n_px_thr_1 is not provided.
+    # Use the provided thresholds otherwise
+    measure_pixels_overlap_n_px_thr_1_2use = set_thresholds_2use(measure_pixels_overlap_n_px_thr_1, channels_stac_k=channels_array_copy)
+    
+    #Set to 0 the min number of pixels of arr_2_against for calculating pixels overlap in measure_pixels_overlap, if measure_pixels_overlap_n_px_thr_2 is not provided.
+    # Use the provided thresholds otherwise
+    measure_pixels_overlap_n_px_thr_2_2use = set_thresholds_2use(measure_pixels_overlap_n_px_thr_2, channels_stac_k=channels_array_copy)
+
+    #Set to 0 the binarization threshold of arr_1 in measure_pixels_overlap, if measure_pixels_overlap_val_threshold_arr_1_2use is not provided.
+    # Use the provided thresholds otherwise
+    measure_pixels_overlap_val_threshold_arr_1_2use = set_thresholds_2use(measure_pixels_overlap_val_threshold_arr_1, channels_stac_k=channels_array_copy)
+
+    #Set to 0 the binarization threshold of arr_2_against in measure_pixels_overlap, if measure_pixels_overlap_val_threshold_arr_2 is not provided.
+    # Use the provided thresholds otherwise
+    measure_pixels_overlap_val_threshold_arr_2_2use = set_thresholds_2use(measure_pixels_overlap_val_threshold_arr_2, channels_stac_k=channels_array_copy)
+
     #Initialize a dictionary to be used to be used to form the output datafram
     measurements_dict = {}
 
@@ -178,8 +195,12 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=analysis_axis, multi_thresholds=False)
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
-        min_px_over_thresh_common_2use_1 = split_thresholds_arrays( min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
-
+        min_px_over_thresh_common_2use_1 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
+        measure_pixels_overlap_n_px_thr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
+        measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
+        measure_pixels_overlap_val_threshold_arr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
+        measure_pixels_overlap_val_threshold_arr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
+    
         # Iterate through the analysis axis
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
@@ -200,8 +221,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
-            min_px_over_thresh_common_2use_2 = split_thresholds_arrays( min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
-
+            min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            measure_pixels_overlap_val_threshold_arr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            measure_pixels_overlap_val_threshold_arr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_val_threshold_arr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
 
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
@@ -307,25 +331,46 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                         multi_value_array=False,
                                                                                         multi_value_axis=-1,
                                                                                         get_a_single_value=True)
-                        # print("===")
-                        # print(ch_n_area_px, cchh_nn_area_px)
-                        # if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
-                        #     print("PASS")
-    # #                     #Measure pixels' overlap
-    # #                     ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
-    # #                                                                    cchh_nn_array,
-    # #                                                                    roi_mask=ch_n_roi_mask_array,
-    # #                                                                    shuffle_times=shuffle_times,
-    # #                                                                    n_px_thr_1=min_px_over_thresh_2use[ch_n][0],
-    # #                                                                    n_px_thr_2=min_px_over_thresh_2use[ch_n][1],
-    # #                                                                    val_threshold_arr_1=ch_bin_thresh_2use[ch_n],
-    # #                                                                    val_threshold_arr_2=ch_bin_thresh_2use[cchh_nn])
-    # #                     if isinstance(ch_n__cchh_nn_overlap_i, tuple):
-    # #                         ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
-    # #                         ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
-    # #                     else:
-    # #                         ch_n__cchh_nn_overlap = np.NaN
-    # #                         ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
+                        
+                        if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
+                            
+                            #Measure pixels' overlap
+                            #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                            ch_n_ixd_n_px_thr_1 = get_threshold_from_list(measure_pixels_overlap_n_px_thr_1_2use_2[ch_n],
+                                                                                            multi_value_array=False,
+                                                                                            multi_value_axis=-1,
+                                                                                            get_a_single_value=True)
+                            
+                            cchh_nn_ixd_n_px_thr_2 = get_threshold_from_list(measure_pixels_overlap_n_px_thr_2_2use_2[cchh_nn],
+                                                                                            multi_value_array=False,
+                                                                                            multi_value_axis=-1,
+                                                                                            get_a_single_value=True)
+                            
+                            ch_n_ixd_val_threshold_arr_1 = get_threshold_from_list(measure_pixels_overlap_val_threshold_arr_1_2use_2,
+                                                                                            multi_value_array=False,
+                                                                                            multi_value_axis=-1,
+                                                                                            get_a_single_value=True)
+                            
+                            cchh_nn_ixd_val_threshold_arr_2 = get_threshold_from_list(measure_pixels_overlap_val_threshold_arr_2_2use_2,
+                                                                                            multi_value_array=False,
+                                                                                            multi_value_axis=-1,
+                                                                                            get_a_single_value=True)
+                            
+                            ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
+                                                                                cchh_nn_array,
+                                                                                roi_mask_arr_1=ch_n_roi_mask_array,
+                                                                                roi_mask_arr_2_against=cchh_nn_roi_mask_array,
+                                                                                shuffle_times=shuffle_times,
+                                                                                n_px_thr_1=ch_n_ixd_n_px_thr_1,
+                                                                                n_px_thr_2=cchh_nn_ixd_n_px_thr_2,
+                                                                                val_threshold_arr_1=ch_n_ixd_val_threshold_arr_1,
+                                                                                val_threshold_arr_2=cchh_nn_ixd_val_threshold_arr_2)
+                            # if isinstance(ch_n__cchh_nn_overlap_i, tuple):
+                            #     ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
+                            #     ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
+                            # else:
+                            #     ch_n__cchh_nn_overlap = np.NaN
+                            #     ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
 
 
 
