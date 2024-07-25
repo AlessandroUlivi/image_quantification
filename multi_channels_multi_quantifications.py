@@ -383,8 +383,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                 ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
                                 ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
                             else:
-                                ch_n__cchh_nn_overlap = np.NaN
-                                ch_n__cchh_nn_overlap_shuff = [np.NaN for shf in range(shuffle_times)]
+                                ch_n__cchh_nn_overlap = np.nan
+                                ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
                             
                             #========================================================
                             #=========  MEASURE REGIONS' EUCLIDEAN DISTANCE =========
