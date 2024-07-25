@@ -371,39 +371,42 @@ def maintain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_
 
         return input_array_copy
 
-def match_arrays_dimensions(input_array_1, target_array):
+def match_arrays_dimensions(input_array_i, target_array_i):
     """
     Given:
-    - input_array_1. ndarray.
-    - target_array. ndarray. The number of dimensions must be >= of the number of dimensions of input_array_1. If target_array and input_array_1 have the same number of dimensions,
-    their shape must be identical (de size of the dimensions and their position must be identical). If tagert_array have more dimensions than input_array_1, each dimension of
-    input_array_1 must be correspondended by at least 1 dimension of the same size in target_array.
+    - input_array_i. ndarray.
+    - target_array_i. ndarray. The number of dimensions must be >= of the number of dimensions of input_array_i. If target_array_i and input_array_i have the same number of dimensions,
+    their shape must be identical (de size of the dimensions and their position must be identical). If tagert_array have more dimensions than input_array_i, each dimension of
+    input_array_i must be correspondended by at least 1 dimension of the same size in target_array_i.
     
-    Returns an ndarray of the same shape of target_array, with values from input_array_1. In particular:
-    - if input_array_1 and target_array have the same shape, input_array_1 is returned.
-    - if input_array_1 has lower dimensions than target array. input_array_1 will be repeated, identical, along each target_array's extra-dimention, for as many times as the size
+    Returns an ndarray of the same shape of target_array_i, with values from input_array_i. In particular:
+    - if input_array_i and target_array_i have the same shape, input_array_i is returned.
+    - if input_array_i has lower dimensions than target array. input_array_i will be repeated, identical, along each target_array_i's extra-dimention, for as many times as the size
     of the dimension.
-    - if any of the dimensions of input_array_1 doesn't have at least 1 dimensions of the same size in target_array, None is returned.
+    - if any of the dimensions of input_array_i doesn't have at least 1 dimensions of the same size in target_array_i, None is returned.
 
-    NOTE: The process of expanding input_array_1 on the extra dimensions of target_array, follows this steps:
-    - First, the dimensions of target_array are matched with the dimensions of input_array_1 based on the size. This process involved the iteration along target_array.shape
-    and input_array_1.shape from position 0 to the end.
-    - Second, for each dimension of target_array without a match, input_array_1 is repeated as many times as the dimension size. This process also follows target_array dimentions
+    NOTE: The process of expanding input_array_i on the extra dimensions of target_array_i, follows this steps:
+    - First, the dimensions of target_array_i are matched with the dimensions of input_array_i based on the size. This process involved the iteration along target_array_i.shape
+    and input_array_i.shape from position 0 to the end.
+    - Second, for each dimension of target_array_i without a match, input_array_i is repeated as many times as the dimension size. This process also follows target_array_i dimentions
     order from 0 to last. Output name: output_array_1.
-    - Finally, output_array_1's shape does not match the target_array's. The dimensions of output_array_1 are reordered to match the shape of target_array. Also this process
-    matches output_array_1 and target_array's dimensions based on their size and starting from position 0 to the last shape position.
-    This means that if input_array_1 has n dimensions (d_of_arr1) of the same size (size_of_the_n_d_of_arr1), with n>1, it is assumed their order matches the m dimensions in
+    - Finally, output_array_1's shape does not match the target_array_i's. The dimensions of output_array_1 are reordered to match the shape of target_array_i. Also this process
+    matches output_array_1 and target_array_i's dimensions based on their size and starting from position 0 to the last shape position.
+    This means that if input_array_i has n dimensions (d_of_arr1) of the same size (size_of_the_n_d_of_arr1), with n>1, it is assumed their order matches the m dimensions in
     target array (d_of_targarr) with size size_of_the_n_d_of_arr1. This also means that if m>n, the first n of d_of_targarr are matched, in order from position i to position i+n
-    with the n d_of_arr1 dimensions. For example, if input_array_1.shape is (3,512,512) and the dimensions correspond to CYX, and target_array.shape is (3,61,512,512,512)
-    corresponding to CTZYX, dimensions YX in input_array_1 will be matched with dimensions ZY of target_array and the CYX input_array_1 will be repeated 61 times along the axis 1
+    with the n d_of_arr1 dimensions. For example, if input_array_i.shape is (3,512,512) and the dimensions correspond to CYX, and target_array_i.shape is (3,61,512,512,512)
+    corresponding to CTZYX, dimensions YX in input_array_i will be matched with dimensions ZY of target_array_i and the CYX input_array_i will be repeated 61 times along the axis 1
     and 512 along the axis 4 to obtain a ouput array of shape (3,61,512,512,512).
 
     """
-    #Make sure that input_array_1 does not hame more dimensions than target_array
-    assert len(input_array_1.shape)<=len(target_array.shape)
-    #Make sure that all the dimensions of input_array_1 have at least 1 dimension of the same size in target array
-    assert all(s in target_array.shape for s in input_array_1.shape), "each dimension in input_array_1 must have at least a dimension of the same size in target_array"
+    #Make sure that input_array_i does not hame more dimensions than target_array_i
+    assert len(input_array_i.shape)<=len(target_array_i.shape)
+    #Make sure that all the dimensions of input_array_i have at least 1 dimension of the same size in target_array_i
+    assert all(s in target_array_i.shape for s in input_array_i.shape), "each dimension in input_array_i must have at least a dimension of the same size in target_array_i"
     
+    input_array_1 = input_array_i.copy()
+    target_array = target_array_i.copy()
+
     #Return input_array_1 if the shape is identical to target_array. Raise an assertion error if the two arrays have equal number of dimensions but different shape
     if len(input_array_1.shape)==len(target_array.shape):
         assert input_array_1.shape==target_array.shape, "if input_array_1 and target_array have the same number of dimensions, their size must match"
