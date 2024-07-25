@@ -371,3 +371,99 @@ def maintain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_
 
         return input_array_copy
 
+def match_arrays_dimensions(input_array_1, target_array):
+    """
+    Given:
+    - input_array_1. ndarray.
+    - target_array. ndarray. The number of dimensions must be >= of the number of dimensions of input_array_1. If target_array and input_array_1 have the same number of dimensions,
+    their shape must be identical (de size of the dimensions and their position must be identical). If tagert_array have more dimensions than input_array_1, each dimension of
+    input_array_1 must be correspondended by at least 1 dimension of the same size in target_array.
+    
+    Returns an ndarray of the same shape of target_array, with values from input_array_1. In particular:
+    - if input_array_1 and target_array have the same shape, input_array_1 is returned.
+    - if input_array_1 has lower dimensions than target array. input_array_1 will be repeated, identical, along each target_array's extra-dimention, for as many times as the size
+    of the dimension.
+    - if any of the dimensions of input_array_1 doesn't have at least 1 dimensions of the same size in target_array, None is returned.
+
+    NOTE: The process of expanding input_array_1 on the extra dimensions of target_array, follows this steps:
+    - First, the dimensions of target_array are matched with the dimensions of input_array_1 based on the size. This process involved the iteration along target_array.shape
+    and input_array_1.shape from position 0 to the end.
+    - Second, for each dimension of target_array without a match, input_array_1 is repeated as many times as the dimension size. This process also follows target_array dimentions
+    order from 0 to last. Output name: output_array_1.
+    - Finally, output_array_1's shape does not match the target_array's. The dimensions of output_array_1 are reordered to match the shape of target_array. Also this process
+    matches output_array_1 and target_array's dimensions based on their size and starting from position 0 to the last shape position.
+    This means that if input_array_1 has n dimensions (d_of_arr1) of the same size (size_of_the_n_d_of_arr1), with n>1, it is assumed their order matches the m dimensions in
+    target array (d_of_targarr) with size size_of_the_n_d_of_arr1. This also means that if m>n, the first n of d_of_targarr are matched, in order from position i to position i+n
+    with the n d_of_arr1 dimensions. For example, if input_array_1.shape is (3,512,512) and the dimensions correspond to CYX, and target_array.shape is (3,61,512,512,512)
+    corresponding to CTZYX, dimensions YX in input_array_1 will be matched with dimensions ZY of target_array and the CYX input_array_1 will be repeated 61 times along the axis 1
+    and 512 along the axis 4 to obtain a ouput array of shape (3,61,512,512,512).
+
+    """
+    #Make sure that input_array_1 does not hame more dimensions than target_array
+    assert len(input_array_1.shape)<=len(target_array.shape)
+    #Make sure that all the dimensions of input_array_1 have at least 1 dimension of the same size in target array
+    assert all(s in target_array.shape for s in input_array_1.shape), "each dimension in input_array_1 must have at least a dimension of the same size in target_array"
+    
+    #Return input_array_1 if the shape is identical to target_array. Raise an assertion error if the two arrays have equal number of dimensions but different shape
+    if len(input_array_1.shape)==len(target_array.shape):
+        assert input_array_1.shape==target_array.shape, "if input_array_1 and target_array have the same number of dimensions, their size must match"
+        return input_array_1
+    
+    #If input_array_1 has lower dimensions of target_array
+    else:
+        #Initialize dictionaries to match the dimensions of input_array_1 with those of target_array
+        matching_dim_arr1_keys = {} #Match input_array_1 dimensions (keys) with dimensions in target_array (values) having the same size
+        matching_dim_trg_keys = {} #Match target_array dimensions (keys) with a dimension in input_array_1 (values) having the same size
+        #Iterate through the dimension position (d) and dimension size (s) of input_array_1
+        for d, s in enumerate(input_array_1.shape):
+            #Iterate through the dimension position (d2) and dimension size (s2) of target_array
+            for d2, s2 in enumerate(target_array.shape):
+                #If two dimension sizes match
+                if s==s2:
+                    #If the dimensions haven't been already matched with other dimensions
+                    if (d not in matching_dim_arr1_keys) and (d2 not in matching_dim_trg_keys):
+                        #Match the dimensions in their respective dictionary
+                        matching_dim_arr1_keys[d]=d2
+                        matching_dim_trg_keys[d2]=d
+        # print(matching_dim_trg_keys)
+        
+        #Initialize the output array by copying input_array_1
+        output_array = input_array_1.copy()
+        #Iterate through the dimension position (d3) and dimension size (size_dimension) of target_array 
+        for d3, size_dimension in range(len(target_array.shape)):
+            #If the dimension does not have a match in input_array_1
+            if d3 not in matching_dim_trg_keys:
+                # print('I will add dimension of size ', size_dimension, ' at position ', d3, " in roi_array")
+                #Add the dimensions to the output array by repeating the initialized ouput_array along the extra-dimension for size_dimension times. The update the initialize output_array
+                new_roi_array = np.stack([output_array for k in range(size_dimension)], axis=d3)
+                output_array = new_roi_array
+
+        #If the shape of the ouput_array matches the shape of target_array, return the output array 
+        if output_array.shape == target_array.shape:
+                return output_array
+        #If the shape of the output_array doesn't match the shape of target_array, it means that the dimensions have to be reordered
+        else:
+            #Initialize dictionaries to match the dimensions of output_array with those of target_array
+            matching_dim_output_keys_2 = {} #Match output_array dimensions (keys) with dimensions in target_array (values) having the same size
+            matching_dim_trg_keys_2 = {} #Match target_array dimensions (keys) with a dimension in output_array (values) having the same size
+            #Iterate through the dimension position (d4) and dimension size (s4) of output_array
+            for d4, s4 in enumerate(output_array.shape):
+                #Iterate through the dimension position (d5) and dimension size (s5) of target_array
+                for d5, s5 in enumerate(target_array.shape):
+                    #If two dimension sizes match
+                    if s4==s5:
+                        #If the dimensions haven't been already matched with other dimensions
+                        if (d4 not in matching_dim_output_keys_2) and (d5 not in matching_dim_trg_keys_2):
+                            #Match the dimensions in matching_dim_trg_keys_2
+                            matching_dim_trg_keys_2[d5]=d4
+            
+            #Get the initial positions of the matching dimensions in the output_array, as a list
+            original_ax_positions = [matching_dim_trg_keys_2[a] for a in matching_dim_trg_keys_2]
+            #Get the positions of the matching dimensions in the target_array, as a list
+            destination_ax_positions = list(matching_dim_trg_keys_2)
+            #Reorder output_array dimensions positions to match those of target_array
+            rearranged_output_array = np.moveaxis(output_array, original_ax_positions, destination_ax_positions)
+
+            return rearranged_output_array
+
+
