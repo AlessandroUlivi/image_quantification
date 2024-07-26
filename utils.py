@@ -115,8 +115,8 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
 
 def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
     """
-    Given the coordinates of the pixels of non-overlapping regions (lists of tuples, each tuple corresponding to one pixel), the function returns:
-    - if desired_distance = 'min', a tuple with in position 0 the maximum euclidean distance between the two regions (a.u., float) and in position 1
+    Given the coordinates of the pixels of two regions (lists of tuples, each tuple corresponding to one pixel), the function returns:
+    - if desired_distance = 'min', a tuple with in position 0 the minimum euclidean distance between the two regions (a.u., float) and in position 1
     the coordinates of the two pixels for which the distance is calculated (list of tuples, position 0 are the coordinates of pixel in coords_1, position 1 the coordinates of pixel in 
     coords_2).
     - if desired_distance = 'max', a tuple with in position 0 the maximum euclidean distance between the two regions (a.u., float) and in position 1
