@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 
-def get_convex_hull_fraction(arr_1, arr_2, roi__mask=None, threshold_arr_1=0, threshold_arr_2=0, threshold_roi_mask=0, px_thre_arr_1=3, px_thre_arr_2=3,
+def get_convex_hull_fraction(arr_1, arr_2, roi__mask_1=None, roi__mask_2=None, threshold_arr_1=0, threshold_arr_2=0, threshold_roi_mask_1=0, threshold_roi_mask_2=0, px_thre_arr_1=3, px_thre_arr_2=3,
                               val_4_arr1_NOpassthres_arr2_passthres=0.0, val_4_arr2_NOpassthres=None):
     """
     returns the fractions of input arrays convex hulls.
@@ -10,11 +10,16 @@ def get_convex_hull_fraction(arr_1, arr_2, roi__mask=None, threshold_arr_1=0, th
     Inputs:
     - arr_1. ndarray. The array undergoes a binarization step. Pixels whose value is >threshold_arr_1 are considered pixels of interest, the rest background.
     - arr_2. ndarray of the same shape of arr_1. The array undergoes a binarization step. Pixels whose value is >threshold_arr_2 are considered pixels of interest, the rest background.
-    - roi__mask. Optional. ndarray of the same shape of arr_1. If provided, restricts the analysis a region of interest identified by pixels whose value is >threshold_roi_mask.
+    - roi__mask_1. Optional. ndarray of the same shape of arr_1. If provided, restricts the analysis of arr_1 to a region of interest identified by pixels whose value are
+      >threshold_roi_mask_1.
+    - roi__mask_2. Optional. ndarray of the same shape of arr_1. If provided, restricts the analysis of arr_2 to a region of interest identified by pixels whose value are
+      >threshold_roi_mask_2.
     - threshold_arr_1. int or float. Default 0. Defines the highpass threshold to distinguish pixels of interest from background pixels in arr_1.
     - threshold_arr_2. int or float. Default 0. Defines the highpass threshold to distinguish pixels of interest from background pixels in arr_2.
-    - threshold_roi_mask. int or float. Default 0. Only applies if roi__mask is provided. Defines the highpass threshold to distinguish pixels of interest from background pixels
-    in roi__mask.
+    - threshold_roi_mask_1. int or float. Default 0. Only applies if roi__mask_1 is provided. Defines the highpass threshold to distinguish pixels of interest from background pixels
+    in roi__mask_1.
+    - threshold_roi_mask_2. int or float. Default 0. Only applies if roi__mask_2 is provided. Defines the highpass threshold to distinguish pixels of interest from background pixels
+    in roi__mask_2.
     - px_thre_arr_1. int or float. Default 3. It must be >=3. The minimum number of pixels of interest in arr_1 for the measurement to be made.
     - px_thre_arr_2. int or float. Default 3. It must be >=3. The minimum number of pixels of interest in arr_1 for the measurement to be made.
     - val_4_arr1_NOpassthres_arr2_passthres. any. Default 0.0. The value to return if the number of pixels of interest in arr_2 >px_thre_arr_2 and the number of pixels
@@ -36,14 +41,20 @@ def get_convex_hull_fraction(arr_1, arr_2, roi__mask=None, threshold_arr_1=0, th
     arr_1_copy = np.where(arr_1>threshold_arr_1, 1, 0)
     arr_2_copy = np.where(arr_2>threshold_arr_2, 1, 0)
 
-    #If roi_mask is provided, copy it, threshold it threshold_roi_mask, set its values to 0 and 1,
-    # and use it to set to 0 pixels in arr_1 and arr_2 which are corresponded by background pixels in roi_mask
-    if hasattr(roi__mask, "__len__"):
-        roi__mask_01 = np.where(roi__mask>threshold_roi_mask, 1,0)
-        arr_1_to_proc = np.where(roi__mask_01>0, arr_1_copy, 0)
-        arr_2_to_proc = np.where(roi__mask_01>0, arr_2_copy, 0)
+    #If roi_mask_1 is provided, copy it, threshold it using threshold_roi_mask_1, set its values to 0 and 1,
+    # and use it to set to 0 pixels in arr_1 which are corresponded by background pixels in roi_mask_1
+    if hasattr(roi__mask_1, "__len__"):
+        roi__mask_1_01 = np.where(roi__mask_1>threshold_roi_mask_1, 1,0)
+        arr_1_to_proc = np.where(roi__mask_1_01>0, arr_1_copy, 0)
     else:
         arr_1_to_proc = arr_1_copy
+    
+    #If roi_mask_2 is provided, copy it, threshold it using threshold_roi_mask_2, set its values to 0 and 1,
+    # and use it to set to 0 pixels in arr_2 which are corresponded by background pixels in roi_mask_2
+    if hasattr(roi__mask_2, "__len__"):
+        roi__mask_2_01 = np.where(roi__mask_2>threshold_roi_mask_2, 1,0)
+        arr_2_to_proc = np.where(roi__mask_2_01>0, arr_2_copy, 0)
+    else:
         arr_2_to_proc = arr_2_copy
     
     #Count the number of pixels of interest in arr_1_to_proc and arr_2_to_proc
