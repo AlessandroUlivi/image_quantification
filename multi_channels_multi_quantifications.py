@@ -3,7 +3,7 @@ import pandas as pd
 from co_localization_measurements import measure_pixels_overlap, measure_regions_euclidean_distances, count_number_of_overlapping_regions
 from counting_measurements import count_regions_number
 from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask
-from topological_measurement import get_convex_hull_fraction
+from topological_measurement import get_convex_hull_fraction, measure_regions_euclidean_distances_within_array
 from utils import match_arrays_dimensions
 
 
@@ -11,6 +11,7 @@ from utils import match_arrays_dimensions
 # measure_regions_euclidean_distances,
 # count_number_of_overlapping_regions
 # get_convex_hull_fractions
+# measure_regions_euclidean_distances_within_array
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0,
@@ -316,12 +317,18 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                 multi_value_array=False,
                                                                                 multi_value_axis=-1,
                                                                                 get_a_single_value=True)
+                #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                ch_n_ixd_transform_to_label_img = get_threshold_from_list(reg_eucl_dist_transform_to_label_img_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+                
                 if ch_n_regions_number>ch_n_ixd_n_of_region_4areas_measure:
                     #Get the areas of the regions within the channel
                     ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
-                                                                    roi__mask=ch_n_roi_mask_array,
-                                                                    transform_to_label_img=True,
-                                                                    binarization_threshold=ch_n_ixd_binarization_threshold)
+                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                        binarization_threshold=ch_n_ixd_binarization_threshold)
                     
                     #Get mean, median, max and min regions' area. Get NaN values if a minimum number of areas is not detected
                     ch_n_regions_mean_area = np.mean(ch_n_regions_areas)
@@ -334,11 +341,34 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_regions_max_area = np.nan
                     ch_n_regions_min_area = np.nan
 
+                # #=======================================================================
+                # #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
+                # ch_n_regions_min_distances = measure_regions_euclidean_distances_within_array(ch_array,
+                #                                                                               roi__mask=ch_n_roi_mask_array,
+                #                                                                               desired__distance='min',
+                #                                                                               transform_to_label_img=False,
+                #                                                                               label_img_thres=0,
+                #                                                                               return_excluded_distances=False)
+
+                # ch_n_regions_max_distances = measure_regions_euclidean_distances_within_array(ch_array,
+                #                                                                               roi__mask=ch_n_roi_mask_array,
+                #                                                                               desired__distance='max',
+                #                                                                               transform_to_label_img=False,
+                #                                                                               label_img_thres=0,
+                #                                                                               return_excluded_distances=False)
+
+                # ch_n_regions_mean_distances = measure_regions_euclidean_distances_within_array(ch_array,
+                #                                                                                roi__mask=ch_n_roi_mask_array,
+                #                                                                                desired__distance='mean',
+                #                                                                                transform_to_label_img=False,
+                #                                                                                label_img_thres=0,
+                #                                                                                return_excluded_distances=False)
+                
                 #==================================================================
                 #=========  START COMPARATIVE MEASUREMENTS AMONG CHANNELS =========
                 #Iterate trough the channels a second time, to get measurements calculated by comparing two channels
                 for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
-                    
+
                     #Avoid measuring a channel angainst itself
                     if ch_n != cchh_nn:
                         
@@ -368,11 +398,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             value_4_zero_regionprops=cchh_nn_ixd_value_4_zero_regionprops)
                         
                         #Do the following analyses only if both channels pass a highpass threshold of number of pixels
-                        #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                        #Get threshold value for channels ch_n and cchh_nn at index ixd in the analysis axis
                         ch_n_ixd_min_px_of_inter_n = get_threshold_from_list(min_px_over_thresh_common_2use_2[ch_n],
-                                                                                        multi_value_array=False,
-                                                                                        multi_value_axis=-1,
-                                                                                        get_a_single_value=True)
+                                                                                    multi_value_array=False,
+                                                                                    multi_value_axis=-1,
+                                                                                    get_a_single_value=True)
                         
                         cchh_nn_ixd_min_px_of_inter_n = get_threshold_from_list(min_px_over_thresh_common_2use_2[cchh_nn],
                                                                                         multi_value_array=False,
@@ -416,12 +446,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             
                             #========================================================
                             #=========  MEASURE REGIONS' EUCLIDEAN DISTANCE =========
-                            #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
-                            ch_n_ixd_transform_to_label_img = get_threshold_from_list(reg_eucl_dist_transform_to_label_img_2use_2[ch_n],
-                                                                                            multi_value_array=False,
-                                                                                            multi_value_axis=-1,
-                                                                                            get_a_single_value=True)
-                            
                             #Calculate relative distances if at least a region is present in channel cchh_nn (individual regions of ch_n are measured for their distance with
                             # regions of cchh_nn)
                             if cchh_nn_area_px>0:
@@ -595,8 +619,38 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                           px_thre_arr_2=cchh_nn_ixd_px_thre_arr_2,
                                                                                           val_4_arr1_NOpassthres_arr2_passthres=get_conv_hull_fract_arr1_NOpass_arr2_pass_v,
                                                                                           val_4_arr2_NOpassthres=get_conv_hull_fract_arr2_NOpass_v)
+                        
+                        #========================================================================================
+                        #=========  ADD NaNs VALUES AS RESULTS OF THE ANALYSES IF THEY COULD NOT BE DONE =========
+                        else:
+                            #channels' overlap
+                            ch_n__cchh_nn_overlap = np.nan
+                            ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
 
-                            #
+                            #inter-channels euclidean distances
+                            mean_ch_n__cchh_nn_min_euclid_distance = np.nan
+                            std_ch_n__cchh_nn_min_euclid_distance = np.nan
+                            min_ch_n__cchh_nn_min_euclid_distance = np.nan
+                            max_ch_n__cchh_nn_min_euclid_distance = np.nan
+
+                            mean_ch_n__cchh_nn_max_euclid_distance = np.nan
+                            std_ch_n__cchh_nn_max_euclid_distance = np.nan
+                            min_ch_n__cchh_nn_max_euclid_distance = np.nan
+                            max_ch_n__cchh_nn_max_euclid_distance = np.nan
+
+                            mean_ch_n__cchh_nn_mean_euclid_distance = np.nan
+                            std_ch_n__cchh_nn_mean_euclid_distance = np.nan
+                            min_ch_n__cchh_nn_mean_euclid_distance = np.nan
+                            max_ch_n__cchh_nn_mean_euclid_distance = np.nan
+
+                            #overlapping regions
+                            #=========
+                            #TO DO
+                            #=========
+
+                            #convex hull
+                            ch_n__cchh_nn_convex_hull_fraction = np.nan
+
 
     # # #If the analysis axis is not provided          
     # # else:
