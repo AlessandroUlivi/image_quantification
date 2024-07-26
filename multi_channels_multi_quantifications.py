@@ -15,8 +15,8 @@ from utils import match_arrays_dimensions
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0,
-                      channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
-                      min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0, reg_eucl_dist_transform_to_label_img=False,
+                      channels_binarization_thresholds=0, transform_to_label_img=False, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
+                      min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0,
                       count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3, conv_hull_fract_px_thre_arr_2=3,
                       get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
     """
@@ -26,7 +26,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     - roi_mask_array can be different for the channels. At least 1 axis mutch match channels_arrays. The matching axis must be in the correct position.
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
     NOTE than when a tuple or a list is passed as a threshold this is interpreted as a multi-threshold, not as individual thresholds for the different channels.
-    NOTE WELL THAT reg_eucl_dist_transform_to_label_img=False.
+    NOTE WELL THAT transform_to_label_img=False.
     NOTE get_conv_hull_fract_arr1_NOpass_arr2_pass_v and get_conv_hull_fract_arr2_NOpass_v can't be changed tailored on the specific channel and array of analysis axis.
     """
     #=========================================
@@ -153,6 +153,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #=========  GET THRESHOLDS IN THE CORRECT FORMAT =========
     #Set binarization thresholds to 0 for all channels, if channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
+
+    #Set to False transform_to_label_img in measure_regions_euclidean_distances if transform_to_label_img is not provided. Use the provided value otherwise
+    transform_to_label_img_2use = set_thresholds_2use(transform_to_label_img, channels_stac_k=channels_array_copy)
     
     #Set val_4zero_regionprops in get_mask_area as 0 by defaut, if None is provided as input. Use the provided value otherwise.
     val_4zero_regionprops_2use = set_thresholds_2use(get_mask_area_val_4zero_regionprops, channels_stac_k=channels_array_copy)
@@ -173,9 +176,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Set to 0 the min number of pixels of arr_2_against for calculating pixels overlap in measure_pixels_overlap, if measure_pixels_overlap_n_px_thr_2 is not provided.
     # Use the provided thresholds otherwise
     measure_pixels_overlap_n_px_thr_2_2use = set_thresholds_2use(measure_pixels_overlap_n_px_thr_2, channels_stac_k=channels_array_copy)
-
-    #Set to False transform_to_label_img in measure_regions_euclidean_distances if reg_eucl_dist_transform_to_label_img is not provided. Use the provided value otherwise
-    reg_eucl_dist_transform_to_label_img_2use = set_thresholds_2use(reg_eucl_dist_transform_to_label_img, channels_stac_k=channels_array_copy)
 
     #Set to tuple of 0s of length=channel_axis'size * (channel_axis'size-1) intersection_threshold in count_number_of_overlapping_regions if count_n_overl_reg_intersection_threshold
     # is not provided. Use the provided tuple otherwise
@@ -217,13 +217,13 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
         #Split threshold arrays on the analysis_axis
         ch_bin_thresh_2use_1 = split_thresholds_arrays(ch_bin_thresh_2use, split_axis=analysis_axis, multi_thresholds=False)
+        transform_to_label_img_2use_1 = split_thresholds_arrays(transform_to_label_img_2use, split_axis=analysis_axis, multi_thresholds=False)
         val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=analysis_axis, multi_thresholds=False)
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
         min_px_over_thresh_common_2use_1 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
-        reg_eucl_dist_transform_to_label_img_2use_1 = split_thresholds_arrays(reg_eucl_dist_transform_to_label_img_2use, split_axis=analysis_axis, multi_thresholds=False)
         count_n_overl_reg_intersection_threshold_2use_1 = split_thresholds_arrays(count_n_overl_reg_intersection_threshold_2use, split_axis=analysis_axis, multi_thresholds=True)
         conv_hull_fract_px_thre_arr_1_2use_1 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
         conv_hull_fract_px_thre_arr_2_2use_1 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
@@ -249,13 +249,13 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
             #Also split on the channel axis the thresholds' arrays corresponding to the ixd-th index along the analysis_axis
             ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            transform_to_label_img_2use_2 = split_thresholds_arrays(transform_to_label_img_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
-            reg_eucl_dist_transform_to_label_img_2use_2 = split_thresholds_arrays(reg_eucl_dist_transform_to_label_img_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             count_n_overl_reg_intersection_threshold_2use_2 = split_thresholds_arrays(count_n_overl_reg_intersection_threshold_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=True)
             conv_hull_fract_px_thre_arr_1_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             conv_hull_fract_px_thre_arr_2_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
@@ -318,11 +318,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                 multi_value_axis=-1,
                                                                                 get_a_single_value=True)
                 #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
-                ch_n_ixd_transform_to_label_img = get_threshold_from_list(reg_eucl_dist_transform_to_label_img_2use_2[ch_n],
+                ch_n_ixd_transform_to_label_img = get_threshold_from_list(transform_to_label_img_2use_2[ch_n],
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
-                
+
                 if ch_n_regions_number>ch_n_ixd_n_of_region_4areas_measure:
                     #Get the areas of the regions within the channel
                     ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
@@ -449,15 +449,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             #Calculate relative distances if at least a region is present in channel cchh_nn (individual regions of ch_n are measured for their distance with
                             # regions of cchh_nn)
                             if cchh_nn_area_px>0:
-
                                 ch_n__cchh_nn_min_euclid_distances_list = measure_regions_euclidean_distances(ch_array,
-                                                                                                            cchh_nn_array,
-                                                                                                            roi__mask_img1=ch_n_roi_mask_array,
-                                                                                                            roi__mask_targ=cchh_nn_roi_mask_array,
-                                                                                                            desired__distance='min',
-                                                                                                            transform_to_label_img=ch_n_ixd_transform_to_label_img,
-                                                                                                            label_img_1_thres=ch_n_ixd_binarization_threshold,
-                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
+                                                                                                                cchh_nn_array,
+                                                                                                                roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                                roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                                desired__distance='min',
+                                                                                                                transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
                                 #The output of ch_n__cchh_nn_min_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
                                 #Get the mean and standard deviation of regions minimum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
@@ -479,13 +478,13 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                     max_ch_n__cchh_nn_min_euclid_distance = np.nan
 
                                 ch_n__cchh_nn_max_euclid_distances_list = measure_regions_euclidean_distances(ch_array,
-                                                                                                            cchh_nn_array,
-                                                                                                            roi__mask_img1=ch_n_roi_mask_array,
-                                                                                                            roi__mask_targ=cchh_nn_roi_mask_array,
-                                                                                                            desired__distance='max',
-                                                                                                            transform_to_label_img=ch_n_ixd_transform_to_label_img,
-                                                                                                            label_img_1_thres=ch_n_ixd_binarization_threshold,
-                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
+                                                                                                                cchh_nn_array,
+                                                                                                                roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                                roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                                desired__distance='max',
+                                                                                                                transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
                                 #The output of ch_n__cchh_nn_max_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
                                 #Get the mean and standard deviation of regions maximum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
@@ -554,7 +553,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             #========================================================
                             #=========  COUNT NUMBER OF OVERLAPPING REGIONS =========
                             #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
-                            cchh_nn_ixd_transform_to_label_img = get_threshold_from_list(reg_eucl_dist_transform_to_label_img_2use_2[cchh_nn],
+                            cchh_nn_ixd_transform_to_label_img = get_threshold_from_list(transform_to_label_img_2use_2[cchh_nn],
                                                                                             multi_value_array=False,
                                                                                             multi_value_axis=-1,
                                                                                             get_a_single_value=True)
