@@ -245,7 +245,7 @@ def measure_regions_euclidean_distances(label_img_1, binary_mask_target, roi__ma
         return output_list, None
 
 
-def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_threshold=0, ro_i__mask=None, transform__to_label_img_arr_1=False,
+def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_threshold=0, ro_i__mask_1=None, ro_i__mask_2=None, transform__to_label_img_arr_1=False,
                                         transform__to_label_img_arr_2=False, arr_1_tot_thres=0, arr_2_part_thres=0, return_regions=False,
                                         return_intersection_arrays=False, output_arr_loval=0, output_arr_highval=255, output_arr_dtype=np.uint8):
     """
@@ -271,8 +271,10 @@ def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_thre
     transform__to_label_img_arr_2=True, the array will be applied a highpass filtering process where pixels whose values is >arr_2_part_thres (default 0) are set to 1
     and the remaining pixels are set to 0. The output array of this first step will then be transformed into a label image
     (refer to https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label).
-    - ro_i__mask. ndarray of the same shape of arr_1_tot. Optional. If provided, restricts the analysis to a region of interest. The region of interest is defined by the
-    pixels in ro_i__mask whose intensity value is >0. NOTE: although not strictly required, the function was conceptualized for the use of binary masks for ro_i__mask.
+    - ro_i__mask_1. ndarray of the same shape of arr_1_tot. Optional. If provided, restricts the analysis of arr_1_tot to a region of interest. The region of interest is defined by the
+    pixels in ro_i__mask_1 whose intensity value is >0. NOTE: although not strictly required, the function was conceptualized for the use of binary masks for ro_i__mask_1.
+    - ro_i__mask_2. ndarray of the same shape of arr_1_tot. Optional. If provided, restricts the analysis of arr_2_part to a region of interest. The region of interest is defined by the
+    pixels in ro_i__mask_2 whose intensity value is >0. NOTE: although not strictly required, the function was conceptualized for the use of binary masks for ro_i__mask_2.
     - transform__to_label_img_arr_1. Bool. Optional. Default False. If True, transforms arr_1_tot to a label image where pixels of interest are pixels whose intensity value
     is >arr_1_tot_thres.
     - transform__to_label_img_arr_2. Bool. Optional. Default False. If True, transforms arr_2_part to a label image where pixels of interest are pixels whose intensity value
@@ -377,13 +379,18 @@ def count_number_of_overlapping_regions(arr_1_tot, arr_2_part, intersection_thre
     else:
         label_arr_2_part = arr_2_part.copy()
 
-    #Set values outside roi to 0 (background) if ro_i__mask is provided
-    if hasattr(ro_i__mask, "__len__"):
-        ro_i__mask_copy = ro_i__mask.copy()
-        arr_1_tot_to_proc = np.where(ro_i__mask_copy>0, label_arr_1_tot, 0)
-        arr_2_part_to_proc = np.where(ro_i__mask_copy>0, label_arr_2_part, 0)
+    #Set values outside roi to 0 (background) if ro_i__mask_1 is provided
+    if hasattr(ro_i__mask_1, "__len__"):
+        ro_i__mask_1_copy = ro_i__mask_1.copy()
+        arr_1_tot_to_proc = np.where(ro_i__mask_1_copy>0, label_arr_1_tot, 0)
     else:
         arr_1_tot_to_proc = label_arr_1_tot
+    
+    #Set values outside roi to 0 (background) if ro_i__mask_2 is provided
+    if hasattr(ro_i__mask_2, "__len__"):
+        ro_i__mask_2_copy = ro_i__mask_2.copy()
+        arr_2_part_to_proc = np.where(ro_i__mask_2_copy>0, label_arr_2_part, 0)
+    else:
         arr_2_part_to_proc = label_arr_2_part
     
     #Get regionprops for the regions of arr_1 and arr_2
