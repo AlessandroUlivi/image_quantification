@@ -410,7 +410,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                             desired__distance='min',
                                                                                                             transform_to_label_img=ch_n_ixd_transform_to_label_img,
                                                                                                             label_img_1_thres=ch_n_ixd_binarization_threshold,
-                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)[0]
+                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
                                 #The output of ch_n__cchh_nn_min_euclid_distances_list in the first position is a list. If no region is present in ch_array
 
@@ -421,7 +421,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                             desired__distance='max',
                                                                                                             transform_to_label_img=ch_n_ixd_transform_to_label_img,
                                                                                                             label_img_1_thres=ch_n_ixd_binarization_threshold,
-                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)[0]
+                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
                                 ch_n__cchh_nn_mean_euclid_distance = measure_regions_euclidean_distances(ch_array,
                                                                                                             cchh_nn_array,
