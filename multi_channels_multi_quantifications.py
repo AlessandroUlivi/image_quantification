@@ -16,7 +16,8 @@ from utils import match_arrays_dimensions
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0,
                       channels_binarization_thresholds=0, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
                       min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0, reg_eucl_dist_transform_to_label_img=False,
-                      count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3, conv_hull_fract_px_thre_arr_2=3):
+                      count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3, conv_hull_fract_px_thre_arr_2=3,
+                      get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
     """
     seems to work with 3 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
     be indicated using negative number indexing (for example -10). 3) If a custom array of thresholds is provided and multiple thresholds are required (e.g. for comparison
@@ -25,8 +26,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
     NOTE than when a tuple or a list is passed as a threshold this is interpreted as a multi-threshold, not as individual thresholds for the different channels.
     NOTE WELL THAT reg_eucl_dist_transform_to_label_img=False.
-    NOTE the values returned when the inputs to get_convex_hull_fractions don't pass conv_hull_fract_px_thre_arr_1 and/or conv_hull_fract_px_thre_arr_2 are forced as 0 and None as
-    they influence the following steps to add output to the dictionary used for forming the dataframe.
+    NOTE get_conv_hull_fract_arr1_NOpass_arr2_pass_v and get_conv_hull_fract_arr2_NOpass_v can't be changed tailored on the specific channel and array of analysis axis.
     """
     #=========================================
     #=========  SUPPORTING FUNCTIONS =========
@@ -224,8 +224,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
         reg_eucl_dist_transform_to_label_img_2use_1 = split_thresholds_arrays(reg_eucl_dist_transform_to_label_img_2use, split_axis=analysis_axis, multi_thresholds=False)
         count_n_overl_reg_intersection_threshold_2use_1 = split_thresholds_arrays(count_n_overl_reg_intersection_threshold_2use, split_axis=analysis_axis, multi_thresholds=True)
-        # conv_hull_fract_px_thre_arr_1_2use_1 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
-        # conv_hull_fract_px_thre_arr_2_2use_1 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
+        conv_hull_fract_px_thre_arr_1_2use_1 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
+        conv_hull_fract_px_thre_arr_2_2use_1 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
 
         #=================================================
         #=========  ITERATE ON THE ANALYSIS AXIS =========
@@ -256,7 +256,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             reg_eucl_dist_transform_to_label_img_2use_2 = split_thresholds_arrays(reg_eucl_dist_transform_to_label_img_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             count_n_overl_reg_intersection_threshold_2use_2 = split_thresholds_arrays(count_n_overl_reg_intersection_threshold_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=True)
-            
+            conv_hull_fract_px_thre_arr_1_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            conv_hull_fract_px_thre_arr_2_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+
             #================================================
             #=========  ITERATE ON THE CHANNEL AXIS =========
             # Iterate through the channels
@@ -537,7 +539,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                 multi_value_array=True,
                                                                                                 multi_value_axis=-1,
                                                                                                 get_a_single_value=True)
-                            print(ch_n_cchh_nn_ixd_intersection_threshold_tuple)
+                            
                             position_of_intersection_threshold = (ch_n*(channels_array.shape[channels_axis]))+cchh_nn #get the position of the threshold in the multi-threshold tuple
                             ch_n_cchh_nn_ixd_intersection_threshold = ch_n_cchh_nn_ixd_intersection_threshold_tuple[position_of_intersection_threshold]
 
@@ -565,11 +567,21 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                             #==================================================
                             #=========  MEASURE CONVEX HULL FRACTIONS =========
-                            #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                            #Get threshold values for channel ch_n and cchh_nn at index ixd in the analysis axis
                             cchh_nn_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[cchh_nn],
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
+                            
+                            ch_n_ixd_px_thre_arr_1 = get_threshold_from_list(conv_hull_fract_px_thre_arr_1_2use_2[ch_n],
+                                                                                multi_value_array=False,
+                                                                                multi_value_axis=-1,
+                                                                                get_a_single_value=True)
+                            
+                            cchh_nn_ixd_px_thre_arr_2 = get_threshold_from_list(conv_hull_fract_px_thre_arr_2_2use_2[cchh_nn],
+                                                                                multi_value_array=False,
+                                                                                multi_value_axis=-1,
+                                                                                get_a_single_value=True)
                             
                             ch_n__cchh_nn_convex_hull_fraction = get_convex_hull_fraction(ch_array,
                                                                                           cchh_nn_array,
@@ -579,10 +591,12 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                           threshold_arr_2=cchh_nn_ixd_binarization_threshold,
                                                                                           threshold_roi_mask_1=ch_n_ixd_threshold_roi_mask,
                                                                                           threshold_roi_mask_2=cchh_nn_ixd_threshold_roi_mask,
-                                                                                          px_thre_arr_1=3,
-                                                                                          px_thre_arr_2=3,
-                                                                                          val_4_arr1_NOpassthres_arr2_passthres=0.0,
-                                                                                          val_4_arr2_NOpassthres=None)
+                                                                                          px_thre_arr_1=ch_n_ixd_px_thre_arr_1,
+                                                                                          px_thre_arr_2=cchh_nn_ixd_px_thre_arr_2,
+                                                                                          val_4_arr1_NOpassthres_arr2_passthres=get_conv_hull_fract_arr1_NOpass_arr2_pass_v,
+                                                                                          val_4_arr2_NOpassthres=get_conv_hull_fract_arr2_NOpass_v)
+
+                            #
 
     # # #If the analysis axis is not provided          
     # # else:
