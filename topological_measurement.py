@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.spatial import ConvexHull
+from skimage.measure import label, regionprops
+from utils import get_euclidean_distances
 
 
 def get_convex_hull_fraction(arr_1, arr_2, roi__mask_1=None, roi__mask_2=None, threshold_arr_1=0, threshold_arr_2=0, threshold_roi_mask_1=0, threshold_roi_mask_2=0, px_thre_arr_1=3, px_thre_arr_2=3,
@@ -84,3 +86,84 @@ def get_convex_hull_fraction(arr_1, arr_2, roi__mask_1=None, roi__mask_2=None, t
             arr_2_vol = arr_2_convexhull.volume
 
             return arr_1_vol/arr_2_vol
+
+
+def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, desired__distance='min', transform_to_label_img=False, label_img_thres=0, return_excluded_distances=False):
+
+    if not transform_to_label_img:
+        assert np.min(label_img)==0, 'label_img must have background values set to 0 if a label image is provided'
+        assert np.max(label_img)>0, 'label_img must have label region values >0 if a label image is provided'
+
+    #Copy the input image
+    label_img_copy = label_img.copy()
+
+    #Transform input images to label images if transform_to_label_img is set to True
+    if transform_to_label_img:
+        #Theshold the input image using label_img_thres and set it to values 1 and 0, where 1s are assumed to be the pixels of interest
+        label_img_copy_01 = np.where(label_img_copy>label_img_thres, 1,0)
+        img_i = label(label_img_copy_01)
+    else:
+        img_i = label_img_copy
+    
+    #Set values outside roi to 0 (background) if roi__mask is provided
+    if hasattr(roi__mask, "__len__"):
+        roi__mask_copy = roi__mask.copy()
+        img = np.where(roi__mask_copy>0, img_i, 0)
+    else:
+        img = img_i
+    
+    #get regionproperties of img
+    regprops_img = regionprops(img)
+
+    #get the coordinates of all the regions in img - transform them in a list of tuples
+    all_regions_coords = [re.coords for re in regprops_img]
+
+    #Initialize an output list
+    output_list = []
+
+    #If desired__distance is min or max, initialize an output dictionary, to track coordinate pairs already included in the analysis.
+    # This will also be output if desired__distance=='min' or desired__distance=='max'
+    #Also initialize a dictionary to double check, in case, the excluded coordinates
+    if desired__distance=='min' or desired__distance=='max':
+        output_dictionary_coords_dist = {}
+        excluded_coordinates_dist_dict = {}
+
+    #Initialize a dictionary to track coordinate pairs already included in the analysis - this will be output if desired__distance=='min' or desired__distance=='max'
+    output_dictionary_coords_dist = {}
+
+    #Iterate through the coordinated of the regions of img:
+    for pos, r in enumerate(all_regions_coords):
+
+        #Remove r coordinates from the general list
+        all_regions_coords_copy = all_regions_coords.copy()
+        all_regions_coords_copy.pop(pos)
+
+        #All the coordinates other than r in a unique list
+        pooled_all_reg_all_regions_coords = []
+        for r2 in all_regions_coords_copy:
+            pooled_all_reg_all_regions_coords = pooled_all_reg_all_regions_coords + list(r2)
+        #Re-transform pooled coordinates in a numpy array
+        pooled_all_reg_coords_arr = np.asarray(pooled_all_reg_all_regions_coords)
+
+        #Get the min/max/mean distance of r to pixels of the rest of regions within the input image, and the coordinates of the pixel pair
+        wanted_distance, pixels_coords = get_euclidean_distances(r, pooled_all_reg_coords_arr, desired_distance=desired__distance)
+
+        #If the min or max distances are calculated, avoid duplicating pixels pairs
+        if desired__distance=='min' or desired__distance=='max':
+            if ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist) or ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist):
+                excluded_coordinates_dist_dict[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
+            else:
+                output_dictionary_coords_dist[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
+                output_list.append(wanted_distance)
+        else:
+            output_list.append(wanted_distance)
+
+    #If desired__distance is min or max, return distances list and dictionary of paired pixels coordinates. Return the distances list and None if  desired__distance is mean
+    if desired__distance=='min' or desired__distance=='max':
+        if return_excluded_distances:
+            return output_list, output_dictionary_coords_dist, excluded_coordinates_dist_dict
+        else:
+            return output_list, output_dictionary_coords_dist
+    else:
+        return output_list, None
+
