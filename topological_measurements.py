@@ -95,8 +95,11 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
     NOTE: when returning the minimum or maxima euclidean distances the following scenario could happen: let's assume that the distance-ij is the minimum distance
     between region-i and the rest of the regions of label_img, and it connect with region-j. It is possible that the minimum distance between
     region-j and the rest of the regions of label_img is also distance-ij, as region-i is the closest region to region-j. This means that if calculating
-    one distance per region, and including them all in the output, some distances could be duplicated. This is avoided, so each distance is only
-    present once in the output list.
+    one distance per region, and including them all in the output, some distances could be duplicated. This scenario has 100% chances of happening if, for example,
+    only 2 regions are present in label_img. 
+    A second simalar scenario is when returning the mean euclean distance between the pixels of a region-i and the pixels of the rest of the regions in label_img,
+    but only 2 regions are present. In this case the distances calculated relative to the 2 regions are identical.
+    Duplicated distances are always avoided, so each distance is only present once in the output list.
 
     Inputs:
     - label_img. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
@@ -122,7 +125,7 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
 
     Outputs:
     I will use i to refer to the i-th region of label_img and j to refer to a separate j-th region of label_img. n is the total number of separate regions in label_img.
-    - there are less or equal to highpass_n_regions number of regions in label_img. A tuple is returned with val_n_regions_nopass value both in position 0 and in position 1.
+    - if there are less or equal to highpass_n_regions number of regions in label_img. A tuple is returned with val_n_regions_nopass value both in position 0 and in position 1.
     - if there are more than highpass_n_regions number of regions in label_img.
         - if desired__distance=='min'.
             - if return_excluded_distances==False. the output is a tuple.
@@ -161,9 +164,13 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
                 to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the
                 ouput dictionary as the key of the dictionary and they are linked to their distance as the dictionary value.
         
-        - if desired__distance=='meam', the output is a tuple.
-            Position-0 is a list of length n and collecting, per each region-i of label_img, its average distance with the rest of the regions of lable_img.
-            Position-1 is None.
+        - if desired__distance=='meam', the output is a tuple. Because duplicated distances are avoided:
+            - if the number of regions is 2:
+                Position-0 is a list of length 1 collecting the average distance between the pixels of the 2 regions.
+                Position-1 is None.
+            - if number of regions is >2:
+                Position-0 is a list of length n, collecting per each region of lable_img, its average distance with the rest of the regions of label_img.
+                Position-1 is None.
     """
     # Make sure highpass_n_regions is equal or higher than 1
     assert highpass_n_regions>=1, "highpass_n_regions must be >=1 as at least 2 regions must be present to calculate a distance"
@@ -196,48 +203,77 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
 
     #get the coordinates of all the regions in img
     all_regions_coords = [re.coords for re in regprops_img]
-
+    
     # Only continue the analysis if there are more than a highpass_n_regions number of regions in label_img
     if len(all_regions_coords)>highpass_n_regions:
         #Initialize an output list
         output_list = []
 
-        #If desired__distance is min or max, initialize an output dictionary, to track coordinate pairs already included in the analysis.
-        # This will also be output if desired__distance=='min' or desired__distance=='max'
-        #Also initialize a dictionary to double check, in case, the excluded coordinates
-        if desired__distance=='min' or desired__distance=='max':
-            output_dictionary_coords_dist = {}
-            excluded_coordinates_dist_dict = {}
-
-        #Iterate through the coordinates of the regions of img:
-        for pos, r in enumerate(all_regions_coords):
-
-            #Remove r coordinates from the general list
-            all_regions_coords_copy = all_regions_coords.copy() #Re-initialize the global list of coordinates at each iteration, and copy it so that it is not modified
-            all_regions_coords_copy.pop(pos)
-
-            #Pool all the coordinates other than r in a unique list
-            pooled_all_reg_all_regions_coords = []
-            for r2 in all_regions_coords_copy:
-                pooled_all_reg_all_regions_coords = pooled_all_reg_all_regions_coords + list(r2)
-            #Re-transform pooled coordinates in a numpy array
-            pooled_all_reg_coords_arr = np.asarray(pooled_all_reg_all_regions_coords)
-
-            #Get the min/max/mean distance of r to pixels of the rest of regions within the input image, and the coordinates of the pixel pair
-            wanted_distance, pixels_coords = get_euclidean_distances(r, pooled_all_reg_coords_arr, desired_distance=desired__distance)
-
-            #If the min or max distances are calculated, avoid duplicating pixels pairs before collecting the distance in the
-            #output list and collection dictionary
+        # If only 2 regions are present, then it is possible to simply calculate the measurements for one of the two. This involves min, max and also mean distances
+        if len(all_regions_coords)==2:
+            
+            #If desired__distance is min or max, initialize an output dictionary, to track coordinate pairs included in the analysis.
+            # This will also be output if desired__distance=='min' or desired__distance=='max'
+            #Also initialize a dictionary to double check, in case, the excluded coordinates
             if desired__distance=='min' or desired__distance=='max':
-                if ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist) or ((tuple(pixels_coords[1]), tuple(pixels_coords[0])) in output_dictionary_coords_dist):
-                    #Collect exlcuded coordinate pairs so that they could be also returned for checking purposes
-                    excluded_coordinates_dist_dict[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
-                else:
-                    output_dictionary_coords_dist[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
-                    output_list.append(wanted_distance)
-            #If mean distance is calculated, there is no possibility of duplicating the distance
+                output_dictionary_coords_dist = {}
+                excluded_coordinates_dist_dict = {}
+            
+            # Get coordinates of the first region and of the second region
+            r1_coords = all_regions_coords[0]
+            r2_coords = all_regions_coords[1]
+
+            #Get the min/max/mean distance of r1 to r2, and the coordinates of the pixel pair
+            wanted_distance_r1_r2, pixels_coords_r1_r2 = get_euclidean_distances(r1_coords, r2_coords, desired_distance=desired__distance)
+            wanted_distance_r2_r1, pixels_coords_r2_r1 = get_euclidean_distances(r2_coords, r1_coords, desired_distance=desired__distance)
+
+            
+            if desired__distance=='min' or desired__distance=='max':
+                excluded_coordinates_dist_dict[(tuple(pixels_coords_r2_r1[0]), tuple(pixels_coords_r2_r1[1]))]=wanted_distance_r2_r1
+                output_dictionary_coords_dist[(tuple(pixels_coords_r1_r2[0]), tuple(pixels_coords_r1_r2[1]))]=wanted_distance_r1_r2
+                output_list.append(wanted_distance_r1_r2)
+            
             else:
-                output_list.append(wanted_distance)
+                output_list.append(wanted_distance_r1_r2)
+        
+        # If more than 2 regions are present
+        else:
+            #If desired__distance is min or max, initialize an output dictionary, to track coordinate pairs already included in the analysis.
+            # This will also be output if desired__distance=='min' or desired__distance=='max'
+            #Also initialize a dictionary to double check, in case, the excluded coordinates
+            if desired__distance=='min' or desired__distance=='max':
+                output_dictionary_coords_dist = {}
+                excluded_coordinates_dist_dict = {}
+
+            #Iterate through the coordinates of the regions of img:
+            for pos, r in enumerate(all_regions_coords):
+                
+                #Remove r coordinates from the general list
+                all_regions_coords_copy = all_regions_coords.copy() #Re-initialize the global list of coordinates at each iteration, and copy it so that it is not modified
+                all_regions_coords_copy.pop(pos)
+
+                #Pool all the coordinates other than r in a unique list
+                pooled_all_reg_all_regions_coords = []
+                for r2 in all_regions_coords_copy:
+                    pooled_all_reg_all_regions_coords = pooled_all_reg_all_regions_coords + list(r2)
+                #Re-transform pooled coordinates in a numpy array
+                pooled_all_reg_coords_arr = np.asarray(pooled_all_reg_all_regions_coords)
+
+                #Get the min/max/mean distance of r to pixels of the rest of regions within the input image, and the coordinates of the pixel pair
+                wanted_distance, pixels_coords = get_euclidean_distances(r, pooled_all_reg_coords_arr, desired_distance=desired__distance)
+                
+                #If the min or max distances are calculated, avoid duplicating pixels pairs before collecting the distance in the
+                #output list and collection dictionary
+                if desired__distance=='min' or desired__distance=='max':
+                    if ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist) or ((tuple(pixels_coords[1]), tuple(pixels_coords[0])) in output_dictionary_coords_dist):
+                        #Collect exlcuded coordinate pairs so that they could be also returned for checking purposes
+                        excluded_coordinates_dist_dict[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
+                    else:
+                        output_dictionary_coords_dist[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
+                        output_list.append(wanted_distance)
+                #If mean distance is calculated, there is no possibility of duplicating the distance
+                else:
+                    output_list.append(wanted_distance)
 
         #If desired__distance is min or max, return distances list and dictionary of paired pixels coordinates. Return the distances list and None if  desired__distance is mean
         if desired__distance=='min' or desired__distance=='max':
