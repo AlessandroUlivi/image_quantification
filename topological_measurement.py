@@ -150,7 +150,7 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
 
         #If the min or max distances are calculated, avoid duplicating pixels pairs
         if desired__distance=='min' or desired__distance=='max':
-            if ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist) or ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist):
+            if ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist) or ((tuple(pixels_coords[1]), tuple(pixels_coords[0])) in output_dictionary_coords_dist):
                 excluded_coordinates_dist_dict[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
             else:
                 output_dictionary_coords_dist[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
