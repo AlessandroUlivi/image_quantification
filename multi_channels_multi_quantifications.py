@@ -3,7 +3,7 @@ import pandas as pd
 from co_localization_measurements import measure_pixels_overlap, measure_regions_euclidean_distances, count_number_of_overlapping_regions
 from counting_measurements import count_regions_number
 from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask
-from topological_measurement import get_convex_hull_fraction, measure_regions_euclidean_distances_within_array
+from topological_measurements import get_convex_hull_fraction, measure_regions_euclidean_distances_within_array
 from utils import match_arrays_dimensions
 
 
