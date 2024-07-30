@@ -89,7 +89,77 @@ def get_convex_hull_fraction(arr_1, arr_2, roi__mask_1=None, roi__mask_2=None, t
 
 
 def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, desired__distance='min', transform_to_label_img=False, label_img_thres=0, return_excluded_distances=False):
+    """
+    Returns the eucledean distances between each region of an input image (label_img) and the rest of the regions of the input image.
+    NOTE: when returning the minimum or maxima euclidean distances the following scenario could happen: let's assume that the distance-ij is the minimum distance
+    between region-i and the rest of the regions of label_img, and it connect with region-j. It is possible that the minimum distance between
+    region-j and the rest of the regions of label_img is also distance-ij, as region-i is the closest region to region-j. This means that if calculating
+    one distance per region, and including them all in the output, some distances could be duplicated. This is avoided, so each distance is only
+    present once in the output list.
 
+    Inputs:
+    - label_img. ndarray. It can either be a label image (an image where pixels of separate regions are assigned the same value and a unique value is assigned to each separate region)
+    or a binary image. If a label image is provided, the values must be >=0 and pixels of value 0 are assumed to correspond to the background. If a binary image is given,
+    the parameter transform_to_label_img must be set to True in order for the function to transfom it in a label image using skimage.measure.label method
+    (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label). If a binary mask is provided it will be firstly rescaled in the 0-1 range using the
+    label_img_thres parameter. Pixels with intensity values >label_img_thres will be set to 1 and considered pixels of interest, while the rest will be
+    set to 0 and considered background. The default value for label_img_thres is 0. NOTE: a binary mask can be considered a label image if only a single
+    region is present.
+    - roi__mask. Optional parameter. ndarray of the same shape of label_img. Binary mask. When provided, the analysis of label_img will be restricted to the region of
+    interest indicated by roi__mask. It is assumed that the region of interest corresponds to pixels in roi__mask with value>0.
+    - desired__distance. String. Three choices are possible: 'min' (default), 'max', 'mean'. The parameter is passed to the function get_euclidean_distances (within utils.py). If 'min'
+    the minimum distances between each region of label_img and the rest of the regions of label_img are measured. If 'max' the maximum distances between each region of label_img and
+    the rest of the regions of label_img are measured. If 'mean' the mean distances between each region of label_img and the rest of the regions of label_img are measured.
+    - transform_to_label_img. Bool (defaul False). Specifies if label_img should be transformed to a label image. It must be True if label_img is not a label image.
+    - label_img_thres. Int or float. Only applies when transform_to_label_img is True. Default 0. Defines the highpass threshold to distinguish pixels of interest from background
+    in label_img. Pixels whose value is >label_img_thres are considered pixels of interest. The rest of the pixels are considered background.
+    - return_excluded_distances. Bool. Default False. Only applies when desired__distance is 'min' or 'max'. When desired__distance is 'min' or 'max', distances could be duplicated
+    as the min/max distance between region-i and region-j can be the same min/max distance between region-j and region-i. This duplication is avoided by default. If
+    return_excluded_distances, coordinate pairs which have been excluded from the ouput because duplicatded, are also returned.
+
+    Outputs:
+    I will use i to refer to the i-th region of label_img and j to refer to a separate j-th region of label_img. n is the total number of separate regions in label_img.
+    - if desired__distance=='min'.
+        - if return_excluded_distances==False. the output is a tuple.
+            Position-0 is a list collecting, per each i region, the minimum euclidean distance with the rest of regions of
+            label_img, but avoiding duplication of distances when the same distance-ij is the minimum distance both between region-i
+            and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
+            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key-value pair of the dictionary.
+        - if return_excluded_distances==True. the output is a tuple.
+            Position-0 is a list collecting, per each i region, the minimum euclidean distance with the rest of regions of
+            label_img, but avoiding duplication of distances when the same distance-ij is the minimum distance both between region-i
+            and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
+            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key-value pair of the dictionary.
+            Position-2 is a dictionary. Let distance-ji be the minimum distance between region-j and the rest of the regions of label_img
+            by connecting region-j to region-j. If it is not entered in the outputs of position-0 and position-1 because it correponds to
+            the distance-ij, which is the minimum distance between region-i and the rest of the regions of label_img, and it connects region-i
+            to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the the
+            ouput dictionary as a key-value pair.
+    - if desired__distance=='max'.
+        - if return_excluded_distances==False. the output is a tuple.
+            Position-0 is a list collecting, per each i region, the maximum euclidean distance with the rest of the regions of
+            label_img, but avoiding duplication of distances when the same distance-ij is the maximum distance both between region-i
+            and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
+            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key-value pair of the dictionary.
+        - if return_excluded_distances==True. the output is a tuple.
+            Position-0 is a list collecting, per each i region, the maximum euclidean distance with the rest of the regions of
+            label_img, but avoiding duplication of distances when the same distance-ij is the maximum distance both between region-i
+            and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
+            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key-value pair of the dictionary.
+            Position-2 is a dictionary. Let distance-ji be the maximum distance between region-j and the rest of the regions of label_img
+            by connecting region-j to region-j. If it is not entered in the outputs of position-0 and position-1 because it correponds to
+            the distance-ij, which is the maximum distance between region-i and the rest of the regions of label_img, and it connects region-i
+            to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the the
+            ouput dictionary as a key-value pair.
+    
+    - if desired__distance=='meam', the output is a tuple.
+        Position-0 is a list of length n and collecting, per each region-i of label_img, its average distance with the rest of the regions of lable_img.
+        Position-1 is None.
+    """
     if not transform_to_label_img:
         assert np.min(label_img)==0, 'label_img must have background values set to 0 if a label image is provided'
         assert np.max(label_img)>0, 'label_img must have label region values >0 if a label image is provided'
