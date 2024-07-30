@@ -128,14 +128,14 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
         output_dictionary_coords_dist = {}
         excluded_coordinates_dist_dict = {}
 
-    #Iterate through the coordinated of the regions of img:
+    #Iterate through the coordinates of the regions of img:
     for pos, r in enumerate(all_regions_coords):
 
         #Remove r coordinates from the general list
-        all_regions_coords_copy = all_regions_coords.copy()
+        all_regions_coords_copy = all_regions_coords.copy() #Re-initialize the global list of coordinates at each iteration, and copy it so that it is not modified
         all_regions_coords_copy.pop(pos)
 
-        #All the coordinates other than r in a unique list
+        #Pool all the coordinates other than r in a unique list
         pooled_all_reg_all_regions_coords = []
         for r2 in all_regions_coords_copy:
             pooled_all_reg_all_regions_coords = pooled_all_reg_all_regions_coords + list(r2)
@@ -145,13 +145,16 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
         #Get the min/max/mean distance of r to pixels of the rest of regions within the input image, and the coordinates of the pixel pair
         wanted_distance, pixels_coords = get_euclidean_distances(r, pooled_all_reg_coords_arr, desired_distance=desired__distance)
 
-        #If the min or max distances are calculated, avoid duplicating pixels pairs
+        #If the min or max distances are calculated, avoid duplicating pixels pairs before collecting the distance in the
+        #output list and collection dictionary
         if desired__distance=='min' or desired__distance=='max':
             if ((tuple(pixels_coords[0]), tuple(pixels_coords[1])) in output_dictionary_coords_dist) or ((tuple(pixels_coords[1]), tuple(pixels_coords[0])) in output_dictionary_coords_dist):
+                #Collect exlcuded coordinate pairs so that they could be also returned for checking purposes
                 excluded_coordinates_dist_dict[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
             else:
                 output_dictionary_coords_dist[(tuple(pixels_coords[0]), tuple(pixels_coords[1]))]=wanted_distance
                 output_list.append(wanted_distance)
+        #If mean distance is calculated, there is no possibility of duplicating the distance
         else:
             output_list.append(wanted_distance)
 
