@@ -15,7 +15,8 @@ from utils import match_arrays_dimensions
 
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0,
-                      channels_binarization_thresholds=0, transform_to_label_img=False, get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
+                      channels_binarization_thresholds=0, transform_to_label_img=False, get_mask_area_val_4zero_regionprops=0,
+                      count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0, reg_eucl_dist_within_arr_val_n_regions_nopass=1,
                       min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0,
                       count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3, conv_hull_fract_px_thre_arr_2=3,
                       get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
@@ -145,7 +146,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     if hasattr(roi_mask_array, "__len__"):
         roi_mask_array_copy_i = roi_mask_array.copy()
         roi_mask_array_2use = match_arrays_dimensions(roi_mask_array_copy_i, channels_array_copy)
-        # print("initial_roi_mask_shape: ", roi_mask_array_2use.shape)
     else:
         roi_mask_array_2use = roi_mask_array
 
@@ -165,6 +165,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     #Set to 0 the highpass threshold for calculating the mean, median, min and max area of regions within a channel, if None is provided as input. Use the provided value otherwise.
     n_of_region_4areas_measure_2use = set_thresholds_2use(n_of_region_4areas_measure, channels_stac_k=channels_array_copy)
+
+    #Set to 1 the highpass threshold for calculating distances within regions of a channel, if reg_eucl_dist_within_arr_val_n_regions_nopass is not provided.
+    #Use the provided value otherwise
+    reg_eucl_dist_within_arr_val_n_regions_nopass_2use = set_thresholds_2use(reg_eucl_dist_within_arr_val_n_regions_nopass, channels_stac_k=channels_array_copy)
 
     #Set to 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, channels_stac_k=channels_array_copy)
@@ -221,6 +225,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         val_4zero_regionprops_2use_1 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=analysis_axis, multi_thresholds=False)
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
+        reg_eucl_dist_within_arr_val_n_regions_nopass_2use_1 = split_thresholds_arrays(reg_eucl_dist_within_arr_val_n_regions_nopass_2use, split_axis=analysis_axis, multi_thresholds=False)
         min_px_over_thresh_common_2use_1 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
@@ -234,7 +239,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
-            # print("===", ixd)
+            # print("==="*3, ixd)
             #===================================================================================
             #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
             #Get the individual channels array as a list
@@ -253,6 +258,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2 = split_thresholds_arrays(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
@@ -264,7 +270,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             #=========  ITERATE ON THE CHANNEL AXIS =========
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
-                # print("===", ch_n)
+                # print("---", ch_n)
                 #Get ch_n roi_mask, if it is provided
 
                 #==================================================
@@ -343,27 +349,114 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                 # #=======================================================================
                 # #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
-                # ch_n_regions_min_distances = measure_regions_euclidean_distances_within_array(ch_array,
-                #                                                                               roi__mask=ch_n_roi_mask_array,
-                #                                                                               desired__distance='min',
-                #                                                                               transform_to_label_img=False,
-                #                                                                               label_img_thres=0,
-                #                                                                               return_excluded_distances=False)
+                #Get threshold value for channel ch_n and index ixd in the analysis axis
+                ch_n_ixd_highpass_n_regions = get_threshold_from_list(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
 
-                # ch_n_regions_max_distances = measure_regions_euclidean_distances_within_array(ch_array,
-                #                                                                               roi__mask=ch_n_roi_mask_array,
-                #                                                                               desired__distance='max',
-                #                                                                               transform_to_label_img=False,
-                #                                                                               label_img_thres=0,
-                #                                                                               return_excluded_distances=False)
+                ch_n_regions_min_distances, ch_n_regions_min_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                                                                        desired__distance='min',
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                        label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                        return_excluded_distances=False,
+                                                                                                                        val_n_regions_nopass=np.nan)
+                # ch_n_regions_min_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
+                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
+                # Report the single distance if only 1 distance is present.
+                if isinstance(ch_n_regions_min_distances,list):
+                    num_ch_n_regions_min_distances = len(ch_n_regions_min_distances)
+                    min_ch_n_regions_min_distances = np.min(ch_n_regions_min_distances)
+                    max_ch_n_regions_min_distances = np.max(ch_n_regions_min_distances)
+                    if num_ch_n_regions_min_distances>2:
+                        mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
+                        std_ch_n_regions_min_distances = np.std(ch_n_regions_min_distances)
+                    elif num_ch_n_regions_min_distances==2:
+                        mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
+                        std_ch_n_regions_min_distances = np.nan
+                    elif num_ch_n_regions_min_distances==1:
+                        mean_ch_n_regions_min_distances = ch_n_regions_min_distances[0]
+                        std_ch_n_regions_min_distances = np.nan
+                    else:
+                        print("it should not be possible that less than a distance is calculated for measure_regions_euclidean_distances_within_array with desired__distance='min'")
+                else:
+                    num_ch_n_regions_min_distances = np.nan
+                    min_ch_n_regions_min_distances = np.nan
+                    max_ch_n_regions_min_distances = np.nan
+                    mean_ch_n_regions_min_distances = np.nan
+                    std_ch_n_regions_min_distances = np.nan
 
-                # ch_n_regions_mean_distances = measure_regions_euclidean_distances_within_array(ch_array,
-                #                                                                                roi__mask=ch_n_roi_mask_array,
-                #                                                                                desired__distance='mean',
-                #                                                                                transform_to_label_img=False,
-                #                                                                                label_img_thres=0,
-                #                                                                                return_excluded_distances=False)
+                ch_n_regions_max_distances, ch_n_regions_max_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                                                                        desired__distance='max',
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                        label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                        return_excluded_distances=False,
+                                                                                                                        val_n_regions_nopass=np.nan)
                 
+                # ch_n_regions_max_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
+                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
+                # Report the single distance if only 1 distance is present.
+                if isinstance(ch_n_regions_max_distances,list):
+                    num_ch_n_regions_max_distances = len(ch_n_regions_max_distances)
+                    min_ch_n_regions_max_distances = np.min(ch_n_regions_max_distances)
+                    max_ch_n_regions_max_distances = np.max(ch_n_regions_max_distances)
+                    if num_ch_n_regions_max_distances>2:
+                        mean_ch_n_regions_max_distances = np.mean(ch_n_regions_max_distances)
+                        std_ch_n_regions_max_distances = np.std(ch_n_regions_max_distances)
+                    elif num_ch_n_regions_max_distances==2:
+                        mean_ch_n_regions_max_distances = np.mean(ch_n_regions_max_distances)
+                        std_ch_n_regions_max_distances = np.nan
+                    elif num_ch_n_regions_max_distances==1:
+                        mean_ch_n_regions_max_distances = ch_n_regions_max_distances[0]
+                        std_ch_n_regions_max_distances = np.nan
+                    else:
+                        print("it should not be possible that less than a distance is calculated for measure_regions_euclidean_distances_within_array with desired__distance='max'")
+                else:
+                    num_ch_n_regions_max_distances = np.nan
+                    min_ch_n_regions_max_distances = np.nan
+                    max_ch_n_regions_max_distances = np.nan
+                    mean_ch_n_regions_max_distances = np.nan
+                    std_ch_n_regions_max_distances = np.nan
+
+                ch_n_regions_mean_distances, ch_n_regions_man_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                                                                        desired__distance='mean',
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                        label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                        return_excluded_distances=False,
+                                                                                                                        val_n_regions_nopass=np.nan)
+                
+                # ch_n_regions_mean_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
+                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
+                # Report the single distance if only 1 distance is present.
+                if isinstance(ch_n_regions_mean_distances,list):
+                    num_ch_n_regions_mean_distances = len(ch_n_regions_mean_distances)
+                    min_ch_n_regions_mean_distances = np.min(ch_n_regions_mean_distances)
+                    max_ch_n_regions_mean_distances = np.max(ch_n_regions_mean_distances)
+                    if num_ch_n_regions_mean_distances>2:
+                        mean_ch_n_regions_mean_distances = np.mean(ch_n_regions_mean_distances)
+                        std_ch_n_regions_mean_distances = np.std(ch_n_regions_mean_distances)
+                    elif num_ch_n_regions_mean_distances==2:
+                        mean_ch_n_regions_mean_distances = np.mean(ch_n_regions_mean_distances)
+                        std_ch_n_regions_mean_distances = np.nan
+                    elif num_ch_n_regions_mean_distances==1:
+                        mean_ch_n_regions_mean_distances = ch_n_regions_mean_distances[0]
+                        std_ch_n_regions_mean_distances = np.nan
+                    else:
+                        print("it should not be possible that less than a distance is calculated for measure_regions_euclidean_distances_within_array with desired__distance='mean'")
+                else:
+                    num_ch_n_regions_mean_distances = np.nan
+                    min_ch_n_regions_mean_distances = np.nan
+                    max_ch_n_regions_mean_distances = np.nan
+                    mean_ch_n_regions_mean_distances = np.nan
+                    std_ch_n_regions_mean_distances = np.nan
+
+
                 #==================================================================
                 #=========  START COMPARATIVE MEASUREMENTS AMONG CHANNELS =========
                 #Iterate trough the channels a second time, to get measurements calculated by comparing two channels
