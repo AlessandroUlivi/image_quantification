@@ -88,7 +88,7 @@ def get_convex_hull_fraction(arr_1, arr_2, roi__mask_1=None, roi__mask_2=None, t
             return arr_1_vol/arr_2_vol
 
 
-def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, desired__distance='min', n_regions=1, transform_to_label_img=False,
+def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, desired__distance='min', highpass_n_regions=1, transform_to_label_img=False,
                                                      label_img_thres=0, return_excluded_distances=False, val_n_regions_nopass=None):
     """
     Returns the eucledean distances between each region of an input image (label_img) and the rest of the regions of the input image.
@@ -111,7 +111,7 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
     - desired__distance. String. Three choices are possible: 'min' (default), 'max', 'mean'. The parameter is passed to the function get_euclidean_distances (within utils.py). If 'min'
     the minimum distances between each region of label_img and the rest of the regions of label_img are measured. If 'max' the maximum distances between each region of label_img and
     the rest of the regions of label_img are measured. If 'mean' the mean distances between each region of label_img and the rest of the regions of label_img are measured.
-    - n_regions. int or float. Default 1. The highpass filter for the minimum number of regions in label_img which have to be present for doint the analysis.
+    - highpass_n_regions. int or float. Default 1. The highpass filter for the minimum number of regions in label_img which have to be present for doint the analysis.
     - transform_to_label_img. Bool (defaul False). Specifies if label_img should be transformed to a label image. It must be True if label_img is not a label image.
     - label_img_thres. Int or float. Only applies when transform_to_label_img is True. Default 0. Defines the highpass threshold to distinguish pixels of interest from background
     in label_img. Pixels whose value is >label_img_thres are considered pixels of interest. The rest of the pixels are considered background.
@@ -122,8 +122,8 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
 
     Outputs:
     I will use i to refer to the i-th region of label_img and j to refer to a separate j-th region of label_img. n is the total number of separate regions in label_img.
-    - there are less or equal to n_regions number of regions in label_img. A tuple is returned with val_n_regions_nopass value both in position 0 and in position 1.
-    - if there are more than n_regions number of regions in label_img.
+    - there are less or equal to highpass_n_regions number of regions in label_img. A tuple is returned with val_n_regions_nopass value both in position 0 and in position 1.
+    - if there are more than highpass_n_regions number of regions in label_img.
         - if desired__distance=='min'.
             - if return_excluded_distances==False. the output is a tuple.
                 Position-0 is a list collecting, per each i region, the minimum euclidean distance with the rest of regions of
@@ -193,8 +193,8 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
     #get the coordinates of all the regions in img
     all_regions_coords = [re.coords for re in regprops_img]
 
-    # Only continue the analysis if there are more than a n_regions number of regions in label_img
-    if len(all_regions_coords)>n_regions:
+    # Only continue the analysis if there are more than a highpass_n_regions number of regions in label_img
+    if len(all_regions_coords)>highpass_n_regions:
         #Initialize an output list
         output_list = []
 
@@ -244,7 +244,7 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
         else:
             return output_list, None
 
-    # return a tuple with val_n_regions_nopass both in position 0 and position 1 if there are not more than n_regions number of regions in label_image
+    # return a tuple with val_n_regions_nopass both in position 0 and position 1 if there are not more than highpass_n_regions number of regions in label_image
     else:
         return val_n_regions_nopass, val_n_regions_nopass
 
