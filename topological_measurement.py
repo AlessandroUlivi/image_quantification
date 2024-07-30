@@ -115,7 +115,7 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
     #get regionproperties of img
     regprops_img = regionprops(img)
 
-    #get the coordinates of all the regions in img - transform them in a list of tuples
+    #get the coordinates of all the regions in img
     all_regions_coords = [re.coords for re in regprops_img]
 
     #Initialize an output list
@@ -127,9 +127,6 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
     if desired__distance=='min' or desired__distance=='max':
         output_dictionary_coords_dist = {}
         excluded_coordinates_dist_dict = {}
-
-    #Initialize a dictionary to track coordinate pairs already included in the analysis - this will be output if desired__distance=='min' or desired__distance=='max'
-    output_dictionary_coords_dist = {}
 
     #Iterate through the coordinated of the regions of img:
     for pos, r in enumerate(all_regions_coords):
