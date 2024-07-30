@@ -125,36 +125,36 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
             label_img, but avoiding duplication of distances when the same distance-ij is the minimum distance both between region-i
             and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
             Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
-            distance has been calculated correspond to the key-value pair of the dictionary.
+            distance has been calculated correspond to the key of the dictionary and the are linked to their distance as the dictionary value.
         - if return_excluded_distances==True. the output is a tuple.
-            Position-0 is a list collecting, per each i region, the minimum euclidean distance with the rest of regions of
+            = Position-0 is a list collecting, per each i region, the minimum euclidean distance with the rest of regions of
             label_img, but avoiding duplication of distances when the same distance-ij is the minimum distance both between region-i
             and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
-            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
-            distance has been calculated correspond to the key-value pair of the dictionary.
-            Position-2 is a dictionary. Let distance-ji be the minimum distance between region-j and the rest of the regions of label_img
+            - Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key of the dictionary and they are linked to their distance as the dictionary value.
+            - Position-2 is a dictionary. Let distance-ji be the minimum distance between region-j and the rest of the regions of label_img
             by connecting region-j to region-j. If it is not entered in the outputs of position-0 and position-1 because it correponds to
             the distance-ij, which is the minimum distance between region-i and the rest of the regions of label_img, and it connects region-i
-            to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the the
-            ouput dictionary as a key-value pair.
+            to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the
+            ouput dictionary as the key of the dictionary and they are linked to their distance as the dictionary value.
     - if desired__distance=='max'.
         - if return_excluded_distances==False. the output is a tuple.
-            Position-0 is a list collecting, per each i region, the maximum euclidean distance with the rest of the regions of
+            - Position-0 is a list collecting, per each i region, the maximum euclidean distance with the rest of the regions of
             label_img, but avoiding duplication of distances when the same distance-ij is the maximum distance both between region-i
             and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
-            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
-            distance has been calculated correspond to the key-value pair of the dictionary.
+            - Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key of the dictionary and they are linked to their distance as the dictionary value.
         - if return_excluded_distances==True. the output is a tuple.
-            Position-0 is a list collecting, per each i region, the maximum euclidean distance with the rest of the regions of
+            - Position-0 is a list collecting, per each i region, the maximum euclidean distance with the rest of the regions of
             label_img, but avoiding duplication of distances when the same distance-ij is the maximum distance both between region-i
             and the rest of the regions of label_img and of region-j and the rest of the regions of label_img.
-            Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
-            distance has been calculated correspond to the key-value pair of the dictionary.
-            Position-2 is a dictionary. Let distance-ji be the maximum distance between region-j and the rest of the regions of label_img
+            - Position-1 is a dictionary. Per each distance of the output at position-0, the coordinates of the pixel pair for which the
+            distance has been calculated correspond to the key of the dictionary and they are linked to their distance as the dictionary value.
+            - Position-2 is a dictionary. Let distance-ji be the maximum distance between region-j and the rest of the regions of label_img
             by connecting region-j to region-j. If it is not entered in the outputs of position-0 and position-1 because it correponds to
             the distance-ij, which is the maximum distance between region-i and the rest of the regions of label_img, and it connects region-i
-            to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the the
-            ouput dictionary as a key-value pair.
+            to region-j. The coordinates of the pixel pair connecting region-j to region-i for which distance-ji is entered in the
+            ouput dictionary as the key of the dictionary and they are linked to their distance as the dictionary value.
     
     - if desired__distance=='meam', the output is a tuple.
         Position-0 is a list of length n and collecting, per each region-i of label_img, its average distance with the rest of the regions of lable_img.
