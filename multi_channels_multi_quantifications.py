@@ -32,24 +32,50 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     """
     #=========================================
     #=========  SUPPORTING FUNCTIONS =========
-    def modify_dictionary(dict2modify, key_name, valu_e=None, interations_times=1):
-        for i in range(interations_times):
-            if interations_times==1:
-                key_name_1 = key_name
-            else:
-                key_name_1 = key_name + "_"+str(i)
-            
-            if key_name_1 not in dict2modify:
-                if valu_e == None:
-                    dict2modify[key_name_1]=[]
+    def modify_dictionary(result_valu_e, dict2modify, root_key_name, channel_1_number=None, channel_2_number=None):
+
+        if isinstance(result_valu_e, list) or isinstance(result_valu_e, tuple):
+            for i,v in enumerate(result_valu_e):
+                if channel_1_number!=None:
+                    if channel_2_number!=None:
+                        result_name = f"{root_key_name}_ch_{channel_1_number}_ch_{channel_2_number}_iter_{i}"
+                    else:
+                        result_name = f"{root_key_name}_ch_{channel_1_number}_iter_{i}"
+                    
+                    if result_name not in dict2modify:
+                        dict2modify[result_name]=[v]
+                    else:
+                        dict2modify[result_name].append(v)
+                    print(len(dict2modify[result_name]))
                 else:
-                    dict2modify[key_name_1]=[valu_e]
-            else:
-                if valu_e != None:
-                    dict2modify[key_name_1].append(valu_e)
+                    result_name = f"{root_key_name}_iter_{i}"
+
+                    if result_name not in dict2modify:
+                        dict2modify[result_name]=[v]
+                    else:
+                        dict2modify[result_name].append(v)
+                    print(len(dict2modify[result_name]))
+        else:
+            if channel_1_number!=None:
+                if channel_2_number!=None:
+                    result_name = f"{root_key_name}_ch_{channel_1_number}_ch_{channel_2_number}"
                 else:
-                    print("WARNING! ", key_name_1, "'s value is updated by no value is provided for the update. None will be used instead")
-                    dict2modify[key_name_1].append(valu_e)
+                    result_name = f"{root_key_name}_ch_{channel_1_number}"
+                
+                if result_name not in dict2modify:
+                    dict2modify[result_name]=[result_valu_e]
+                else:
+                    dict2modify[result_name].append(result_valu_e)
+                print(len(dict2modify[result_name]))
+            else:
+                result_name=root_key_name
+
+                if result_name not in dict2modify:
+                    dict2modify[result_name]=[result_valu_e]
+                else:
+                    dict2modify[result_name].append(result_valu_e)
+                print(len(dict2modify[result_name]))
+
     
     def set_thresholds_2use(input_thresholds, channels_stac_k):
         """
@@ -239,7 +265,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
-            # print("==="*3, ixd)
+            print("==="*3, ixd)
+            #============================================
+            #========= UPDATE OUTPUT DICTIONARY =========
+            modify_dictionary(result_valu_e=ixd, dict2modify=measurements_dict, root_key_name='timepoint', channel_1_number=None, channel_2_number=None)
+
             #===================================================================================
             #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
             #Get the individual channels array as a list
@@ -271,10 +301,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
                 # print("---", ch_n)
-                #Get ch_n roi_mask, if it is provided
 
                 #==================================================
                 #=========  GET ROI IN THE CORRECT FORMAT =========
+                #Get ch_n roi_mask, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
                     # print("final shape roi mask", ch_n_roi_mask_array.shape)
@@ -299,7 +329,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                               roi_mas_k=ch_n_roi_mask_array,
                                                               binarization_threshold=ch_n_ixd_binarization_threshold,
                                                               value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
-                
+                print(ch_n_area_px)
+                #============================================
+                #========= UPDATE OUTPUT DICTIONARY =========
+                modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
+
                 #==================================
                 #=========  COUNT REGIONS =========
                 #Count region number
@@ -314,6 +348,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                            threshold_input_arr=ch_n_ixd_binarization_threshold,
                                                            threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
                 
+                #============================================
+                #========= UPDATE OUTPUT DICTIONARY =========
+                print(ch_n_regions_number)
+                modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
+
                 #===========================================
                 #=========  MEASURE REGIONS' AREAS =========
                 #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
