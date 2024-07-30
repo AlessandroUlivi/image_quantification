@@ -111,7 +111,7 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
     - desired__distance. String. Three choices are possible: 'min' (default), 'max', 'mean'. The parameter is passed to the function get_euclidean_distances (within utils.py). If 'min'
     the minimum distances between each region of label_img and the rest of the regions of label_img are measured. If 'max' the maximum distances between each region of label_img and
     the rest of the regions of label_img are measured. If 'mean' the mean distances between each region of label_img and the rest of the regions of label_img are measured.
-    - highpass_n_regions. int or float. Default 1. The highpass filter for the minimum number of regions in label_img which have to be present for doint the analysis.
+    - highpass_n_regions. int or float. Must be >=1. Default 1. The highpass filter for the minimum number of regions in label_img which have to be present for doint the analysis.
     - transform_to_label_img. Bool (defaul False). Specifies if label_img should be transformed to a label image. It must be True if label_img is not a label image.
     - label_img_thres. Int or float. Only applies when transform_to_label_img is True. Default 0. Defines the highpass threshold to distinguish pixels of interest from background
     in label_img. Pixels whose value is >label_img_thres are considered pixels of interest. The rest of the pixels are considered background.
@@ -165,6 +165,10 @@ def measure_regions_euclidean_distances_within_array(label_img, roi__mask=None, 
             Position-0 is a list of length n and collecting, per each region-i of label_img, its average distance with the rest of the regions of lable_img.
             Position-1 is None.
     """
+    # Make sure highpass_n_regions is equal or higher than 1
+    assert highpass_n_regions>=1, "highpass_n_regions must be >=1 as at least 2 regions must be present to calculate a distance"
+
+    # Make sure that if a label image is passed as an input its values are >=0.
     if not transform_to_label_img:
         assert np.min(label_img)==0, 'label_img must have background values set to 0 if a label image is provided'
         assert np.max(label_img)>0, 'label_img must have label region values >0 if a label image is provided'
