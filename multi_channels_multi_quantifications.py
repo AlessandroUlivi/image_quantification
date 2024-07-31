@@ -98,9 +98,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         if not isinstance(results_measurements,list) and not isinstance(results_measurements, tuple):
             print("results_measurements must be either a list or a tuple")
             return
-        print("initial list length ", len(results_measurements))
+        
         if len(results_measurements)>2:
-            print("calulating everything")
             mean_results_measurements = np.mean(results_measurements)
             median_results_measurements = np.median(results_measurements)
             stdv_results_measurements = np.std(results_measurements)
@@ -108,7 +107,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             min_results_measurements = np.min(results_measurements)
             max_results_measurements = np.max(results_measurements)
         elif len(results_measurements)==2:
-            print("calulating mean, median, min, max")
             mean_results_measurements = np.mean(results_measurements)
             median_results_measurements = np.median(results_measurements)
             stdv_results_measurements = no_quantification_value
@@ -116,7 +114,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             min_results_measurements = np.min(results_measurements)
             max_results_measurements = np.max(results_measurements)
         elif len(results_measurements)==1:
-            print("reporting value...")
             mean_results_measurements = results_measurements[0]
             median_results_measurements = results_measurements[0]
             stdv_results_measurements = no_quantification_value
@@ -124,7 +121,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             min_results_measurements = results_measurements[0]
             max_results_measurements = results_measurements[0]
         else:
-            print("using no_quantification_value")
             mean_results_measurements = no_quantification_value
             median_results_measurements = no_quantification_value
             stdv_results_measurements = no_quantification_value
@@ -403,15 +399,15 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                            roi_mask=ch_n_roi_mask_array,
                                                            threshold_input_arr=ch_n_ixd_binarization_threshold,
                                                            threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
-                print("n of regions ", ch_n_regions_number)
+                # print("n of regions ", ch_n_regions_number)
                 #============================================
                 #========= UPDATE OUTPUT DICTIONARY =========
                 # modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
 
                 #===========================================
                 #=========  MEASURE REGIONS' AREAS =========
-                #Calculate mean, median, max and min regions' area, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
-                # link mean, median, max and min variables to NaN values
+                #Calculate properties of regions, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
+                # link properties variables to NaN values
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
                 ch_n_ixd_n_of_region_4areas_measure = get_threshold_from_list(n_of_region_4areas_measure_2use_2[ch_n],
                                                                                 multi_value_array=False,
@@ -445,7 +441,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_regions_sem_area = np.nan
                     ch_n_regions_min_area = np.nan
                     ch_n_regions_max_area = np.nan
-                print(ch_n_regions_mean_area, ch_n_regions_median_area, ch_n_regions_stdv_area, ch_n_regions_sem_area, ch_n_regions_min_area, ch_n_regions_max_area)
+                
                 #============================================
                 #========= UPDATE OUTPUT DICTIONARY =========
                 # modify_dictionary(result_valu_e=ch_n_regions_mean_area, dict2modify=measurements_dict, root_key_name='mean_regions_area', channel_1_number=ch_n, channel_2_number=None)
@@ -459,95 +455,95 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
 
-                # ch_n_regions_min_distances, ch_n_regions_min_dict = measure_regions_euclidean_distances_within_array(ch_array,
-                #                                                                                                         roi__mask=ch_n_roi_mask_array,
-                #                                                                                                         desired__distance='min',
-                #                                                                                                         highpass_n_regions=ch_n_ixd_highpass_n_regions,
-                #                                                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
-                #                                                                                                         label_img_thres=ch_n_ixd_binarization_threshold,
-                #                                                                                                         return_excluded_distances=False,
-                #                                                                                                         val_n_regions_nopass=np.nan)
+                ch_n_regions_min_distances, ch_n_regions_min_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                                                                        desired__distance='min',
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                        label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                        return_excluded_distances=False,
+                                                                                                                        val_n_regions_nopass=np.nan)
                 # ch_n_regions_min_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
                 # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
                 # Report the single distance if only 1 distance is present.
-                # if isinstance(ch_n_regions_min_distances,list):
-                #     ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
-                #     num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
-                #     mean_ch_n_regions_min_distances = ch_n_regions_min_distances_results[1]
-                #     median_ch_n_regions_min_distances = ch_n_regions_min_distances_results[2]
-                #     std_ch_n_regions_min_distances = ch_n_regions_min_distances_results[3]
-                #     sem_ch_n_regions_min_distances = ch_n_regions_min_distances_results[4]
-                #     min_ch_n_regions_min_distances = ch_n_regions_min_distances_results[5]
-                #     max_ch_n_regions_min_distances = ch_n_regions_min_distances_results[6]
+                if isinstance(ch_n_regions_min_distances,list):
+                    ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
+                    num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
+                    mean_ch_n_regions_min_distances = ch_n_regions_min_distances_results[1]
+                    median_ch_n_regions_min_distances = ch_n_regions_min_distances_results[2]
+                    std_ch_n_regions_min_distances = ch_n_regions_min_distances_results[3]
+                    sem_ch_n_regions_min_distances = ch_n_regions_min_distances_results[4]
+                    min_ch_n_regions_min_distances = ch_n_regions_min_distances_results[5]
+                    max_ch_n_regions_min_distances = ch_n_regions_min_distances_results[6]
 
-                # else:
-                #     num_ch_n_regions_min_distances = np.nan
-                #     mean_ch_n_regions_min_distances = np.nan
-                #     median_ch_n_regions_min_distances = np.nan
-                #     std_ch_n_regions_min_distances = np.nan
-                #     sem_ch_n_regions_min_distances = np.nan
-                #     min_ch_n_regions_min_distances = np.nan
-                #     max_ch_n_regions_min_distances = np.nan
-
-                # ch_n_regions_max_distances, ch_n_regions_max_dict = measure_regions_euclidean_distances_within_array(ch_array,
-                #                                                                                                         roi__mask=ch_n_roi_mask_array,
-                #                                                                                                         desired__distance='max',
-                #                                                                                                         highpass_n_regions=ch_n_ixd_highpass_n_regions,
-                #                                                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
-                #                                                                                                         label_img_thres=ch_n_ixd_binarization_threshold,
-                #                                                                                                         return_excluded_distances=False,
-                #                                                                                                         val_n_regions_nopass=np.nan)
+                else:
+                    num_ch_n_regions_min_distances = np.nan
+                    mean_ch_n_regions_min_distances = np.nan
+                    median_ch_n_regions_min_distances = np.nan
+                    std_ch_n_regions_min_distances = np.nan
+                    sem_ch_n_regions_min_distances = np.nan
+                    min_ch_n_regions_min_distances = np.nan
+                    max_ch_n_regions_min_distances = np.nan
                 
-                # # ch_n_regions_max_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
-                # # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
-                # # Report the single distance if only 1 distance is present.
-                # if isinstance(ch_n_regions_max_distances,list):
-                #     ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
-                #     num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
-                #     mean_ch_n_regions_max_distances = ch_n_regions_max_distances_results[1]
-                #     median_ch_n_regions_max_distances = ch_n_regions_max_distances_results[2]
-                #     std_ch_n_regions_max_distances = ch_n_regions_max_distances_results[3]
-                #     sem_ch_n_regions_max_distances = ch_n_regions_max_distances_results[4]
-                #     min_ch_n_regions_max_distances = ch_n_regions_max_distances_results[5]
-                #     max_ch_n_regions_max_distances = ch_n_regions_max_distances_results[6]
-                # else:
-                #     num_ch_n_regions_max_distances = np.nan
-                #     mean_ch_n_regions_max_distances = np.nan
-                #     median_ch_n_regions_max_distances = np.nan
-                #     std_ch_n_regions_max_distances = np.nan
-                #     sem_ch_n_regions_max_distances = np.nan
-                #     min_ch_n_regions_max_distances = np.nan
-                #     max_ch_n_regions_max_distances = np.nan
-
-                # ch_n_regions_mean_distances, ch_n_regions_mean_dict = measure_regions_euclidean_distances_within_array(ch_array,
-                #                                                                                                         roi__mask=ch_n_roi_mask_array,
-                #                                                                                                         desired__distance='mean',
-                #                                                                                                         highpass_n_regions=ch_n_ixd_highpass_n_regions,
-                #                                                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
-                #                                                                                                         label_img_thres=ch_n_ixd_binarization_threshold,
-                #                                                                                                         return_excluded_distances=False,
-                #                                                                                                         val_n_regions_nopass=np.nan)
+                ch_n_regions_max_distances, ch_n_regions_max_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                                                                        desired__distance='max',
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                        label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                        return_excluded_distances=False,
+                                                                                                                        val_n_regions_nopass=np.nan)
                 
-                # # ch_n_regions_mean_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
-                # # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
-                # # Report the single distance if only 1 distance is present.
-                # if isinstance(ch_n_regions_mean_distances,list):
-                #     ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
-                #     num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
-                #     mean_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[1]
-                #     median_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[2]
-                #     std_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[3]
-                #     sem_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[4]
-                #     min_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[5]
-                #     max_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[6]
-                # else:
-                #     num_ch_n_regions_mean_distances = np.nan
-                #     mean_ch_n_regions_mean_distances = np.nan
-                #     median_ch_n_regions_mean_distances = np.nan
-                #     std_ch_n_regions_mean_distances = np.nan
-                #     sem_ch_n_regions_mean_distances = np.nan
-                #     min_ch_n_regions_mean_distances = np.nan
-                #     max_ch_n_regions_mean_distances = np.nan
+                # ch_n_regions_max_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
+                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
+                # Report the single distance if only 1 distance is present.
+                if isinstance(ch_n_regions_max_distances,list):
+                    ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
+                    num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
+                    mean_ch_n_regions_max_distances = ch_n_regions_max_distances_results[1]
+                    median_ch_n_regions_max_distances = ch_n_regions_max_distances_results[2]
+                    std_ch_n_regions_max_distances = ch_n_regions_max_distances_results[3]
+                    sem_ch_n_regions_max_distances = ch_n_regions_max_distances_results[4]
+                    min_ch_n_regions_max_distances = ch_n_regions_max_distances_results[5]
+                    max_ch_n_regions_max_distances = ch_n_regions_max_distances_results[6]
+                else:
+                    num_ch_n_regions_max_distances = np.nan
+                    mean_ch_n_regions_max_distances = np.nan
+                    median_ch_n_regions_max_distances = np.nan
+                    std_ch_n_regions_max_distances = np.nan
+                    sem_ch_n_regions_max_distances = np.nan
+                    min_ch_n_regions_max_distances = np.nan
+                    max_ch_n_regions_max_distances = np.nan
+
+                ch_n_regions_mean_distances, ch_n_regions_mean_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                        roi__mask=ch_n_roi_mask_array,
+                                                                                                                        desired__distance='mean',
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                        label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                        return_excluded_distances=False,
+                                                                                                                        val_n_regions_nopass=np.nan)
+                
+                # ch_n_regions_mean_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
+                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
+                # Report the single distance if only 1 distance is present.
+                if isinstance(ch_n_regions_mean_distances,list):
+                    ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
+                    num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
+                    mean_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[1]
+                    median_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[2]
+                    std_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[3]
+                    sem_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[4]
+                    min_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[5]
+                    max_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[6]
+                else:
+                    num_ch_n_regions_mean_distances = np.nan
+                    mean_ch_n_regions_mean_distances = np.nan
+                    median_ch_n_regions_mean_distances = np.nan
+                    std_ch_n_regions_mean_distances = np.nan
+                    sem_ch_n_regions_mean_distances = np.nan
+                    min_ch_n_regions_mean_distances = np.nan
+                    max_ch_n_regions_mean_distances = np.nan
 
 
                 #==================================================================
@@ -596,7 +592,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                         get_a_single_value=True)
                         
                         if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
-                            
+                            print("...")
                             #==============================================
                             #=========  MEASURE CHANNELS' OVERLAP =========
                             #Measure pixels' overlap
@@ -635,7 +631,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             #Calculate relative distances if at least a region is present in channel cchh_nn (individual regions of ch_n are measured for their distance with
                             # regions of cchh_nn)
                             if cchh_nn_area_px>0:
-                                ch_n__cchh_nn_min_euclid_distances_list = measure_regions_euclidean_distances(ch_array,
+                                ch_n__cchh_nn_min_euclid_distances_list, ch_n__cchh_nn_min_euclid_distances_dict = measure_regions_euclidean_distances(ch_array,
                                                                                                                 cchh_nn_array,
                                                                                                                 roi__mask_img1=ch_n_roi_mask_array,
                                                                                                                 roi__mask_targ=cchh_nn_roi_mask_array,
@@ -647,23 +643,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                 #The output of ch_n__cchh_nn_min_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
                                 #Get the mean and standard deviation of regions minimum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
                                 #distance. Get the min and max minimum euclidean distances. Use np.nan if no distance is present.
-                                if len(ch_n__cchh_nn_min_euclid_distances_list[0])>1:
-                                    mean_ch_n__cchh_nn_min_euclid_distance = np.mean(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                    std_ch_n__cchh_nn_min_euclid_distance = np.std(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                    min_ch_n__cchh_nn_min_euclid_distance = np.min(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                    max_ch_n__cchh_nn_min_euclid_distance = np.max(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                elif len(ch_n__cchh_nn_min_euclid_distances_list[0])==1:
-                                    mean_ch_n__cchh_nn_min_euclid_distance = np.mean(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                    std_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                    min_ch_n__cchh_nn_min_euclid_distance = np.min(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                    max_ch_n__cchh_nn_min_euclid_distance = np.max(ch_n__cchh_nn_min_euclid_distances_list[0])
-                                else:
-                                    mean_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                    std_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                    min_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                    max_ch_n__cchh_nn_min_euclid_distance = np.nan
-
-                                ch_n__cchh_nn_max_euclid_distances_list = measure_regions_euclidean_distances(ch_array,
+                                ch_n__cchh_nn_min_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_min_euclid_distances_list,
+                                                                                                                     no_quantification_value=no_quantification_valu_e)
+                                mean_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[1]
+                                median_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[2]
+                                std_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[3]
+                                sem_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[4]
+                                min_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[5]
+                                max_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[6]
+                                
+                                ch_n__cchh_nn_max_euclid_distances_list, ch_n__cchh_nn_max_euclid_distances_dict = measure_regions_euclidean_distances(ch_array,
                                                                                                                 cchh_nn_array,
                                                                                                                 roi__mask_img1=ch_n_roi_mask_array,
                                                                                                                 roi__mask_targ=cchh_nn_roi_mask_array,
@@ -672,27 +661,19 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                                 label_img_1_thres=ch_n_ixd_binarization_threshold,
                                                                                                                 binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
-                                #The output of ch_n__cchh_nn_max_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
-                                #Get the mean and standard deviation of regions maximum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
-                                #distance. Get the min and max maximum euclidean distances. Use np.nan if no distance is present.
-                                if len(ch_n__cchh_nn_max_euclid_distances_list[0])>1:
-                                    mean_ch_n__cchh_nn_max_euclid_distance = np.mean(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                    std_ch_n__cchh_nn_max_euclid_distance = np.std(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                    min_ch_n__cchh_nn_max_euclid_distance = np.min(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                    max_ch_n__cchh_nn_max_euclid_distance = np.max(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                elif len(ch_n__cchh_nn_max_euclid_distances_list[0])==1:
-                                    mean_ch_n__cchh_nn_max_euclid_distance = np.mean(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                    std_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                    min_ch_n__cchh_nn_max_euclid_distance = np.min(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                    max_ch_n__cchh_nn_max_euclid_distance = np.max(ch_n__cchh_nn_max_euclid_distances_list[0])
-                                else:
-                                    mean_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                    std_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                    min_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                    max_ch_n__cchh_nn_max_euclid_distance = np.nan
+                                # The output of ch_n__cchh_nn_max_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
+                                # Get the mean and standard deviation of regions maximum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
+                                # distance. Get the min and max maximum euclidean distances. Use np.nan if no distance is present.
+                                ch_n__cchh_nn_max_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_max_euclid_distances_list,
+                                                                                                                     no_quantification_value=no_quantification_valu_e)
+                                mean_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[1]
+                                median_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[2]
+                                std_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[3]
+                                sem_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[4]
+                                min_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[5]
+                                max_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[6]
 
-
-                                ch_n__cchh_nn_mean_euclid_distance = measure_regions_euclidean_distances(ch_array,
+                                ch_n__cchh_nn_mean_euclid_distance_list, ch_n__cchh_nn_mean_euclid_distance_dict = measure_regions_euclidean_distances(ch_array,
                                                                                                             cchh_nn_array,
                                                                                                             roi__mask_img1=ch_n_roi_mask_array,
                                                                                                             roi__mask_targ=cchh_nn_roi_mask_array,
@@ -704,38 +685,38 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                 #The output of ch_n__cchh_nn_mean_euclid_distance in the first position is a list. If no region is present in ch_array this list is empty.
                                 #Get the mean and standard deviation of regions mean euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
                                 #distance. Get the min and max mean euclidean distances. Use np.nan if no distance is present.
-                                if len(ch_n__cchh_nn_mean_euclid_distance[0])>1:
-                                    mean_ch_n__cchh_nn_mean_euclid_distance = np.mean(ch_n__cchh_nn_mean_euclid_distance[0])
-                                    std_ch_n__cchh_nn_mean_euclid_distance = np.std(ch_n__cchh_nn_mean_euclid_distance[0])
-                                    min_ch_n__cchh_nn_mean_euclid_distance = np.min(ch_n__cchh_nn_mean_euclid_distance[0])
-                                    max_ch_n__cchh_nn_mean_euclid_distance = np.max(ch_n__cchh_nn_mean_euclid_distance[0])
-                                elif len(ch_n__cchh_nn_mean_euclid_distance[0])==1:
-                                    mean_ch_n__cchh_nn_mean_euclid_distance = np.mean(ch_n__cchh_nn_mean_euclid_distance[0])
-                                    std_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                    min_ch_n__cchh_nn_mean_euclid_distance = np.min(ch_n__cchh_nn_mean_euclid_distance[0])
-                                    max_ch_n__cchh_nn_mean_euclid_distance = np.max(ch_n__cchh_nn_mean_euclid_distance[0])
-                                else:
-                                    mean_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                    std_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                    min_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                    max_ch_n__cchh_nn_mean_euclid_distance = np.nan
+                                ch_n__cchh_nn_mean_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_mean_euclid_distance_list,
+                                                                                                                     no_quantification_value=no_quantification_valu_e)
+                                mean_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[1]
+                                median_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[2]
+                                std_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[3]
+                                sem_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[4]
+                                min_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[5]
+                                max_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[6]
+                                
                             #Assign np.nan values to measurements if no region is present in channel cchh_nn
                             else:
-                                mean_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                std_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                min_ch_n__cchh_nn_min_euclid_distance = np.nan
-                                max_ch_n__cchh_nn_min_euclid_distance = np.nan
+                                mean_ch_n__cchh_nn_min_euclid_distances = np.nan
+                                median_ch_n__cchh_nn_min_euclid_distances = np.nan
+                                std_ch_n__cchh_nn_min_euclid_distances = np.nan
+                                sem_ch_n__cchh_nn_min_euclid_distances = np.nan
+                                min_ch_n__cchh_nn_min_euclid_distances = np.nan
+                                max_ch_n__cchh_nn_min_euclid_distances = np.nan
 
-                                mean_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                std_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                min_ch_n__cchh_nn_max_euclid_distance = np.nan
-                                max_ch_n__cchh_nn_max_euclid_distance = np.nan
+                                mean_ch_n__cchh_nn_max_euclid_distances = np.nan
+                                median_ch_n__cchh_nn_max_euclid_distances = np.nan
+                                std_ch_n__cchh_nn_max_euclid_distances = np.nan
+                                sem_ch_n__cchh_nn_max_euclid_distances = np.nan
+                                min_ch_n__cchh_nn_max_euclid_distances = np.nan
+                                max_ch_n__cchh_nn_max_euclid_distances = np.nan
 
-                                mean_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                std_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                min_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                                max_ch_n__cchh_nn_mean_euclid_distance = np.nan
-
+                                mean_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                                median_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                                std_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                                sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                                min_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                                max_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            
                             #========================================================
                             #=========  COUNT NUMBER OF OVERLAPPING REGIONS =========
                             #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
@@ -813,20 +794,26 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
 
                             #inter-channels euclidean distances
-                            mean_ch_n__cchh_nn_min_euclid_distance = np.nan
-                            std_ch_n__cchh_nn_min_euclid_distance = np.nan
-                            min_ch_n__cchh_nn_min_euclid_distance = np.nan
-                            max_ch_n__cchh_nn_min_euclid_distance = np.nan
+                            mean_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            median_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            std_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            sem_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            min_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            max_ch_n__cchh_nn_min_euclid_distances = np.nan
 
-                            mean_ch_n__cchh_nn_max_euclid_distance = np.nan
-                            std_ch_n__cchh_nn_max_euclid_distance = np.nan
-                            min_ch_n__cchh_nn_max_euclid_distance = np.nan
-                            max_ch_n__cchh_nn_max_euclid_distance = np.nan
+                            mean_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            median_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            std_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            sem_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            min_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            max_ch_n__cchh_nn_max_euclid_distances = np.nan
 
-                            mean_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                            std_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                            min_ch_n__cchh_nn_mean_euclid_distance = np.nan
-                            max_ch_n__cchh_nn_mean_euclid_distance = np.nan
+                            mean_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            median_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            std_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            min_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            max_ch_n__cchh_nn_mean_euclid_distances = np.nan
 
                             #overlapping regions
                             #=========
