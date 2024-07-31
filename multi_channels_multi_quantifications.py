@@ -46,7 +46,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         dict2modify[result_name]=[v]
                     else:
                         dict2modify[result_name].append(v)
-                    print(len(dict2modify[result_name]))
+                    print(result_name, len(dict2modify[result_name]))
                 else:
                     result_name = f"{root_key_name}_iter_{i}"
 
@@ -54,7 +54,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         dict2modify[result_name]=[v]
                     else:
                         dict2modify[result_name].append(v)
-                    print(len(dict2modify[result_name]))
+                    print(result_name, len(dict2modify[result_name]))
         else:
             if channel_1_number!=None:
                 if channel_2_number!=None:
@@ -66,7 +66,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     dict2modify[result_name]=[result_valu_e]
                 else:
                     dict2modify[result_name].append(result_valu_e)
-                print(len(dict2modify[result_name]))
+                print(result_name, len(dict2modify[result_name]))
             else:
                 result_name=root_key_name
 
@@ -74,8 +74,30 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     dict2modify[result_name]=[result_valu_e]
                 else:
                     dict2modify[result_name].append(result_valu_e)
-                print(len(dict2modify[result_name]))
+                print(result_name, len(dict2modify[result_name]))
 
+    # def get_means_medians_std_max_min_results(results_measurements):
+    #     if isinstance(ch_n_regions_min_distances,list):
+    #         num_ch_n_regions_min_distances = len(ch_n_regions_min_distances)
+    #         min_ch_n_regions_min_distances = np.min(ch_n_regions_min_distances)
+    #         max_ch_n_regions_min_distances = np.max(ch_n_regions_min_distances)
+    #         if num_ch_n_regions_min_distances>2:
+    #         mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
+    #         std_ch_n_regions_min_distances = np.std(ch_n_regions_min_distances)
+    #     elif num_ch_n_regions_min_distances==2:
+    #         mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
+    #         std_ch_n_regions_min_distances = np.nan
+    #     elif num_ch_n_regions_min_distances==1:
+    #         mean_ch_n_regions_min_distances = ch_n_regions_min_distances[0]
+    #         std_ch_n_regions_min_distances = np.nan
+    #     else:
+    #         print("it should not be possible that less than a distance is calculated for measure_regions_euclidean_distances_within_array with desired__distance='min'")
+    #     else:
+    #         num_ch_n_regions_min_distances = np.nan
+    #         min_ch_n_regions_min_distances = np.nan
+    #         max_ch_n_regions_min_distances = np.nan
+    #         mean_ch_n_regions_min_distances = np.nan
+    #         std_ch_n_regions_min_distances = np.nan
     
     def set_thresholds_2use(input_thresholds, channels_stac_k):
         """
@@ -329,7 +351,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                               roi_mas_k=ch_n_roi_mask_array,
                                                               binarization_threshold=ch_n_ixd_binarization_threshold,
                                                               value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
-                print(ch_n_area_px)
+                
                 #============================================
                 #========= UPDATE OUTPUT DICTIONARY =========
                 modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
@@ -350,7 +372,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #============================================
                 #========= UPDATE OUTPUT DICTIONARY =========
-                print(ch_n_regions_number)
                 modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
 
                 #===========================================
@@ -385,6 +406,11 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     ch_n_regions_median_area = np.nan
                     ch_n_regions_max_area = np.nan
                     ch_n_regions_min_area = np.nan
+
+                #============================================
+                #========= UPDATE OUTPUT DICTIONARY =========
+                # modify_dictionary(result_valu_e=ch_n_regions_mean_area, dict2modify=measurements_dict, root_key_name='mean_regions_area', channel_1_number=ch_n, channel_2_number=None)
+                # modify_dictionary(result_valu_e=ch_n_regions_median_area, dict2modify=measurements_dict, root_key_name='mean_regions_area', channel_1_number=ch_n, channel_2_number=None)
 
                 # #=======================================================================
                 # #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
