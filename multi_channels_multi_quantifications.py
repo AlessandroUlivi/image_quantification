@@ -34,7 +34,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #=========================================
     #=========  SUPPORTING FUNCTIONS =========
     def modify_dictionary(result_valu_e, dict2modify, root_key_name, channel_1_number=None, channel_2_number=None):
-        
+
         if isinstance(result_valu_e, list) or isinstance(result_valu_e, tuple):
             for i,v in enumerate(result_valu_e):
                 if channel_1_number!=None:
@@ -317,8 +317,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             print("==="*3, ixd)
             #============================================
             #========= UPDATE OUTPUT DICTIONARY =========
-            modify_dictionary(result_valu_e=ixd, dict2modify=measurements_dict, root_key_name='timepoint', channel_1_number=None, channel_2_number=None)
-
+            modify_dictionary(result_valu_e=ixd, dict2modify=measurements_dict, root_key_name='axis_'+str(analysis_axis), channel_1_number=None, channel_2_number=None)
+            
             #===================================================================================
             #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
             #Get the individual channels array as a list
@@ -850,8 +850,30 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                         #============================================
                         #========= UPDATE OUTPUT DICTIONARY =========
-                        modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap, dict2modify=measurements_dict, root_key_name='pixels_overlap_observed', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                        modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap_shuff, dict2modify=measurements_dict, root_key_name='pixels_overlap_shuffle', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap, dict2modify=measurements_dict, root_key_name='pixels_overlap_observed', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap_shuff, dict2modify=measurements_dict, root_key_name='pixels_overlap_shuffle', channel_1_number=ch_n, channel_2_number=cchh_nn)
+
+                        modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=median_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='median_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=std_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=min_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='min_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=max_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='max_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                            
+                        modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=median_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='median_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=std_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=min_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='min_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=max_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='max_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+
+                        modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=median_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='median_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=std_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=min_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='min_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=max_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='max_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)    
+                        
 
 
     # # #If the analysis axis is not provided          
