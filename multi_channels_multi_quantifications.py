@@ -119,8 +119,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             print("reporting value...")
             mean_results_measurements = results_measurements[0]
             median_results_measurements = results_measurements[0]
-            stdv_results_measurements = no_quantification_value[0]
-            sem_results_measurements = no_quantification_value[0]
+            stdv_results_measurements = no_quantification_value
+            sem_results_measurements = no_quantification_value
             min_results_measurements = results_measurements[0]
             max_results_measurements = results_measurements[0]
         else:
