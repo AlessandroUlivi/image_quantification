@@ -77,7 +77,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     dict2modify[result_name].append(result_valu_e)
                 print(result_name, len(dict2modify[result_name]))
 
-    def get_means_medians_std_max_min_results(results_measurements, no_quantification_value=np.nan):
+    def get_mean_median_std_sem_min_max_results(results_measurements, no_quantification_value=np.nan):
         """
         many of the output measurements are lists and the length of the list depends/corresponds to the number of quantified elements (e.g. regions).
         - if the list has 3 or more quantifications. Return the mean, median, standard deviation, standard error of mean, max and min values of the measurement list.
@@ -431,7 +431,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                         binarization_threshold=ch_n_ixd_binarization_threshold)
                     
                     #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is not detected
-                    ch_n_regions_areas_results = get_means_medians_std_max_min_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
+                    ch_n_regions_areas_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
                     ch_n_regions_mean_area = ch_n_regions_areas_results[1]
                     ch_n_regions_median_area = ch_n_regions_areas_results[2]
                     ch_n_regions_stdv_area = ch_n_regions_areas_results[3]
@@ -471,7 +471,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
                 # Report the single distance if only 1 distance is present.
                 # if isinstance(ch_n_regions_min_distances,list):
-                #     ch_n_regions_min_distances_results = get_means_medians_std_max_min_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
+                #     ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
                 #     num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
                 #     mean_ch_n_regions_min_distances = ch_n_regions_min_distances_results[1]
                 #     median_ch_n_regions_min_distances = ch_n_regions_min_distances_results[2]
@@ -502,7 +502,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 # # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
                 # # Report the single distance if only 1 distance is present.
                 # if isinstance(ch_n_regions_max_distances,list):
-                #     ch_n_regions_max_distances_results = get_means_medians_std_max_min_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
+                #     ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
                 #     num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
                 #     mean_ch_n_regions_max_distances = ch_n_regions_max_distances_results[1]
                 #     median_ch_n_regions_max_distances = ch_n_regions_max_distances_results[2]
@@ -532,7 +532,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 # # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
                 # # Report the single distance if only 1 distance is present.
                 # if isinstance(ch_n_regions_mean_distances,list):
-                #     ch_n_regions_mean_distances_results = get_means_medians_std_max_min_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
+                #     ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
                 #     num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
                 #     mean_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[1]
                 #     median_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[2]
