@@ -76,28 +76,80 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     dict2modify[result_name].append(result_valu_e)
                 print(result_name, len(dict2modify[result_name]))
 
-    # def get_means_medians_std_max_min_results(results_measurements):
-    #     if isinstance(ch_n_regions_min_distances,list):
-    #         num_ch_n_regions_min_distances = len(ch_n_regions_min_distances)
-    #         min_ch_n_regions_min_distances = np.min(ch_n_regions_min_distances)
-    #         max_ch_n_regions_min_distances = np.max(ch_n_regions_min_distances)
-    #         if num_ch_n_regions_min_distances>2:
-    #         mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
-    #         std_ch_n_regions_min_distances = np.std(ch_n_regions_min_distances)
-    #     elif num_ch_n_regions_min_distances==2:
-    #         mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
-    #         std_ch_n_regions_min_distances = np.nan
-    #     elif num_ch_n_regions_min_distances==1:
-    #         mean_ch_n_regions_min_distances = ch_n_regions_min_distances[0]
-    #         std_ch_n_regions_min_distances = np.nan
-    #     else:
-    #         print("it should not be possible that less than a distance is calculated for measure_regions_euclidean_distances_within_array with desired__distance='min'")
-    #     else:
-    #         num_ch_n_regions_min_distances = np.nan
-    #         min_ch_n_regions_min_distances = np.nan
-    #         max_ch_n_regions_min_distances = np.nan
-    #         mean_ch_n_regions_min_distances = np.nan
-    #         std_ch_n_regions_min_distances = np.nan
+    def get_means_medians_std_max_min_results(results_measurements, no_quantification_value=np.nan):
+        """
+        many of the output measurements are lists and the length of the list depends/corresponds to the number of quantified elements (e.g. regions).
+        - if the list has 3 or more quantifications. Return the mean, median, standard deviation, standard error of mean, max and min values of the measurement list.
+        - if the list has 2 quantifications. Return the mean, median, max and min values of the measurement list and return no_quantification_value for the standard deviation and standard
+        error of means.
+        - if the list has 1 quantification. Return the value for the mean, median, max and min and return no_quantification_value for the standard deviation and standard
+        error of means.
+        - the list has 0 quantifications. Return no_quantification_value for mean, median, standard deviation, standard error of mean, max and min.
+
+        Inputs:
+        - results_measurements. list of tuple.
+        - no_quantification_value. any. Default np.nan.
+
+        Output:
+        tuple. Pos-0, mean of results_measurements. Pos-1, median of results_measurements. Pos-2, standard deviation of results_measurements.
+        Pos-3, standard error of the means of results_measurements. Pos-4, min of results_measurements. Pos-5, max of results_measurements. 
+        """
+        if not isinstance(results_measurements,list) and not isinstance(results_measurements, tuple):
+            print("results_measurements must be either a list or a tuple")
+            return
+        if len(results_measurements)>2:
+            mean_results_measurements = np.mean(results_measurements)
+            median_results_measurements = np.median(results_measurements)
+            stdv_results_measurements = np.std(results_measurements)
+            sem_results_measurements = np.sem(results_measurements)
+            min_results_measurements = np.min(results_measurements)
+            max_results_measurements = np.max(results_measurements)
+        elif len(results_measurements)==2:
+            mean_results_measurements = np.mean(results_measurements)
+            median_results_measurements = np.median(results_measurements)
+            stdv_results_measurements = no_quantification_value
+            sem_results_measurements = no_quantification_value
+            min_results_measurements = np.min(results_measurements)
+            max_results_measurements = np.max(results_measurements)
+        elif len(results_measurements)==1:
+            mean_results_measurements = results_measurements
+            median_results_measurements = results_measurements
+            stdv_results_measurements = no_quantification_value
+            sem_results_measurements = no_quantification_value
+            min_results_measurements = results_measurements
+            max_results_measurements = results_measurements
+        else:
+            mean_results_measurements = no_quantification_value
+            median_results_measurements = no_quantification_value
+            stdv_results_measurements = no_quantification_value
+            sem_results_measurements = no_quantification_value
+            min_results_measurements = no_quantification_value
+            max_results_measurements = no_quantification_value
+        return mean_results_measurements, median_results_measurements, stdv_results_measurements, sem_results_measurements, min_results_measurements, max_results_measurements
+
+
+        # if isinstance(ch_n_regions_min_distances,list):
+        #     num_ch_n_regions_min_distances = len(ch_n_regions_min_distances)
+        #     min_ch_n_regions_min_distances = np.min(ch_n_regions_min_distances)
+        #     max_ch_n_regions_min_distances = np.max(ch_n_regions_min_distances)
+        #     if num_ch_n_regions_min_distances>2:
+        #     mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
+        #     std_ch_n_regions_min_distances = np.std(ch_n_regions_min_distances)
+        # elif num_ch_n_regions_min_distances==2:
+        #     mean_ch_n_regions_min_distances = np.mean(ch_n_regions_min_distances)
+        #     std_ch_n_regions_min_distances = np.nan
+        # elif num_ch_n_regions_min_distances==1:
+        #     mean_ch_n_regions_min_distances = ch_n_regions_min_distances[0]
+        #     std_ch_n_regions_min_distances = np.nan
+        # else:
+        #     print("it should not be possible that less than a distance is calculated for measure_regions_euclidean_distances_within_array with desired__distance='min'")
+        # else:
+        #     num_ch_n_regions_min_distances = np.nan
+        #     min_ch_n_regions_min_distances = np.nan
+        #     max_ch_n_regions_min_distances = np.nan
+        #     mean_ch_n_regions_min_distances = np.nan
+        #     std_ch_n_regions_min_distances = np.nan
+        pass
     
     def set_thresholds_2use(input_thresholds, channels_stac_k):
         """
@@ -290,7 +342,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             print("==="*3, ixd)
             #============================================
             #========= UPDATE OUTPUT DICTIONARY =========
-            modify_dictionary(result_valu_e=ixd, dict2modify=measurements_dict, root_key_name='timepoint', channel_1_number=None, channel_2_number=None)
+            # modify_dictionary(result_valu_e=ixd, dict2modify=measurements_dict, root_key_name='timepoint', channel_1_number=None, channel_2_number=None)
 
             #===================================================================================
             #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
@@ -354,7 +406,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #============================================
                 #========= UPDATE OUTPUT DICTIONARY =========
-                modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
+                # modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
 
                 #==================================
                 #=========  COUNT REGIONS =========
@@ -372,7 +424,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #============================================
                 #========= UPDATE OUTPUT DICTIONARY =========
-                modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
+                # modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
 
                 #===========================================
                 #=========  MEASURE REGIONS' AREAS =========
