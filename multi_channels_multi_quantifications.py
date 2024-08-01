@@ -773,13 +773,13 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             
                             #========================================================
                             #=========  COUNT NUMBER OF OVERLAPPING REGIONS =========
-                            #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                            #Get threshold value for channel cchh_nn at index ixd in the analysis axis
                             cchh_nn_ixd_transform_to_label_img = get_threshold_from_list(transform_to_label_img_2use_2[cchh_nn],
                                                                                             multi_value_array=False,
                                                                                             multi_value_axis=-1,
                                                                                             get_a_single_value=True)
                             #Get intersection threshold
-                            #Get the multi-threshold intersection threshold for channe ch_n at position ixd of the analysis axis
+                            #Get the multi-threshold intersection threshold for channel ch_n at position ixd of the analysis axis
                             ch_n_cchh_nn_ixd_intersection_threshold_tuple = get_threshold_from_list(count_n_overl_reg_intersection_threshold_2use_2[ch_n],
                                                                                                 multi_value_array=True,
                                                                                                 multi_value_axis=-1,
@@ -805,7 +805,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                     output_arr_dtype=np.uint8) #only applies if return_intersection_arrays=True
                             
                             # The output of ch_n__cchh_nn_overlapping_regions in position 0 is a dictionary. If no region is present in ch_n the dictionary is empty.
-                            # Link the quantification to np.nan if the dictionary is empty, keep the output otherwise
+                            # Link the quantification to np.nan if the dictionary is empty, keep the output otherwise. NOTE that this only depends on the number of ch_n regions.
+                            # When no region is present in cchh_nn, all regions of channel ch_n are quantified as having 0 overlap with the regions of cchh_nn.
                             if len(ch_n__cchh_nn_overlapping_regions_i)>0:
                                 ch_n__cchh_nn_overlapping_regions=ch_n__cchh_nn_overlapping_regions_i
                             else:
@@ -1421,6 +1422,47 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
                             min_ch_n__cchh_nn_mean_euclid_distances = np.nan
                             max_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        
+                        #========================================================
+                        #=========  COUNT NUMBER OF OVERLAPPING REGIONS =========
+                        #Get threshold value for channel cchh_nn
+                        cchh_nn_ixd_transform_to_label_img = get_threshold_from_list(transform_to_label_img_2use_2[cchh_nn],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                        #Get intersection threshold
+                        #Get the multi-threshold intersection threshold for channel ch_n at position ixd of the analysis axis
+                        ch_n_cchh_nn_ixd_intersection_threshold_tuple = get_threshold_from_list(count_n_overl_reg_intersection_threshold_2use_2[ch_n],
+                                                                                                multi_value_array=True,
+                                                                                                multi_value_axis=-1,
+                                                                                                get_a_single_value=True)
+                        
+                        position_of_intersection_threshold = (ch_n*(channels_array.shape[channels_axis]))+cchh_nn #get the position of the threshold in the multi-threshold tuple
+                        ch_n_cchh_nn_ixd_intersection_threshold = ch_n_cchh_nn_ixd_intersection_threshold_tuple[position_of_intersection_threshold] #get the actual intersection threshold for the channel couple ch_n and cchh_nn at position ixd of the analysis axis
+                        
+                        #Count overlapping regions
+                        ch_n__cchh_nn_overlapping_regions_i,dum_my,dum_my1,dum_my2 = count_number_of_overlapping_regions(ch_array,
+                                                                                                    cchh_nn_array,
+                                                                                                    intersection_threshold=ch_n_cchh_nn_ixd_intersection_threshold,
+                                                                                                    ro_i__mask_1=ch_n_roi_mask_array,
+                                                                                                    ro_i__mask_2=cchh_nn_roi_mask_array,
+                                                                                                    transform__to_label_img_arr_1=ch_n_ixd_transform_to_label_img,
+                                                                                                    transform__to_label_img_arr_2=cchh_nn_ixd_transform_to_label_img,
+                                                                                                    arr_1_tot_thres=ch_n_ixd_binarization_threshold,
+                                                                                                    arr_2_part_thres=cchh_nn_ixd_binarization_threshold,
+                                                                                                    return_regions=False,
+                                                                                                    return_intersection_arrays=False,
+                                                                                                    output_arr_loval=0, #only applies if return_intersection_arrays=True
+                                                                                                    output_arr_highval=255, #only applies if return_intersection_arrays=True
+                                                                                                    output_arr_dtype=np.uint8) #only applies if return_intersection_arrays=True
+                            
+                        # The output of ch_n__cchh_nn_overlapping_regions in position 0 is a dictionary. If no region is present in ch_n the dictionary is empty.
+                        # Link the quantification to np.nan if the dictionary is empty, keep the output otherwise. NOTE that this only depends on the number of ch_n regions.
+                        # When no region is present in cchh_nn, all regions of channel ch_n are quantified as having 0 overlap with the regions of cchh_nn.
+                        if len(ch_n__cchh_nn_overlapping_regions_i)>0:
+                            ch_n__cchh_nn_overlapping_regions=ch_n__cchh_nn_overlapping_regions_i
+                        else:
+                            ch_n__cchh_nn_overlapping_regions=np.nan
 
     
     # #Use measurements_dict to form the output dataframe
