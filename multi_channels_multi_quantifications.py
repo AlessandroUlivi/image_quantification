@@ -444,7 +444,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                         binarization_threshold=ch_n_ixd_binarization_threshold)
                     
                     #ch_n_regions_areas is a list with the areas of each region in ch_n
-                    #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is not detected
+                    #Get mean, median, stdv, sem, max and min regions' area. Get no_quantification_valu_e values if a minimum number of areas is not detected
                     ch_n_regions_areas_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
                     ch_n_regions_mean_area = ch_n_regions_areas_results[1]
                     ch_n_regions_median_area = ch_n_regions_areas_results[2]
@@ -489,7 +489,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #ch_n_regions_min_distances is a list with the min distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
                 # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-                #Get mean, median, stdv, sem, max and min regions' min distances. Get NaN values if a minimum number of regions is not detected
+                #Get mean, median, stdv, sem, max and min regions' min distances. Get no_quantification_valu_e values if a minimum number of regions is not detected
                 if isinstance(ch_n_regions_min_distances,list):
                     ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
@@ -521,7 +521,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #ch_n_regions_max_distances is a list with the max distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
                 # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-                #Get mean, median, stdv, sem, max and mim regions' max distances. Get NaN values if a minimum number of regions is not detected
+                #Get mean, median, stdv, sem, max and mim regions' max distances. Get no_quantification_valu_e values if a minimum number of regions is not detected
                 if isinstance(ch_n_regions_max_distances,list):
                     ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
@@ -552,7 +552,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #ch_n_regions_mean_distances is a list with the mean distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
                 # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if a minimum number of regions is not detected
+                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if a minimum number of regions is not detected
                 if isinstance(ch_n_regions_mean_distances,list):
                     ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
@@ -696,7 +696,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                 
                                 #ch_n__cchh_nn_min_euclid_distances_list is a list with the min distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
                                 #region is present in ch_n.
-                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if the list is empty.
+                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if the list is empty.
                                 ch_n__cchh_nn_min_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_min_euclid_distances_list,
                                                                                                                      no_quantification_value=no_quantification_valu_e)
                                 mean_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[1]
@@ -717,7 +717,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                 
                                 #ch_n__cchh_nn_max_euclid_distances_list is a list with the max distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
                                 #region is present in ch_n.
-                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if the list is empty.
+                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if the list is empty.
                                 ch_n__cchh_nn_max_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_max_euclid_distances_list,
                                                                                                                      no_quantification_value=no_quantification_valu_e)
                                 mean_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[1]
@@ -738,7 +738,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                                 #ch_n__cchh_nn_mean_euclid_distance_list is a list with the mean distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
                                 #region is present in ch_n.
-                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if the list is empty.
+                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if the list is empty.
                                 ch_n__cchh_nn_mean_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_mean_euclid_distance_list,
                                                                                                                      no_quantification_value=no_quantification_valu_e)
                                 mean_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[1]
@@ -1095,7 +1095,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                     binarization_threshold=ch_n_ixd_binarization_threshold)
                     
                 #ch_n_regions_areas is a list with the areas of each region in ch_n
-                #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is not detected
+                #Get mean, median, stdv, sem, max and min regions' area. Get no_quantification_valu_e values if a minimum number of areas is not detected
                 ch_n_regions_areas_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
                 ch_n_regions_mean_area = ch_n_regions_areas_results[1]
                 ch_n_regions_median_area = ch_n_regions_areas_results[2]
@@ -1141,7 +1141,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
             #ch_n_regions_min_distances is a list with the min distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
             # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-            #Get mean, median, stdv, sem, max and min regions' min distances. Get NaN values if a minimum number of regions is not detected
+            #Get mean, median, stdv, sem, max and min regions' min distances. Get no_quantification_valu_e values if a minimum number of regions is not detected
             if isinstance(ch_n_regions_min_distances,list):
                 ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
                 num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
@@ -1173,7 +1173,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
             #ch_n_regions_max_distances is a list with the max distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
             # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-            #Get mean, median, stdv, sem, max and mim regions' max distances. Get NaN values if a minimum number of regions is not detected
+            #Get mean, median, stdv, sem, max and mim regions' max distances. Get no_quantification_valu_e values if a minimum number of regions is not detected
             if isinstance(ch_n_regions_max_distances,list):
                 ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
                 num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
@@ -1204,7 +1204,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
             #ch_n_regions_mean_distances is a list with the mean distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
             # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-            #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if a minimum number of regions is not detected
+            #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if a minimum number of regions is not detected
             if isinstance(ch_n_regions_mean_distances,list):
                 ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
                 num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
@@ -1331,6 +1331,96 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             ch_n__cchh_nn_overlap = np.nan
                             ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
                         
+                        #========================================================
+                        #=========  MEASURE REGIONS' EUCLIDEAN DISTANCE =========
+                        #Calculate relative distances if at least a region is present in channel cchh_nn (because individual regions of ch_n are measured for their distance with
+                        # regions of cchh_nn)
+                        if cchh_nn_area_px>0:
+                            ch_n__cchh_nn_min_euclid_distances_list, ch_n__cchh_nn_min_euclid_distances_dict = measure_regions_euclidean_distances(ch_array,
+                                                                                                                cchh_nn_array,
+                                                                                                                roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                                roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                                desired__distance='min',
+                                                                                                                transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
+                                
+                            #ch_n__cchh_nn_min_euclid_distances_list is a list with the min distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
+                            #region is present in ch_n.
+                            #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if the list is empty.
+                            ch_n__cchh_nn_min_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_min_euclid_distances_list,
+                                                                                                                     no_quantification_value=no_quantification_valu_e)
+                            mean_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[1]
+                            median_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[2]
+                            std_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[3]
+                            sem_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[4]
+                            min_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[5]
+                            max_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[6]
+                                
+                            ch_n__cchh_nn_max_euclid_distances_list, ch_n__cchh_nn_max_euclid_distances_dict = measure_regions_euclidean_distances(ch_array,
+                                                                                                                cchh_nn_array,
+                                                                                                                roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                                roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                                desired__distance='max',
+                                                                                                                transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
+                                
+                            #ch_n__cchh_nn_max_euclid_distances_list is a list with the max distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
+                            #region is present in ch_n.
+                            #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if the list is empty.
+                            ch_n__cchh_nn_max_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_max_euclid_distances_list,
+                                                                                                                     no_quantification_value=no_quantification_valu_e)
+                            mean_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[1]
+                            median_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[2]
+                            std_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[3]
+                            sem_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[4]
+                            min_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[5]
+                            max_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[6]
+
+                            ch_n__cchh_nn_mean_euclid_distance_list, ch_n__cchh_nn_mean_euclid_distance_dict = measure_regions_euclidean_distances(ch_array,
+                                                                                                            cchh_nn_array,
+                                                                                                            roi__mask_img1=ch_n_roi_mask_array,
+                                                                                                            roi__mask_targ=cchh_nn_roi_mask_array,
+                                                                                                            desired__distance='mean',
+                                                                                                            transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                            label_img_1_thres=ch_n_ixd_binarization_threshold,
+                                                                                                            binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
+
+                            #ch_n__cchh_nn_mean_euclid_distance_list is a list with the mean distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
+                            #region is present in ch_n.
+                            #Get mean, median, stdv, sem, max and mim regions' mean distances. Get no_quantification_valu_e values if the list is empty.
+                            ch_n__cchh_nn_mean_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_mean_euclid_distance_list,
+                                                                                                                     no_quantification_value=no_quantification_valu_e)
+                            mean_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[1]
+                            median_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[2]
+                            std_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[3]
+                            sem_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[4]
+                            min_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[5]
+                            max_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[6]
+                                
+                        #Assign np.nan values to measurements if no region is present in channel cchh_nn
+                        else:
+                            mean_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            median_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            std_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            sem_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            min_ch_n__cchh_nn_min_euclid_distances = np.nan
+                            max_ch_n__cchh_nn_min_euclid_distances = np.nan
+
+                            mean_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            median_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            std_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            sem_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            min_ch_n__cchh_nn_max_euclid_distances = np.nan
+                            max_ch_n__cchh_nn_max_euclid_distances = np.nan
+
+                            mean_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            median_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            std_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            min_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                            max_ch_n__cchh_nn_mean_euclid_distances = np.nan
 
     
     # #Use measurements_dict to form the output dataframe
