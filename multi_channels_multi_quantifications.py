@@ -992,7 +992,21 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         conv_hull_fract_px_thre_arr_1_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         conv_hull_fract_px_thre_arr_2_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         
-        
+        #================================================
+        #=========  ITERATE ON THE CHANNEL AXIS =========
+        # Iterate through the channels
+        for ch_n, ch_array in enumerate(ch_arrays_list):
+            print("---", ch_n, ch_array.shape)
+
+            #==================================================
+            #=========  GET ROI IN THE CORRECT FORMAT =========
+            #Get ch_n roi_mask, if it is provided
+            if hasattr(roi_mask_array, "__len__"):
+                ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
+                print("final shape roi mask", ch_n_roi_mask_array.shape)
+            else:
+                ch_n_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
+
         
     
     # #Use measurements_dict to form the output dataframe
