@@ -1534,38 +1534,91 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     # #Update measurements_dict, which will be used to form the output dataframe
 
                     # #channels' overlap
-                    modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap, dict2modify=measurements_dict, root_key_name='pixels_overlap_observed', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap_shuff, dict2modify=measurements_dict, root_key_name='pixels_overlap_shuffle', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap, dict2modify=measurements_dict, root_key_name='pixels_overlap_observed', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap_shuff, dict2modify=measurements_dict, root_key_name='pixels_overlap_shuffle', channel_1_number=ch_n, channel_2_number=cchh_nn)
                         
-                    # #inter-channels euclidean distances
-                    modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=median_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='median_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=std_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=min_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='min_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=max_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='max_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # # #inter-channels euclidean distances
+                    # modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=median_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='median_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=std_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=min_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='min_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=max_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='max_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
                             
-                    modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=median_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='median_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=std_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=min_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='min_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=max_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='max_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=median_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='median_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=std_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=min_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='min_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=max_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='max_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
 
-                    modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=median_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='median_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=std_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=min_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='min_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
-                    modify_dictionary(result_valu_e=max_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='max_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=median_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='median_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=std_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=min_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='min_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=max_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='max_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
                                                 
-                    # #Also update count_number_of_overlapping_regions_coll_dict, to be used for adding the measurements of count_number_of_overlapping_regions to measurements_dict,
-                    # #at the end of the iterations
+                    # # #Also update count_number_of_overlapping_regions_coll_dict, to be used for adding the measurements of count_number_of_overlapping_regions to measurements_dict,
+                    # # #at the end of the iterations
                     count_number_of_overlapping_regions_coll_dict[(ch_n,cchh_nn)]=ch_n__cchh_nn_overlapping_regions
 
-                    #convex hull
-                    modify_dictionary(result_valu_e=ch_n__cchh_nn_convex_hull_fraction, dict2modify=measurements_dict, root_key_name='convex_hull_fraction', channel_1_number=ch_n, channel_2_number=cchh_nn)
-    
+                    # #convex hull
+                    # modify_dictionary(result_valu_e=ch_n__cchh_nn_convex_hull_fraction, dict2modify=measurements_dict, root_key_name='convex_hull_fraction', channel_1_number=ch_n, channel_2_number=cchh_nn)
+
+        #====================================================================================================
+        #========= UPDATE OUTPUT DICTIONARY FOR THE RESULTS OF  count_number_of_overlapping_regions =========
+        #The output of count_number_of_overlapping_regions is a dictionary.
+        #Each key:value pair of the dictionary is interpreted like this: if, for example, we consider a key:value pair 3:9, this means that 9 regions of channel ch_n have 3
+        # overlapping regions in channel cchh_nn.
+        # I will call the key (the 3 in the example) "number of overlapping regions", and the value (the 9 in the example) "overlap counts"
+
+        #Get all the possible "number of overlapping regions" which have been found
+        counted_overlapping_region_coll_list = [] #Initialize a collection list
+        #Iterate through the channels couple in count_number_of_overlapping_regions_coll_dict
+        for ch_coupl in count_number_of_overlapping_regions_coll_dict:
+            #Iterate through the "number of overlapping regions" for the channel couple ch_coupl, if the channel_couple ch_coupl could be quantified
+            if isinstance(count_number_of_overlapping_regions_coll_dict[ch_coupl], dict):
+                for over_count in count_number_of_overlapping_regions_coll_dict[ch_coupl]:
+                    #Add "number of overlapping regions" to counted_overlapping_region_coll_list collection list
+                    counted_overlapping_region_coll_list.append(over_count)
+
+        #Remove duplicate "number of overlapping regions" from counted_overlapping_region_coll_list and sort "number of overlapping regions" ascending
+        sorted_unique_counted_overlapping_region_coll_list = sorted(list(set(counted_overlapping_region_coll_list)))
+        print(sorted_unique_counted_overlapping_region_coll_list)
+        #Iterate through the sorted "number of overlapping regions"
+        for scor in sorted_unique_counted_overlapping_region_coll_list:
+            #Iterate through the channels couple in count_number_of_overlapping_regions_coll_dict
+            for ch_coupl_1 in count_number_of_overlapping_regions_coll_dict:
+                #form the key name for measurements_dict
+                key_name_4reg_overlap_measure = f"n_ch_{ch_coupl_1[0]}_regions_overlap_w_{scor}_ch_{ch_coupl_1[1]}_regions"
+                #Check if "number of overlapping regions" scor has been quantified for channel couple ch_coupl_1
+                try:
+                    #If scor has been quantified, add the corresponding "overlap counts" to measurements_dict, which is the dictionary which will be used to form the output dataframe
+                    quantification_result = count_number_of_overlapping_regions_coll_dict[ch_coupl_1][scor]
+                    modify_dictionary(result_valu_e=quantification_result,
+                                          dict2modify=measurements_dict,
+                                          root_key_name=key_name_4reg_overlap_measure,
+                                          channel_1_number=None,
+                                          channel_2_number=None)
+                except:
+                    #If scor not present, but the channel couple ch_coupl_1 was quantified, it means that there are
+                    #no regions in the ch_n which overlap with regions of cchh_nn scor number of times. Add 0 to measurements_dict,
+                    # which is the dictionary which will be used to form the output dataframe
+                    if isinstance(count_number_of_overlapping_regions_coll_dict[ch_coupl_1], dict):
+                        modify_dictionary(result_valu_e=0.0,
+                                            dict2modify=measurements_dict,
+                                            root_key_name=key_name_4reg_overlap_measure,
+                                            channel_1_number=None,
+                                            channel_2_number=None)
+                    #If no dictionary has been associated to the channel couple ch_coupl_1, it means that no quantification could be done.
+                    #Add np.nan to measurements_dict, which is the dictionary which will be used to form the output dataframe
+                    else:
+                        modify_dictionary(result_valu_e=count_number_of_overlapping_regions_coll_dict[ch_coupl_1],
+                                            dict2modify=measurements_dict,
+                                            root_key_name=key_name_4reg_overlap_measure,
+                                            channel_1_number=None,
+                                            channel_2_number=None)
 
     # #Use measurements_dict to form the output dataframe
     # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
