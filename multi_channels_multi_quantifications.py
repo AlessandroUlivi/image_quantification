@@ -1007,6 +1007,25 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             else:
                 ch_n_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
 
+            #=================================
+            #=========  ANALYSE AREA =========
+            print(ch_bin_thresh_2use_2[ch_n].shape)
+            print(val_4zero_regionprops_2use_2[ch_n].shape)
+            #Get threshold value for channel ch_n and index ixd in the analysis axis
+            ch_n_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[ch_n],
+                                                                        multi_value_array=False,
+                                                                        multi_value_axis=-1,
+                                                                        get_a_single_value=True)
+            #Get threshold value for channel ch_n and index ixd in the analysis axis
+            ch_n_ixd_value_4_zero_regionprops = get_threshold_from_list(val_4zero_regionprops_2use_2[ch_n],
+                                                                        multi_value_array=False,
+                                                                        multi_value_axis=-1,
+                                                                        get_a_single_value=True)
+            
+            ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
+                                                            roi_mas_k=ch_n_roi_mask_array,
+                                                            binarization_threshold=ch_n_ixd_binarization_threshold,
+                                                            value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
         
     
     # #Use measurements_dict to form the output dataframe
