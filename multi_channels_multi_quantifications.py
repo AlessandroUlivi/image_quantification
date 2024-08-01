@@ -944,7 +944,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         #If no dictionary has been associated to the channel couple ch_coupl_1 at index ixd_2, it means that no quantification could be done.
                         #Add np.nan to the output dictionary
                         else:
-                            modify_dictionary(result_valu_e=np.nan,
+                            modify_dictionary(result_valu_e=count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1],
                                             dict2modify=measurements_dict,
                                             root_key_name=column_name_4reg_overlap_measure,
                                             channel_1_number=None,
