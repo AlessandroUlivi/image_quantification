@@ -47,7 +47,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         dict2modify[result_name]=[v]
                     else:
                         dict2modify[result_name].append(v)
-                    # print(result_name, len(dict2modify[result_name]))
+                    print(result_name, len(dict2modify[result_name]))
                 else:
                     result_name = f"{root_key_name}_iter_{i}"
 
@@ -55,7 +55,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         dict2modify[result_name]=[v]
                     else:
                         dict2modify[result_name].append(v)
-                    # print(result_name, len(dict2modify[result_name]))
+                    print(result_name, len(dict2modify[result_name]))
         else:
             if channel_1_number!=None:
                 if channel_2_number!=None:
@@ -67,7 +67,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     dict2modify[result_name]=[result_valu_e]
                 else:
                     dict2modify[result_name].append(result_valu_e)
-                # print(result_name, len(dict2modify[result_name]))
+                print(result_name, len(dict2modify[result_name]))
             else:
                 result_name=root_key_name
 
@@ -75,7 +75,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     dict2modify[result_name]=[result_valu_e]
                 else:
                     dict2modify[result_name].append(result_valu_e)
-                # print(result_name, len(dict2modify[result_name]))
+                print(result_name, len(dict2modify[result_name]))
 
     def get_mean_median_std_sem_min_max_results(results_measurements, no_quantification_value=np.nan):
         """
@@ -973,7 +973,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                             channel_2_number=None)
 
 
-    #If the analysis axis is not provided          
+    #If the analysis axis is not provided - NOTE: all the analyses are repeated identical without iteration on the analysis axis
     else:
 
         print("==="*10)
@@ -1049,29 +1049,28 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                             binarization_threshold=ch_n_ixd_binarization_threshold,
                                                             value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
 
-            # #============================================
-            # #========= UPDATE OUTPUT DICTIONARY =========
-            # #Update measurements_dict, which will be used to form the output dataframe
-            # modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
+            #============================================
+            #========= UPDATE OUTPUT DICTIONARY =========
+            #Update measurements_dict, which will be used to form the output dataframe
+            modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
 
-            # #==================================
-            # #=========  COUNT REGIONS =========
-            # 
-            # #Get threshold value for channel ch_n
-            # ch_n_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[ch_n],
-            #                                                             multi_value_array=False,
-            #                                                             multi_value_axis=-1,
-            #                                                             get_a_single_value=True)
-            # #Count region number
-            # ch_n_regions_number = count_regions_number(ch_array,
-            #                                             roi_mask=ch_n_roi_mask_array,
-            #                                             threshold_input_arr=ch_n_ixd_binarization_threshold,
-            #                                             threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
-            # # print("n of regions ", ch_n_regions_number)
-            # #============================================
-            # #========= UPDATE OUTPUT DICTIONARY =========
-            # #Update measurements_dict, which will be used to form the output dataframe
-            # modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
+            #==================================
+            #=========  COUNT REGIONS =========
+            #Get threshold value for channel ch_n
+            ch_n_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[ch_n],
+                                                                        multi_value_array=False,
+                                                                        multi_value_axis=-1,
+                                                                        get_a_single_value=True)
+            #Count region number
+            ch_n_regions_number = count_regions_number(ch_array,
+                                                        roi_mask=ch_n_roi_mask_array,
+                                                        threshold_input_arr=ch_n_ixd_binarization_threshold,
+                                                        threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
+            # print("n of regions ", ch_n_regions_number)
+            #============================================
+            #========= UPDATE OUTPUT DICTIONARY =========
+            #Update measurements_dict, which will be used to form the output dataframe
+            modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
     
     # #Use measurements_dict to form the output dataframe
     # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
