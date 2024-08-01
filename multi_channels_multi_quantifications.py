@@ -1494,41 +1494,41 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                           val_4_arr1_NOpassthres_arr2_passthres=get_conv_hull_fract_arr1_NOpass_arr2_pass_v,
                                                                                           val_4_arr2_NOpassthres=get_conv_hull_fract_arr2_NOpass_v)
                     
-                    # #========================================================================================
-                    # #=========  ADD NaNs VALUES AS RESULTS OF THE ANALYSES IF THEY COULD NOT BE DONE =========
-                    # else:
-                    #     #channels' overlap
-                    #     ch_n__cchh_nn_overlap = np.nan
-                    #     ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
+                    #========================================================================================
+                    #=========  ADD NaNs VALUES AS RESULTS OF THE ANALYSES IF THEY COULD NOT BE DONE =========
+                    else:
+                        #channels' overlap
+                        ch_n__cchh_nn_overlap = np.nan
+                        ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
 
-                    #     #inter-channels euclidean distances
-                    #     mean_ch_n__cchh_nn_min_euclid_distances = np.nan
-                    #     median_ch_n__cchh_nn_min_euclid_distances = np.nan
-                    #     std_ch_n__cchh_nn_min_euclid_distances = np.nan
-                    #     sem_ch_n__cchh_nn_min_euclid_distances = np.nan
-                    #     min_ch_n__cchh_nn_min_euclid_distances = np.nan
-                    #     max_ch_n__cchh_nn_min_euclid_distances = np.nan
+                        #inter-channels euclidean distances
+                        mean_ch_n__cchh_nn_min_euclid_distances = np.nan
+                        median_ch_n__cchh_nn_min_euclid_distances = np.nan
+                        std_ch_n__cchh_nn_min_euclid_distances = np.nan
+                        sem_ch_n__cchh_nn_min_euclid_distances = np.nan
+                        min_ch_n__cchh_nn_min_euclid_distances = np.nan
+                        max_ch_n__cchh_nn_min_euclid_distances = np.nan
 
-                    #     mean_ch_n__cchh_nn_max_euclid_distances = np.nan
-                    #     median_ch_n__cchh_nn_max_euclid_distances = np.nan
-                    #     std_ch_n__cchh_nn_max_euclid_distances = np.nan
-                    #     sem_ch_n__cchh_nn_max_euclid_distances = np.nan
-                    #     min_ch_n__cchh_nn_max_euclid_distances = np.nan
-                    #     max_ch_n__cchh_nn_max_euclid_distances = np.nan
+                        mean_ch_n__cchh_nn_max_euclid_distances = np.nan
+                        median_ch_n__cchh_nn_max_euclid_distances = np.nan
+                        std_ch_n__cchh_nn_max_euclid_distances = np.nan
+                        sem_ch_n__cchh_nn_max_euclid_distances = np.nan
+                        min_ch_n__cchh_nn_max_euclid_distances = np.nan
+                        max_ch_n__cchh_nn_max_euclid_distances = np.nan
 
-                    #     mean_ch_n__cchh_nn_mean_euclid_distances = np.nan
-                    #     median_ch_n__cchh_nn_mean_euclid_distances = np.nan
-                    #     std_ch_n__cchh_nn_mean_euclid_distances = np.nan
-                    #     sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
-                    #     min_ch_n__cchh_nn_mean_euclid_distances = np.nan
-                    #     max_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        mean_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        median_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        std_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        min_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                        max_ch_n__cchh_nn_mean_euclid_distances = np.nan
 
-                    #     #overlapping regions
-                    #     ch_n__cchh_nn_overlapping_regions = np.nan
+                        #overlapping regions
+                        ch_n__cchh_nn_overlapping_regions = np.nan
 
-                    #     #convex hull
-                    #     ch_n__cchh_nn_convex_hull_fraction = np.nan
-
+                        #convex hull
+                        ch_n__cchh_nn_convex_hull_fraction = np.nan
+                    
                     # #============================================
                     # #========= UPDATE OUTPUT DICTIONARY =========
                     # # #Update measurements_dict, which will be used to form the output dataframe
