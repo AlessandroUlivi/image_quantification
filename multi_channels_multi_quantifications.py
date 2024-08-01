@@ -428,14 +428,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                 multi_value_array=False,
                                                                                 multi_value_axis=-1,
                                                                                 get_a_single_value=True)
-                #Get threshold value for channel ch_n and cchh_nn at index ixd in the analysis axis
+                #Get threshold value for channel ch_n at index ixd in the analysis axis
                 ch_n_ixd_transform_to_label_img = get_threshold_from_list(transform_to_label_img_2use_2[ch_n],
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
                 
                 #Calculate the area of each individual region in ch_n, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
-                # link properties variables to NaN values
+                # link area measurements to NaN values
                 if ch_n_regions_number>ch_n_ixd_n_of_region_4areas_measure:
                     #Get the areas of the regions within the channel
                     ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
@@ -444,7 +444,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                         binarization_threshold=ch_n_ixd_binarization_threshold)
                     
                     #ch_n_regions_areas is a list with the areas of each region in ch_n
-                    #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is detected
+                    #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is not detected
                     ch_n_regions_areas_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
                     ch_n_regions_mean_area = ch_n_regions_areas_results[1]
                     ch_n_regions_median_area = ch_n_regions_areas_results[2]
@@ -470,8 +470,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 modify_dictionary(result_valu_e=ch_n_regions_min_area, dict2modify=measurements_dict, root_key_name='min_regions_area', channel_1_number=ch_n, channel_2_number=None)
                 modify_dictionary(result_valu_e=ch_n_regions_max_area, dict2modify=measurements_dict, root_key_name='max_regions_area', channel_1_number=ch_n, channel_2_number=None)
 
-                # #=======================================================================
-                # #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
+                #=======================================================================
+                #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
                 ch_n_ixd_highpass_n_regions_4distance = get_threshold_from_list(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n],
                                                                             multi_value_array=False,
@@ -489,7 +489,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #ch_n_regions_min_distances is a list with the min distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
                 # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-                #Get mean, median, stdv, sem, max and min regions' min distances. Get NaN values if a minimum number of regions is detected
+                #Get mean, median, stdv, sem, max and min regions' min distances. Get NaN values if a minimum number of regions is not detected
                 if isinstance(ch_n_regions_min_distances,list):
                     ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
@@ -521,7 +521,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #ch_n_regions_max_distances is a list with the max distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
                 # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-                #Get mean, median, stdv, sem, max and mim regions' max distances. Get NaN values if a minimum number of regions is detected
+                #Get mean, median, stdv, sem, max and mim regions' max distances. Get NaN values if a minimum number of regions is not detected
                 if isinstance(ch_n_regions_max_distances,list):
                     ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
@@ -552,7 +552,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 
                 #ch_n_regions_mean_distances is a list with the mean distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
                 # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
-                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if a minimum number of regions is detected
+                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if a minimum number of regions is not detected
                 if isinstance(ch_n_regions_mean_distances,list):
                     ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
@@ -1071,6 +1071,187 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             #========= UPDATE OUTPUT DICTIONARY =========
             #Update measurements_dict, which will be used to form the output dataframe
             modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
+
+            #===========================================
+            #=========  MEASURE REGIONS' AREAS =========
+            #Get threshold value for channel ch_n
+            ch_n_ixd_n_of_region_4areas_measure = get_threshold_from_list(n_of_region_4areas_measure_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+            #Get threshold value for channel ch_n
+            ch_n_ixd_transform_to_label_img = get_threshold_from_list(transform_to_label_img_2use_2[ch_n],
+                                                                        multi_value_array=False,
+                                                                        multi_value_axis=-1,
+                                                                        get_a_single_value=True)
+                
+            #Calculate the area of each individual region in ch_n, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
+            # link area measurements to NaN values
+            if ch_n_regions_number>ch_n_ixd_n_of_region_4areas_measure:
+                #Get the areas of the regions within the channel
+                ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
+                                                                    roi__mask=ch_n_roi_mask_array,
+                                                                    transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                    binarization_threshold=ch_n_ixd_binarization_threshold)
+                    
+                #ch_n_regions_areas is a list with the areas of each region in ch_n
+                #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is not detected
+                ch_n_regions_areas_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
+                ch_n_regions_mean_area = ch_n_regions_areas_results[1]
+                ch_n_regions_median_area = ch_n_regions_areas_results[2]
+                ch_n_regions_stdv_area = ch_n_regions_areas_results[3]
+                ch_n_regions_sem_area = ch_n_regions_areas_results[4]
+                ch_n_regions_min_area = ch_n_regions_areas_results[5]
+                ch_n_regions_max_area = ch_n_regions_areas_results[6]
+            else:
+                ch_n_regions_mean_area = np.nan
+                ch_n_regions_median_area = np.nan
+                ch_n_regions_stdv_area = np.nan
+                ch_n_regions_sem_area = np.nan
+                ch_n_regions_min_area = np.nan
+                ch_n_regions_max_area = np.nan
+                
+            #============================================
+            #========= UPDATE OUTPUT DICTIONARY =========
+            #Update measurements_dict, which will be used to form the output dataframe
+            modify_dictionary(result_valu_e=ch_n_regions_mean_area, dict2modify=measurements_dict, root_key_name='mean_regions_area', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=ch_n_regions_median_area, dict2modify=measurements_dict, root_key_name='median_regions_area', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=ch_n_regions_stdv_area, dict2modify=measurements_dict, root_key_name='stdv_regions_area', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=ch_n_regions_sem_area, dict2modify=measurements_dict, root_key_name='sem_regions_area', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=ch_n_regions_min_area, dict2modify=measurements_dict, root_key_name='min_regions_area', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=ch_n_regions_max_area, dict2modify=measurements_dict, root_key_name='max_regions_area', channel_1_number=ch_n, channel_2_number=None)
+
+            #=======================================================================
+            #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
+            #Get threshold value for channel ch_n
+            print(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n].shape)
+            ch_n_ixd_highpass_n_regions_4distance = get_threshold_from_list(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+            #Measure region minimum distances
+            ch_n_regions_min_distances, ch_n_regions_min_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                    roi__mask=ch_n_roi_mask_array,
+                                                                                                                    desired__distance='min',
+                                                                                                                    highpass_n_regions=ch_n_ixd_highpass_n_regions_4distance,
+                                                                                                                    transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                    label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                    return_excluded_distances=False,
+                                                                                                                    val_n_regions_nopass=np.nan)
+                
+            #ch_n_regions_min_distances is a list with the min distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
+            # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
+            #Get mean, median, stdv, sem, max and min regions' min distances. Get NaN values if a minimum number of regions is not detected
+            if isinstance(ch_n_regions_min_distances,list):
+                ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
+                num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
+                mean_ch_n_regions_min_distances = ch_n_regions_min_distances_results[1]
+                median_ch_n_regions_min_distances = ch_n_regions_min_distances_results[2]
+                std_ch_n_regions_min_distances = ch_n_regions_min_distances_results[3]
+                sem_ch_n_regions_min_distances = ch_n_regions_min_distances_results[4]
+                min_ch_n_regions_min_distances = ch_n_regions_min_distances_results[5]
+                max_ch_n_regions_min_distances = ch_n_regions_min_distances_results[6]
+
+            else:
+                num_ch_n_regions_min_distances = np.nan
+                mean_ch_n_regions_min_distances = np.nan
+                median_ch_n_regions_min_distances = np.nan
+                std_ch_n_regions_min_distances = np.nan
+                sem_ch_n_regions_min_distances = np.nan
+                min_ch_n_regions_min_distances = np.nan
+                max_ch_n_regions_min_distances = np.nan
+                
+            #Measure region maximum distances
+            ch_n_regions_max_distances, ch_n_regions_max_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                    roi__mask=ch_n_roi_mask_array,
+                                                                                                                    desired__distance='max',
+                                                                                                                    highpass_n_regions=ch_n_ixd_highpass_n_regions_4distance,
+                                                                                                                    transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                    label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                    return_excluded_distances=False,
+                                                                                                                    val_n_regions_nopass=np.nan)
+                
+            #ch_n_regions_max_distances is a list with the max distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
+            # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
+            #Get mean, median, stdv, sem, max and mim regions' max distances. Get NaN values if a minimum number of regions is not detected
+            if isinstance(ch_n_regions_max_distances,list):
+                ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
+                num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
+                mean_ch_n_regions_max_distances = ch_n_regions_max_distances_results[1]
+                median_ch_n_regions_max_distances = ch_n_regions_max_distances_results[2]
+                std_ch_n_regions_max_distances = ch_n_regions_max_distances_results[3]
+                sem_ch_n_regions_max_distances = ch_n_regions_max_distances_results[4]
+                min_ch_n_regions_max_distances = ch_n_regions_max_distances_results[5]
+                max_ch_n_regions_max_distances = ch_n_regions_max_distances_results[6]
+            else:
+                num_ch_n_regions_max_distances = np.nan
+                mean_ch_n_regions_max_distances = np.nan
+                median_ch_n_regions_max_distances = np.nan
+                std_ch_n_regions_max_distances = np.nan
+                sem_ch_n_regions_max_distances = np.nan
+                min_ch_n_regions_max_distances = np.nan
+                max_ch_n_regions_max_distances = np.nan
+
+            #Measure region mean distances
+            ch_n_regions_mean_distances, ch_n_regions_mean_dict = measure_regions_euclidean_distances_within_array(ch_array,
+                                                                                                                    roi__mask=ch_n_roi_mask_array,
+                                                                                                                    desired__distance='mean',
+                                                                                                                    highpass_n_regions=ch_n_ixd_highpass_n_regions_4distance,
+                                                                                                                    transform_to_label_img=ch_n_ixd_transform_to_label_img,
+                                                                                                                    label_img_thres=ch_n_ixd_binarization_threshold,
+                                                                                                                    return_excluded_distances=False,
+                                                                                                                    val_n_regions_nopass=np.nan)
+                
+            #ch_n_regions_mean_distances is a list with the mean distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
+            # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
+            #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if a minimum number of regions is not detected
+            if isinstance(ch_n_regions_mean_distances,list):
+                ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
+                num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
+                mean_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[1]
+                median_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[2]
+                std_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[3]
+                sem_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[4]
+                min_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[5]
+                max_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[6]
+            else:
+                num_ch_n_regions_mean_distances = np.nan
+                mean_ch_n_regions_mean_distances = np.nan
+                median_ch_n_regions_mean_distances = np.nan
+                std_ch_n_regions_mean_distances = np.nan
+                sem_ch_n_regions_mean_distances = np.nan
+                min_ch_n_regions_mean_distances = np.nan
+                max_ch_n_regions_mean_distances = np.nan
+
+            #============================================
+            #========= UPDATE OUTPUT DICTIONARY =========
+            #Update measurements_dict, which will be used to form the output dataframe
+            modify_dictionary(result_valu_e=num_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='number_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=mean_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='mean_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=median_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='median_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=std_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='stdv_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=sem_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='sem_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=min_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='min_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=max_ch_n_regions_min_distances, dict2modify=measurements_dict, root_key_name='max_region_min_distances', channel_1_number=ch_n, channel_2_number=None)
+
+            modify_dictionary(result_valu_e=num_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='number_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=mean_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='mean_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=median_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='median_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=std_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='stdv_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=sem_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='sem_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=min_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='min_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=max_ch_n_regions_max_distances, dict2modify=measurements_dict, root_key_name='max_region_max_distances', channel_1_number=ch_n, channel_2_number=None)
+
+            modify_dictionary(result_valu_e=num_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='number_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=mean_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='mean_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=median_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='median_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=std_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='stdv_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=sem_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='sem_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=min_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='min_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+            modify_dictionary(result_valu_e=max_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='max_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+
+            
+
     
     # #Use measurements_dict to form the output dataframe
     # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
