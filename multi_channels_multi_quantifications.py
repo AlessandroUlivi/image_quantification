@@ -953,21 +953,49 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     #If the analysis axis is not provided          
     else:
-        pass
-        # print("==="*10)
-        # print("---NO analysis of a specific axis---")
-        # print("==="*10)
 
-        # # Iterate through the channels
-        # for ch_n1, ch_array1 in enumerate([np.squeeze(c) for c in np.split(channels_array_copy,
-        #                                                                      indices_or_sections=channels_array_copy.shape[channels_axis_2use],
-        #                                                                      axis=channels_axis_2use)]):
-        #     if hasattr(roi_mask_array, "__len__"):
-        #         print("shape roi mask", roi_mask_array_copy.shape)
-        #     else:
-        #         print(roi_mask_array_copy)
+        print("==="*10)
+        print("---NO analysis of a specific axis---")
+        print("==="*10)
+
+        #====================================================================================================
+        #=========  INITIALIZE DICTIONARY COLLECTING RESULTS OF count_number_of_overlapping_regions =========
+        #The output of count_number_of_overlapping_regions is a dictionary linking the amount of regions in channel-j overlapping to region-i of channel-i to the
+        #number of times such number of overlapping regions has been observed. This output non fixed, it is thus impossible to establish a prioi how main columns in
+        #the output dataframe will contain this quantification. The only way to do it is to collect all the output first and then re-arrange them at the end.
+        #Here a dictionary is initialized to collect all these outputs
+        count_number_of_overlapping_regions_coll_dict = {}
+
+        #===================================================================================
+        #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
+        #Get the individual channels array as a list
+        ch_arrays_list = [np.squeeze(b) for b in np.split(channels_array_copy, indices_or_sections=channels_array_copy.shape[channels_axis_2use], axis=channels_axis_2use)]
+
+        #Also get the individual channels arrays as a list for the roi_mask, if it is provided
+        if hasattr(roi_mask_array, "__len__"):
+            roi_mask_array_2use_2 = [np.squeeze(v) for v in np.split(roi_mask_array_2use, indices_or_sections=channels_array_copy.shape[channels_axis_2use], axis=channels_axis_2use)]
+            # print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
+        else:
+            roi_mask_array_2use_2 = roi_mask_array_2use_1 #which should be meaning None
+
+        #Also split on the channel axis the thresholds' arrays corresponding to the ixd-th index along the analysis_axis
+        ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        transform_to_label_img_2use_2 = split_thresholds_arrays(transform_to_label_img_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2 = split_thresholds_arrays(reg_eucl_dist_within_arr_val_n_regions_nopass_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        count_n_overl_reg_intersection_threshold_2use_2 = split_thresholds_arrays(count_n_overl_reg_intersection_threshold_2use, split_axis=channels_axis_2use, multi_thresholds=True)
+        conv_hull_fract_px_thre_arr_1_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_1_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        conv_hull_fract_px_thre_arr_2_2use_2 = split_thresholds_arrays(conv_hull_fract_px_thre_arr_2_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        
+        
+        
     
-    #Use measurements_dict to form the output dataframe
-    output_dataframe = pd.DataFrame.from_dict(measurements_dict)
+    # #Use measurements_dict to form the output dataframe
+    # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
 
-    return output_dataframe
+    # return output_dataframe
