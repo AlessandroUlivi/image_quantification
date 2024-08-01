@@ -88,7 +88,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         - the list has 0 quantifications. Return no_quantification_value for mean, median, standard deviation, standard error of mean, max and min.
 
         Inputs:
-        - results_measurements. list of tuple.
+        - results_measurements. list or tuple.
         - no_quantification_value. any. Default np.nan.
 
         Output:
@@ -139,7 +139,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         - if input_thresholds is int/float. The output is an ndarray of the same shape of channels_stac_k and all values set to input_threshols.
         - if input_thresholds is tuple/list. The output is an ndarray of shape=channels_stac_k.shape+1. The extra dimension is in position -1 and its size corresponds to the
         length of input_thresholds. Each ndarray of shape=channels_stac_k.shape which is stacked along the -1 dimension, contains one of the values of input_thresholds.
-        - if input_thresholds is ndarray. The output is input_thresholds. NOTE: it multiple thresholds are reported and input_thresholds is ndarray, the multiple threshold values
+        - if input_thresholds is ndarray. The output is input_thresholds. NOTE: if multiple thresholds are reported and input_thresholds is ndarray, the multiple threshold values
         must be indicated on axis -1.
         """
         if isinstance(input_thresholds, int) or isinstance(input_thresholds, float):
@@ -151,12 +151,18 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     def split_thresholds_arrays(thr_array, split_axis, multi_thresholds=False):
         """
-        Splits thr_array along split_axis. If multi_thresholds array is True, split_axis is reduced of 1 number.
+        Splits thr_array along the axis split_axis. If multi_thresholds array is True, split_axis is reduced of 1 number.
+
+        Inputs:
+        - thr_array. ndarray.
+        - split_axis. int. Must be <len(thr_array.shape). The dimension, among those present in thr_array, on which to split thr_array.
+        - multi_thehresholds. Bool. Defauls False. If True, reduced split_axis of 1 before thr_array is splat. 
+
         This function works in the context of set_thresholds_2use and quantify_channels. For certain quantification functions it is required to indicate multiple thresholds. These
-        thresholds must be indicated in the -1 axis of the threshold array which is either the output of set_threshold_2use or directly input to quantify_channels. For this reason,
-        when multiple thresholds are reported, the threshold array has an additional axis than channel_array (see quantify_channels inputs), in position -1. When channels_array and
-        threshold arrays have to be split, the axis along which to do the split is referring to channel array and does not take into consideration the extra dimension of
-        thresholds array. This results in a wrong indexing when the index is indicated using negative numbers. The present function compensates for this fact.
+        thresholds are assumed to be indicated in the -1 axis of the threshold array which is either the output of set_threshold_2use or directly input to quantify_channels. For this
+        reason, when multiple thresholds are reported, the threshold array has an additional axis than channel_array (see quantify_channels inputs), in position -1.
+        When channels_array and threshold arrays have to be split, the axis along which to do the split is referring to channel array and does not take into consideration the
+        extra dimension of thresholds array. This results in a wrong indexing when the index is indicated using negative numbers. The present function compensates for this fact.
         """
         if multi_thresholds:
             if split_axis<0:
@@ -208,7 +214,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Make sure that channels_axis and analysis axis are not the same axis
     assert channels_axis != analysis_axis, "channels_axis can't be the same of analysis_axis"
 
-    #If arrays are split along an axis to analyses, because channels_axis will work after the splitting, reduce it of 1 unit to compensate for the recuded dimension
+    #If arrays are split along an axis to analyses, because channels_axis will work after the splitting along analysis axis, reduce
+    #channel axis of 1 unit to compensate for the recuded dimension due to the initial split.
     if analysis_axis != None:
         if channels_axis>analysis_axis:
             channels_axis_2use = channels_axis-1
@@ -232,7 +239,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Set binarization thresholds to 0 for all channels, if channels_binarization_thresholds is not provided. Use provided values othewise.
     ch_bin_thresh_2use = set_thresholds_2use(channels_binarization_thresholds, channels_stac_k=channels_array_copy)
 
-    #Set to False transform_to_label_img in measure_regions_euclidean_distances if transform_to_label_img is not provided. Use the provided value otherwise
+    #Set to False transform_to_label_img if transform_to_label_img is not provided. Use the provided value otherwise
     transform_to_label_img_2use = set_thresholds_2use(transform_to_label_img, channels_stac_k=channels_array_copy)
     
     #Set val_4zero_regionprops in get_mask_area as 0 by defaut, if None is provided as input. Use the provided value otherwise.
@@ -259,7 +266,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     # Use the provided thresholds otherwise
     measure_pixels_overlap_n_px_thr_2_2use = set_thresholds_2use(measure_pixels_overlap_n_px_thr_2, channels_stac_k=channels_array_copy)
 
-    #Set to tuple of 0s of length=channel_axis'size * (channel_axis'size-1) intersection_threshold in count_number_of_overlapping_regions if count_n_overl_reg_intersection_threshold
+    #Set to a tuple of 0s of length=(channel_axis'size * channel_axis'size) intersection_threshold in count_number_of_overlapping_regions if count_n_overl_reg_intersection_threshold
     # is not provided. Use the provided tuple otherwise
     if count_n_overl_reg_intersection_threshold==None:
         default_intersection_thresholds = tuple([0 for chnll in range(channels_array_copy.shape[channels_axis]*channels_array_copy.shape[channels_axis])])
@@ -275,7 +282,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
     #==========================================
     #=========  INITIALIZE THE OUTPUT =========
-    #Initialize a dictionary to be used to be used to form the output datafram
+    #Initialize a dictionary to be used to form the output datafram
     measurements_dict = {}
 
     #==================================================
@@ -311,7 +318,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         #====================================================================================================
         #=========  INITIALIZE DICTIONARY COLLECTING RESULTS OF count_number_of_overlapping_regions =========
         #The output of count_number_of_overlapping_regions is a dictionary linking the amount of regions in channel-j overlapping to region-i of channel-i to the
-        #number of times such number of overlapping regions has been observed. This output non fixed, it is thus impossible to establish a prioi how main columns in
+        #number of times such number of overlapping regions has been observed. This output is non fixed, it is thus impossible to establish a prioi how many columns in
         #the output dataframe will contain this quantification. The only way to do it is to collect all the output first and then re-arrange them at the end.
         #Here a dictionary is initialized to collect all these outputs
         count_number_of_overlapping_regions_coll_dict = {}
@@ -334,10 +341,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
             #===================================================================================
             #=========  PREPARE DATA, ROI AND THRESHOLDS FOR ITERATION ON CHANNEL AXIS =========
-            #Get the individual channels array as a list
+            #Get the individual channel arrays as a list
             ch_arrays_list = [np.squeeze(b) for b in np.split(idx_array, indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
 
-            #Also get the individual channels arrays as a list for the roi_mask, if it is provided
+            #Also get the roi_mask corresponding to individual channel arrays as a list, if it is provided
             if hasattr(roi_mask_array, "__len__"):
                 roi_mask_array_2use_2 = [np.squeeze(v) for v in np.split(roi_mask_array_2use_1[ixd], indices_or_sections=idx_array.shape[channels_axis_2use], axis=channels_axis_2use)]
                 # print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
@@ -366,7 +373,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                 #==================================================
                 #=========  GET ROI IN THE CORRECT FORMAT =========
-                #Get ch_n roi_mask, if it is provided
+                #Get the roi_mask for channel ch_n, if it is provided
                 if hasattr(roi_mask_array, "__len__"):
                     ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
                     # print("final shape roi mask", ch_n_roi_mask_array.shape)
@@ -385,7 +392,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
-                
+                #Measure area as number of pixels
                 ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
                                                               roi_mas_k=ch_n_roi_mask_array,
                                                               binarization_threshold=ch_n_ixd_binarization_threshold,
@@ -398,13 +405,12 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                 #==================================
                 #=========  COUNT REGIONS =========
-                #Count region number
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
                 ch_n_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[ch_n],
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
-                
+                #Count region number
                 ch_n_regions_number = count_regions_number(ch_array,
                                                            roi_mask=ch_n_roi_mask_array,
                                                            threshold_input_arr=ch_n_ixd_binarization_threshold,
@@ -417,8 +423,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                 #===========================================
                 #=========  MEASURE REGIONS' AREAS =========
-                #Calculate properties of regions, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
-                # link properties variables to NaN values
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
                 ch_n_ixd_n_of_region_4areas_measure = get_threshold_from_list(n_of_region_4areas_measure_2use_2[ch_n],
                                                                                 multi_value_array=False,
@@ -429,7 +433,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
-
+                
+                #Calculate the area of each individual region in ch_n, if there are >n_of_region_4areas_measure_2use regions. Alternatively,
+                # link properties variables to NaN values
                 if ch_n_regions_number>ch_n_ixd_n_of_region_4areas_measure:
                     #Get the areas of the regions within the channel
                     ch_n_regions_areas = get_areas_of_regions_in_mask(ch_array,
@@ -437,7 +443,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
                                                                         binarization_threshold=ch_n_ixd_binarization_threshold)
                     
-                    #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is not detected
+                    #ch_n_regions_areas is a list with the areas of each region in ch_n
+                    #Get mean, median, stdv, sem, max and min regions' area. Get NaN values if a minimum number of areas is detected
                     ch_n_regions_areas_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_areas, no_quantification_value=no_quantification_valu_e)
                     ch_n_regions_mean_area = ch_n_regions_areas_results[1]
                     ch_n_regions_median_area = ch_n_regions_areas_results[2]
@@ -466,22 +473,23 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 # #=======================================================================
                 # #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
                 #Get threshold value for channel ch_n and index ixd in the analysis axis
-                ch_n_ixd_highpass_n_regions = get_threshold_from_list(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n],
+                ch_n_ixd_highpass_n_regions_4distance = get_threshold_from_list(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n],
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
                                                                             get_a_single_value=True)
-
+                #Measure region minimum distances
                 ch_n_regions_min_distances, ch_n_regions_min_dict = measure_regions_euclidean_distances_within_array(ch_array,
                                                                                                                         roi__mask=ch_n_roi_mask_array,
                                                                                                                         desired__distance='min',
-                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions_4distance,
                                                                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
                                                                                                                         label_img_thres=ch_n_ixd_binarization_threshold,
                                                                                                                         return_excluded_distances=False,
                                                                                                                         val_n_regions_nopass=np.nan)
-                # ch_n_regions_min_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
-                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
-                # Report the single distance if only 1 distance is present.
+                
+                #ch_n_regions_min_distances is a list with the min distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
+                # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
+                #Get mean, median, stdv, sem, max and min regions' min distances. Get NaN values if a minimum number of regions is detected
                 if isinstance(ch_n_regions_min_distances,list):
                     ch_n_regions_min_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_min_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_min_distances = ch_n_regions_min_distances_results[0]
@@ -501,18 +509,19 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     min_ch_n_regions_min_distances = np.nan
                     max_ch_n_regions_min_distances = np.nan
                 
+                #Measure region maximum distances
                 ch_n_regions_max_distances, ch_n_regions_max_dict = measure_regions_euclidean_distances_within_array(ch_array,
                                                                                                                         roi__mask=ch_n_roi_mask_array,
                                                                                                                         desired__distance='max',
-                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions_4distance,
                                                                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
                                                                                                                         label_img_thres=ch_n_ixd_binarization_threshold,
                                                                                                                         return_excluded_distances=False,
                                                                                                                         val_n_regions_nopass=np.nan)
                 
-                # ch_n_regions_max_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
-                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
-                # Report the single distance if only 1 distance is present.
+                #ch_n_regions_max_distances is a list with the max distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
+                # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
+                #Get mean, median, stdv, sem, max and mim regions' max distances. Get NaN values if a minimum number of regions is detected
                 if isinstance(ch_n_regions_max_distances,list):
                     ch_n_regions_max_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_max_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_max_distances = ch_n_regions_max_distances_results[0]
@@ -531,18 +540,19 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     min_ch_n_regions_max_distances = np.nan
                     max_ch_n_regions_max_distances = np.nan
 
+                #Measure region mean distances
                 ch_n_regions_mean_distances, ch_n_regions_mean_dict = measure_regions_euclidean_distances_within_array(ch_array,
                                                                                                                         roi__mask=ch_n_roi_mask_array,
                                                                                                                         desired__distance='mean',
-                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions,
+                                                                                                                        highpass_n_regions=ch_n_ixd_highpass_n_regions_4distance,
                                                                                                                         transform_to_label_img=ch_n_ixd_transform_to_label_img,
                                                                                                                         label_img_thres=ch_n_ixd_binarization_threshold,
                                                                                                                         return_excluded_distances=False,
                                                                                                                         val_n_regions_nopass=np.nan)
                 
-                # ch_n_regions_mean_distances is either a list or val_n_regions_nopass value. If it is a list it is because more than highpass_n_regions are present
-                # If it is a list, measure the mean and standard deviation if at least 3 distances are present. Only measure the mean if two distances are present.
-                # Report the single distance if only 1 distance is present.
+                #ch_n_regions_mean_distances is a list with the mean distance of each region in ch_n to the rest of the regions of ch_n. If less or equal to
+                # ch_n_ixd_highpass_n_regions_4distance are present the output is np.nan.
+                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if a minimum number of regions is detected
                 if isinstance(ch_n_regions_mean_distances,list):
                     ch_n_regions_mean_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n_regions_mean_distances, no_quantification_value=no_quantification_valu_e)
                     num_ch_n_regions_mean_distances = ch_n_regions_mean_distances_results[0]
@@ -598,14 +608,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                         # print("...")
                         #===============================================================
                         #=========  VERIFY IF COMPARATIVE ANALYSIS CAN BE DONE =========
-                        #Get cchh_nn roi mask if it is provided
+                        #Get the roi_mask for channel cchh_nn, if it is provided
                         if hasattr(roi_mask_array, "__len__"):
                             cchh_nn_roi_mask_array = roi_mask_array_2use_2[cchh_nn]
                             # print("final shape roi mask", cchh_nn_roi_mask_array.shape)
                         else:
                             cchh_nn_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
                         
-                        #Count the number of pixels in the second channel
+                        #Count the number of pixels in channel cchh_nn
                         #Get threshold value for channel cchh_nn and index ixd in the analysis axis
                         cchh_nn_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[cchh_nn],
                                                                                         multi_value_array=False,
@@ -616,6 +626,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                         multi_value_array=False,
                                                                                         multi_value_axis=-1,
                                                                                         get_a_single_value=True)
+                        #Count number of pixels in cchh_nn
                         cchh_nn_area_px, cchh_nn_area_props = get_mask_area(cchh_nn_array,
                                                                             roi_mas_k=cchh_nn_roi_mask_array,
                                                                             binarization_threshold=cchh_nn_ixd_binarization_threshold,
@@ -649,6 +660,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                             multi_value_axis=-1,
                                                                                             get_a_single_value=True)
                             
+                            #Measure the observed overlap and the overlap obtained after shuffling the pixels
                             ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
                                                                                 cchh_nn_array,
                                                                                 roi_mask_arr_1=ch_n_roi_mask_array,
@@ -670,7 +682,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             
                             #========================================================
                             #=========  MEASURE REGIONS' EUCLIDEAN DISTANCE =========
-                            #Calculate relative distances if at least a region is present in channel cchh_nn (individual regions of ch_n are measured for their distance with
+                            #Calculate relative distances if at least a region is present in channel cchh_nn (because individual regions of ch_n are measured for their distance with
                             # regions of cchh_nn)
                             if cchh_nn_area_px>0:
                                 ch_n__cchh_nn_min_euclid_distances_list, ch_n__cchh_nn_min_euclid_distances_dict = measure_regions_euclidean_distances(ch_array,
@@ -682,9 +694,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                                 label_img_1_thres=ch_n_ixd_binarization_threshold,
                                                                                                                 binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
-                                #The output of ch_n__cchh_nn_min_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
-                                #Get the mean and standard deviation of regions minimum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
-                                #distance. Get the min and max minimum euclidean distances. Use np.nan if no distance is present.
+                                #ch_n__cchh_nn_min_euclid_distances_list is a list with the min distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
+                                #region is present in ch_n.
+                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if the list is empty.
                                 ch_n__cchh_nn_min_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_min_euclid_distances_list,
                                                                                                                      no_quantification_value=no_quantification_valu_e)
                                 mean_ch_n__cchh_nn_min_euclid_distances = ch_n__cchh_nn_min_euclid_distances_results[1]
@@ -703,9 +715,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                                 label_img_1_thres=ch_n_ixd_binarization_threshold,
                                                                                                                 binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
                                 
-                                # The output of ch_n__cchh_nn_max_euclid_distances_list in the first position is a list. If no region is present in ch_array this list is empty.
-                                # Get the mean and standard deviation of regions maximum euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
-                                # distance. Get the min and max maximum euclidean distances. Use np.nan if no distance is present.
+                                #ch_n__cchh_nn_max_euclid_distances_list is a list with the max distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
+                                #region is present in ch_n.
+                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if the list is empty.
                                 ch_n__cchh_nn_max_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_max_euclid_distances_list,
                                                                                                                      no_quantification_value=no_quantification_valu_e)
                                 mean_ch_n__cchh_nn_max_euclid_distances = ch_n__cchh_nn_max_euclid_distances_results[1]
@@ -724,9 +736,9 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                                             label_img_1_thres=ch_n_ixd_binarization_threshold,
                                                                                                             binary_mask_target_thres=cchh_nn_ixd_binarization_threshold)
 
-                                #The output of ch_n__cchh_nn_mean_euclid_distance in the first position is a list. If no region is present in ch_array this list is empty.
-                                #Get the mean and standard deviation of regions mean euclidean distances if there are at least 2 distances. Only measure the mean if there is only 1
-                                #distance. Get the min and max mean euclidean distances. Use np.nan if no distance is present.
+                                #ch_n__cchh_nn_mean_euclid_distance_list is a list with the mean distance of each region in ch_n to the the regions of cchh_nn. The list is empty if no
+                                #region is present in ch_n.
+                                #Get mean, median, stdv, sem, max and mim regions' mean distances. Get NaN values if the list is empty.
                                 ch_n__cchh_nn_mean_euclid_distances_results = get_mean_median_std_sem_min_max_results(results_measurements=ch_n__cchh_nn_mean_euclid_distance_list,
                                                                                                                      no_quantification_value=no_quantification_valu_e)
                                 mean_ch_n__cchh_nn_mean_euclid_distances = ch_n__cchh_nn_mean_euclid_distances_results[1]
@@ -767,14 +779,16 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                             multi_value_axis=-1,
                                                                                             get_a_single_value=True)
                             #Get intersection threshold
+                            #Get the multi-threshold intersection threshold for channe ch_n at position ixd of the analysis axis
                             ch_n_cchh_nn_ixd_intersection_threshold_tuple = get_threshold_from_list(count_n_overl_reg_intersection_threshold_2use_2[ch_n],
                                                                                                 multi_value_array=True,
                                                                                                 multi_value_axis=-1,
                                                                                                 get_a_single_value=True)
                             
                             position_of_intersection_threshold = (ch_n*(channels_array.shape[channels_axis]))+cchh_nn #get the position of the threshold in the multi-threshold tuple
-                            ch_n_cchh_nn_ixd_intersection_threshold = ch_n_cchh_nn_ixd_intersection_threshold_tuple[position_of_intersection_threshold]
+                            ch_n_cchh_nn_ixd_intersection_threshold = ch_n_cchh_nn_ixd_intersection_threshold_tuple[position_of_intersection_threshold] #get the actual intersection threshold for the channel couple ch_n and cchh_nn at position ixd of the analysis axis
 
+                            #Count overlapping regions
                             ch_n__cchh_nn_overlapping_regions_i,dum_my,dum_my1,dum_my2 = count_number_of_overlapping_regions(ch_array,
                                                                                                     cchh_nn_array,
                                                                                                     intersection_threshold=ch_n_cchh_nn_ixd_intersection_threshold,
@@ -814,7 +828,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                 multi_value_array=False,
                                                                                 multi_value_axis=-1,
                                                                                 get_a_single_value=True)
-                            
+                            #Calculate the convex hull fraction
                             ch_n__cchh_nn_convex_hull_fraction = get_convex_hull_fraction(ch_array,
                                                                                           cchh_nn_array,
                                                                                           roi__mask_1=ch_n_roi_mask_array,
@@ -903,50 +917,58 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         
         #====================================================================================================
         #========= UPDATE OUTPUT DICTIONARY FOR THE RESULTS OF  count_number_of_overlapping_regions =========
-        #Get the higher number of counted overlapping regions
+        #The output of count_number_of_overlapping_regions is a dictionary.
+        #Each key:value pair of the dictionary is interpreted like this: if, for example, we consider a key:value pair 3:9, this means that 9 regions of channel ch_n have 3
+        # overlapping regions in channel cchh_nn.
+        # I will call the key (the 3 in the example) "number of overlapping regions", and the value (the 9 in the example) "overlap counts"
+
+        #Get all the possible "number of overlapping regions" which have been found
         counted_overlapping_region_coll_list = [] #Initialize a collection list
         #Iterate through the indexes along analysis axis within count_number_of_overlapping_regions_coll_dict
         for ixd_1 in count_number_of_overlapping_regions_coll_dict:
-            #Iterate through the channels couple at each index ixd_1
+            #Iterate through the channels couple at each index ixd_1 in count_number_of_overlapping_regions_coll_dict
             for ch_coupl in count_number_of_overlapping_regions_coll_dict[ixd_1]:
-                #Iterate through the counted overlapping regions, if the channel_couple ch_coupl at index ixd_1 could be quantified
+                #Iterate through the "number of overlapping regions" for the channel couple ch_coupl at index ixd_1, if the channel_couple ch_coupl at index ixd_1 could be quantified
                 if isinstance(count_number_of_overlapping_regions_coll_dict[ixd_1][ch_coupl], dict):
                     for over_count in count_number_of_overlapping_regions_coll_dict[ixd_1][ch_coupl]:
+                        #Add "number of overlapping regions" to counted_overlapping_region_coll_list collection list
                         counted_overlapping_region_coll_list.append(over_count)
-        #Remove duplicate counts from counted_overlapping_region_coll_list and sort number ascending
+
+        #Remove duplicate "number of overlapping regions" from counted_overlapping_region_coll_list and sort "number of overlapping regions" ascending
         sorted_unique_counted_overlapping_region_coll_list = sorted(list(set(counted_overlapping_region_coll_list)))
-        #Iterate through the sorted counted number of overlapping regions
+        #Iterate through the sorted "number of overlapping regions"
         for scor in sorted_unique_counted_overlapping_region_coll_list:
             #Iterate through the indexes along analysis axis within count_number_of_overlapping_regions_coll_dict
             for ixd_2 in count_number_of_overlapping_regions_coll_dict:
-                #Iterate through the channels couple at each index ixd_2
+                #Iterate through the channels couple at each index ixd_2 in count_number_of_overlapping_regions_coll_dict
                 for ch_coupl_1 in count_number_of_overlapping_regions_coll_dict[ixd_2]:
-                    #form the column name
-                    column_name_4reg_overlap_measure = f"n_ch_{ch_coupl_1[0]}_regions_overlap_w_{scor}_ch_{ch_coupl_1[1]}_regions"
-                    #Check if counted number of overlapping regions has been quantified for index ixd_2 and channel couple ch_coupl_1
+                    #form the key name for measurements_dict
+                    key_name_4reg_overlap_measure = f"n_ch_{ch_coupl_1[0]}_regions_overlap_w_{scor}_ch_{ch_coupl_1[1]}_regions"
+                    #Check if "number of overlapping regions" scor has been quantified for index ixd_2 and channel couple ch_coupl_1
                     try:
-                        #If they have been quantified, add them to the output dictionary
+                        #If scor has been quantified, add the corresponding "overlap counts" to measurements_dict, which is the dictionary which will be used to form the output dataframe
                         quantification_result = count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1][scor]
                         modify_dictionary(result_valu_e=quantification_result,
                                           dict2modify=measurements_dict,
-                                          root_key_name=column_name_4reg_overlap_measure,
+                                          root_key_name=key_name_4reg_overlap_measure,
                                           channel_1_number=None,
                                           channel_2_number=None)
                     except:
-                        #If the counted number of overlapping regions are not present, but the channel couple ch_coupl_1 at index ixd_2 was quantified, it means that there are
-                        #no regions in the first channels which overlap with regions of the second channel the counted number of times. Add 0 to the collected dictionary
+                        #If scor not present, but the channel couple ch_coupl_1 at index ixd_2 was quantified, it means that there are
+                        #no regions in the ch_n which overlap with regions of cchh_nn scor number of times. Add 0 to measurements_dict,
+                        # which is the dictionary which will be used to form the output dataframe
                         if isinstance(count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1], dict):
                             modify_dictionary(result_valu_e=0.0,
                                             dict2modify=measurements_dict,
-                                            root_key_name=column_name_4reg_overlap_measure,
+                                            root_key_name=key_name_4reg_overlap_measure,
                                             channel_1_number=None,
                                             channel_2_number=None)
                         #If no dictionary has been associated to the channel couple ch_coupl_1 at index ixd_2, it means that no quantification could be done.
-                        #Add np.nan to the output dictionary
+                        #Add np.nan to measurements_dict, which is the dictionary which will be used to form the output dataframe
                         else:
                             modify_dictionary(result_valu_e=count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1],
                                             dict2modify=measurements_dict,
-                                            root_key_name=column_name_4reg_overlap_measure,
+                                            root_key_name=key_name_4reg_overlap_measure,
                                             channel_1_number=None,
                                             channel_2_number=None)
 
@@ -971,14 +993,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         #Get the individual channels array as a list
         ch_arrays_list = [np.squeeze(b) for b in np.split(channels_array_copy, indices_or_sections=channels_array_copy.shape[channels_axis_2use], axis=channels_axis_2use)]
 
-        #Also get the individual channels arrays as a list for the roi_mask, if it is provided
+        #Also get the roi_mask corresponding to individual channel arrays as a list, if it is provided
         if hasattr(roi_mask_array, "__len__"):
             roi_mask_array_2use_2 = [np.squeeze(v) for v in np.split(roi_mask_array_2use, indices_or_sections=channels_array_copy.shape[channels_axis_2use], axis=channels_axis_2use)]
             # print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
         else:
             roi_mask_array_2use_2 = roi_mask_array_2use_1 #which should be meaning None
 
-        #Also split on the channel axis the thresholds' arrays corresponding to the ixd-th index along the analysis_axis
+        #Also split on the channel axis the thresholds' arrays
         ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         transform_to_label_img_2use_2 = split_thresholds_arrays(transform_to_label_img_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         val_4zero_regionprops_2use_2 = split_thresholds_arrays(val_4zero_regionprops_2use, split_axis=channels_axis_2use, multi_thresholds=False)
@@ -1000,7 +1022,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
             #==================================================
             #=========  GET ROI IN THE CORRECT FORMAT =========
-            #Get ch_n roi_mask, if it is provided
+            #Get the roi_mask for channel ch_n, if it is provided
             if hasattr(roi_mask_array, "__len__"):
                 ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
                 print("final shape roi mask", ch_n_roi_mask_array.shape)
@@ -1009,24 +1031,47 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
             #=================================
             #=========  ANALYSE AREA =========
-            print(ch_bin_thresh_2use_2[ch_n].shape)
-            print(val_4zero_regionprops_2use_2[ch_n].shape)
-            #Get threshold value for channel ch_n and index ixd in the analysis axis
+            # print(ch_bin_thresh_2use_2[ch_n].shape)
+            # print(val_4zero_regionprops_2use_2[ch_n].shape)
+            #Get threshold value for channel ch_n
             ch_n_ixd_binarization_threshold = get_threshold_from_list(ch_bin_thresh_2use_2[ch_n],
                                                                         multi_value_array=False,
                                                                         multi_value_axis=-1,
                                                                         get_a_single_value=True)
-            #Get threshold value for channel ch_n and index ixd in the analysis axis
+            #Get threshold value for channel ch_n
             ch_n_ixd_value_4_zero_regionprops = get_threshold_from_list(val_4zero_regionprops_2use_2[ch_n],
                                                                         multi_value_array=False,
                                                                         multi_value_axis=-1,
                                                                         get_a_single_value=True)
-            
+            #Get the area as number of pixels
             ch_n_area_px, ch_n_area_props = get_mask_area(ch_array,
                                                             roi_mas_k=ch_n_roi_mask_array,
                                                             binarization_threshold=ch_n_ixd_binarization_threshold,
                                                             value_4_zero_regionprops=ch_n_ixd_value_4_zero_regionprops)
-        
+
+            # #============================================
+            # #========= UPDATE OUTPUT DICTIONARY =========
+            # #Update measurements_dict, which will be used to form the output dataframe
+            # modify_dictionary(result_valu_e=ch_n_area_px, dict2modify=measurements_dict, root_key_name='area', channel_1_number=ch_n, channel_2_number=None)
+
+            # #==================================
+            # #=========  COUNT REGIONS =========
+            # 
+            # #Get threshold value for channel ch_n
+            # ch_n_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[ch_n],
+            #                                                             multi_value_array=False,
+            #                                                             multi_value_axis=-1,
+            #                                                             get_a_single_value=True)
+            # #Count region number
+            # ch_n_regions_number = count_regions_number(ch_array,
+            #                                             roi_mask=ch_n_roi_mask_array,
+            #                                             threshold_input_arr=ch_n_ixd_binarization_threshold,
+            #                                             threshold_roi_mask=ch_n_ixd_threshold_roi_mask)
+            # # print("n of regions ", ch_n_regions_number)
+            # #============================================
+            # #========= UPDATE OUTPUT DICTIONARY =========
+            # #Update measurements_dict, which will be used to form the output dataframe
+            # modify_dictionary(result_valu_e=ch_n_regions_number, dict2modify=measurements_dict, root_key_name='region_number', channel_1_number=ch_n, channel_2_number=None)
     
     # #Use measurements_dict to form the output dataframe
     # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
