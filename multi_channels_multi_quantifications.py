@@ -1297,7 +1297,41 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                                                     get_a_single_value=True)
 
                     if ch_n_area_px>ch_n_ixd_min_px_of_inter_n and cchh_nn_area_px>cchh_nn_ixd_min_px_of_inter_n:
-                        print("PASS")
+                        #==============================================
+                        #=========  MEASURE CHANNELS' OVERLAP =========
+                        #Measure pixels' overlap
+                        #Get threshold value for channel ch_n and cchh_nn
+                        ch_n_ixd_n_px_thr_1 = get_threshold_from_list(measure_pixels_overlap_n_px_thr_1_2use_2[ch_n],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                            
+                        cchh_nn_ixd_n_px_thr_2 = get_threshold_from_list(measure_pixels_overlap_n_px_thr_2_2use_2[cchh_nn],
+                                                                                        multi_value_array=False,
+                                                                                        multi_value_axis=-1,
+                                                                                        get_a_single_value=True)
+                            
+                        #Measure the observed overlap and the overlap obtained after shuffling the pixels
+                        ch_n__cchh_nn_overlap_i = measure_pixels_overlap(ch_array,
+                                                                            cchh_nn_array,
+                                                                            roi_mask_arr_1=ch_n_roi_mask_array,
+                                                                            roi_mask_arr_2_against=cchh_nn_roi_mask_array,
+                                                                            shuffle_times=shuffle_times,
+                                                                            n_px_thr_1=ch_n_ixd_n_px_thr_1,
+                                                                            n_px_thr_2=cchh_nn_ixd_n_px_thr_2,
+                                                                            val_threshold_arr_1=ch_n_ixd_binarization_threshold,
+                                                                            val_threshold_arr_2=cchh_nn_ixd_binarization_threshold)
+                            
+                        #The output of measure_pixels_overlap is different depending on the selected parameters (refer to its documentation).
+                        # Get the specific outputs
+                        if isinstance(ch_n__cchh_nn_overlap_i, tuple):
+                            ch_n__cchh_nn_overlap = ch_n__cchh_nn_overlap_i[0]
+                            ch_n__cchh_nn_overlap_shuff = ch_n__cchh_nn_overlap_i[1]
+                        else:
+                            ch_n__cchh_nn_overlap = np.nan
+                            ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
+                        
+
     
     # #Use measurements_dict to form the output dataframe
     # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
