@@ -1019,14 +1019,14 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         #=========  ITERATE ON THE CHANNEL AXIS =========
         # Iterate through the channels
         for ch_n, ch_array in enumerate(ch_arrays_list):
-            print("---", ch_n, ch_array.shape)
+            print("---", ch_n)
 
             #==================================================
             #=========  GET ROI IN THE CORRECT FORMAT =========
             #Get the roi_mask for channel ch_n, if it is provided
             if hasattr(roi_mask_array, "__len__"):
                 ch_n_roi_mask_array = roi_mask_array_2use_2[ch_n]
-                print("final shape roi mask", ch_n_roi_mask_array.shape)
+                # print("final shape roi mask", ch_n_roi_mask_array.shape)
             else:
                 ch_n_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
 
@@ -1125,7 +1125,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             #=======================================================================
             #=========  MEASURE INTER-REGIONS DISTANCES WITHIN THE CHANNEL =========
             #Get threshold value for channel ch_n
-            print(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n].shape)
             ch_n_ixd_highpass_n_regions_4distance = get_threshold_from_list(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2[ch_n],
                                                                             multi_value_array=False,
                                                                             multi_value_axis=-1,
@@ -1264,7 +1263,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                     #Get the roi_mask for channel cchh_nn, if it is provided
                     if hasattr(roi_mask_array, "__len__"):
                         cchh_nn_roi_mask_array = roi_mask_array_2use_2[cchh_nn]
-                        print("final shape roi mask", cchh_nn_roi_mask_array.shape)
+                        # print("final shape roi mask", cchh_nn_roi_mask_array.shape)
                     else:
                         cchh_nn_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
                     
@@ -1463,7 +1462,109 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                             ch_n__cchh_nn_overlapping_regions=ch_n__cchh_nn_overlapping_regions_i
                         else:
                             ch_n__cchh_nn_overlapping_regions=np.nan
+                        
+                        #==================================================
+                        #=========  MEASURE CONVEX HULL FRACTIONS =========
+                        #Get threshold values for channel ch_n and cchh_nn
+                        cchh_nn_ixd_threshold_roi_mask = get_threshold_from_list(threshold_roi_mask_2use_2[cchh_nn],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+                            
+                        ch_n_ixd_px_thre_arr_1 = get_threshold_from_list(conv_hull_fract_px_thre_arr_1_2use_2[ch_n],
+                                                                            multi_value_array=False,
+                                                                            multi_value_axis=-1,
+                                                                            get_a_single_value=True)
+                            
+                        cchh_nn_ixd_px_thre_arr_2 = get_threshold_from_list(conv_hull_fract_px_thre_arr_2_2use_2[cchh_nn],
+                                                                                multi_value_array=False,
+                                                                                multi_value_axis=-1,
+                                                                                get_a_single_value=True)
+                        #Calculate the convex hull fraction
+                        ch_n__cchh_nn_convex_hull_fraction = get_convex_hull_fraction(ch_array,
+                                                                                          cchh_nn_array,
+                                                                                          roi__mask_1=ch_n_roi_mask_array,
+                                                                                          roi__mask_2=cchh_nn_roi_mask_array,
+                                                                                          threshold_arr_1=ch_n_ixd_binarization_threshold,
+                                                                                          threshold_arr_2=cchh_nn_ixd_binarization_threshold,
+                                                                                          threshold_roi_mask_1=ch_n_ixd_threshold_roi_mask,
+                                                                                          threshold_roi_mask_2=cchh_nn_ixd_threshold_roi_mask,
+                                                                                          px_thre_arr_1=ch_n_ixd_px_thre_arr_1,
+                                                                                          px_thre_arr_2=cchh_nn_ixd_px_thre_arr_2,
+                                                                                          val_4_arr1_NOpassthres_arr2_passthres=get_conv_hull_fract_arr1_NOpass_arr2_pass_v,
+                                                                                          val_4_arr2_NOpassthres=get_conv_hull_fract_arr2_NOpass_v)
+                    
+                    # #========================================================================================
+                    # #=========  ADD NaNs VALUES AS RESULTS OF THE ANALYSES IF THEY COULD NOT BE DONE =========
+                    # else:
+                    #     #channels' overlap
+                    #     ch_n__cchh_nn_overlap = np.nan
+                    #     ch_n__cchh_nn_overlap_shuff = [np.nan for shf in range(shuffle_times)]
 
+                    #     #inter-channels euclidean distances
+                    #     mean_ch_n__cchh_nn_min_euclid_distances = np.nan
+                    #     median_ch_n__cchh_nn_min_euclid_distances = np.nan
+                    #     std_ch_n__cchh_nn_min_euclid_distances = np.nan
+                    #     sem_ch_n__cchh_nn_min_euclid_distances = np.nan
+                    #     min_ch_n__cchh_nn_min_euclid_distances = np.nan
+                    #     max_ch_n__cchh_nn_min_euclid_distances = np.nan
+
+                    #     mean_ch_n__cchh_nn_max_euclid_distances = np.nan
+                    #     median_ch_n__cchh_nn_max_euclid_distances = np.nan
+                    #     std_ch_n__cchh_nn_max_euclid_distances = np.nan
+                    #     sem_ch_n__cchh_nn_max_euclid_distances = np.nan
+                    #     min_ch_n__cchh_nn_max_euclid_distances = np.nan
+                    #     max_ch_n__cchh_nn_max_euclid_distances = np.nan
+
+                    #     mean_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                    #     median_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                    #     std_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                    #     sem_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                    #     min_ch_n__cchh_nn_mean_euclid_distances = np.nan
+                    #     max_ch_n__cchh_nn_mean_euclid_distances = np.nan
+
+                    #     #overlapping regions
+                    #     ch_n__cchh_nn_overlapping_regions = np.nan
+
+                    #     #convex hull
+                    #     ch_n__cchh_nn_convex_hull_fraction = np.nan
+
+                    # #============================================
+                    # #========= UPDATE OUTPUT DICTIONARY =========
+                    # # #Update measurements_dict, which will be used to form the output dataframe
+
+                    # # #channels' overlap
+                    # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap, dict2modify=measurements_dict, root_key_name='pixels_overlap_observed', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap_shuff, dict2modify=measurements_dict, root_key_name='pixels_overlap_shuffle', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        
+                    # # #inter-channels euclidean distances
+                    # modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=median_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='median_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=std_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=min_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='min_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=max_ch_n__cchh_nn_min_euclid_distances, dict2modify=measurements_dict, root_key_name='max_min_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                            
+                    # modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=median_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='median_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=std_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=min_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='min_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=max_ch_n__cchh_nn_max_euclid_distances, dict2modify=measurements_dict, root_key_name='max_max_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+
+                    # modify_dictionary(result_valu_e=mean_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='mean_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=median_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='median_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=std_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='stdv_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=sem_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='sem_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=min_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='min_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                    # modify_dictionary(result_valu_e=max_ch_n__cchh_nn_mean_euclid_distances, dict2modify=measurements_dict, root_key_name='max_mean_distance_regions', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                                                
+                    # # #Also update count_number_of_overlapping_regions_coll_dict, to be used for adding the measurements of count_number_of_overlapping_regions to measurements_dict,
+                    # # #at the end of the iterations
+                    # count_number_of_overlapping_regions_coll_dict[ixd][(ch_n,cchh_nn)]=ch_n__cchh_nn_overlapping_regions
+
+                    # #convex hull
+                    # modify_dictionary(result_valu_e=ch_n__cchh_nn_convex_hull_fraction, dict2modify=measurements_dict, root_key_name='convex_hull_fraction', channel_1_number=ch_n, channel_2_number=cchh_nn)
     
     # #Use measurements_dict to form the output dataframe
     # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
