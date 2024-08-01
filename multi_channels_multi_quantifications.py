@@ -178,8 +178,8 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             - if get_a_single_value==True. The function returns the average value of array_threshold, as an int or float.
             - if get_a_single_value==False. The function returns array_threshold.
         - if multi_value_array==True. The function splits array_threshold in sub-arrays along multi_value_axis (defaul is -1).
-            - if get_a_single_value==True. The function returns a tuple with the average value of the of each sub-array of array_threshold along the multi_value_axis.
-            - if get_a_single_value==True. The function return the sub-arrays obtained by splitting array_threshold along the multi_value_axis. The output dtype is a list.
+            - if get_a_single_value==True. The function returns a tuple with the average value of each sub-array of array_threshold along the multi_value_axis.
+            - if get_a_single_value==False. The function return the sub-arrays obtained by splitting array_threshold along the multi_value_axis. The output dtype is a list.
         
         This function works in the context of set_thresholds_2use and quantify_channels. For certain quantification functions it is required to indicate multiple thresholds. These
         thresholds must be indicated in the -1 axis of the threshold array which is either the output of set_threshold_2use or directly input to quantify_channels. For this reason,
