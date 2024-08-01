@@ -322,7 +322,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         for ixd, idx_array in enumerate([np.squeeze(a) for a in np.split(channels_array_copy,
                                                                          indices_or_sections=channels_array_copy.shape[analysis_axis],
                                                                          axis=analysis_axis)]):
-            # print("==="*3, ixd)
+            print("==="*3, ixd)
             #============================================
             #========= UPDATE OUTPUT DICTIONARY =========
             #Update measurements_dict, which will be used to form the output dataframe
@@ -362,7 +362,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             #=========  ITERATE ON THE CHANNEL AXIS =========
             # Iterate through the channels
             for ch_n, ch_array in enumerate(ch_arrays_list):
-                # print("---", ch_n)
+                print("---", ch_n)
 
                 #==================================================
                 #=========  GET ROI IN THE CORRECT FORMAT =========
@@ -595,7 +595,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                     #Avoid measuring a channel angainst itself
                     if ch_n != cchh_nn:
-                        # print("...")
+                        print("...")
                         #===============================================================
                         #=========  VERIFY IF COMPARATIVE ANALYSIS CAN BE DONE =========
                         #Get cchh_nn roi mask if it is provided
@@ -895,60 +895,60 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                                 
                         # #Also update count_number_of_overlapping_regions_coll_dict, to be used for adding the measurements of count_number_of_overlapping_regions to measurements_dict,
                         # #at the end of the iterations
-                        count_number_of_overlapping_regions_coll_dict[ixd][(ch_n,cchh_nn)]=ch_n__cchh_nn_overlapping_regions
+                        # count_number_of_overlapping_regions_coll_dict[ixd][(ch_n,cchh_nn)]=ch_n__cchh_nn_overlapping_regions
 
                         #convex hull
-                        # modify_dictionary(result_valu_e=ch_n__cchh_nn_overlap, dict2modify=measurements_dict, root_key_name='pixels_overlap_observed', channel_1_number=ch_n, channel_2_number=cchh_nn)
+                        modify_dictionary(result_valu_e=ch_n__cchh_nn_convex_hull_fraction, dict2modify=measurements_dict, root_key_name='convex_hull_fraction', channel_1_number=ch_n, channel_2_number=cchh_nn)
 
         
         #====================================================================================================
         #========= UPDATE OUTPUT DICTIONARY FOR THE RESULTS OF  count_number_of_overlapping_regions =========
-        #Get the higher number of counted overlapping regions
-        counted_overlapping_region_coll_list = [] #Initialize a collection list
-        #Iterate through the indexes along analysis axis within count_number_of_overlapping_regions_coll_dict
-        for ixd_1 in count_number_of_overlapping_regions_coll_dict:
-            #Iterate through the channels couple at each index ixd_1
-            for ch_coupl in count_number_of_overlapping_regions_coll_dict[ixd_1]:
-                #Iterate through the counted overlapping regions, if the channel_couple ch_coupl at index ixd_1 could be quantified
-                if isinstance(count_number_of_overlapping_regions_coll_dict[ixd_1][ch_coupl], dict):
-                    for over_count in count_number_of_overlapping_regions_coll_dict[ixd_1][ch_coupl]:
-                        counted_overlapping_region_coll_list.append(over_count)
-        #Remove duplicate counts from counted_overlapping_region_coll_list and sort number ascending
-        sorted_unique_counted_overlapping_region_coll_list = sorted(list(set(counted_overlapping_region_coll_list)))
-        #Iterate through the sorted counted number of overlapping regions
-        for scor in sorted_unique_counted_overlapping_region_coll_list:
-            #Iterate through the indexes along analysis axis within count_number_of_overlapping_regions_coll_dict
-            for ixd_2 in count_number_of_overlapping_regions_coll_dict:
-                #Iterate through the channels couple at each index ixd_2
-                for ch_coupl_1 in count_number_of_overlapping_regions_coll_dict[ixd_2]:
-                    #form the column name
-                    column_name_4reg_overlap_measure = f"n_ch_{ch_coupl_1[0]}_regions_overlap_w_{scor}_ch_{ch_coupl_1[1]}_regions"
-                    #Check if counted number of overlapping regions has been quantified for index ixd_2 and channel couple ch_coupl_1
-                    try:
-                        #If they have been quantified, add them to the output dictionary
-                        quantification_result = count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1][scor]
-                        modify_dictionary(result_valu_e=quantification_result,
-                                          dict2modify=measurements_dict,
-                                          root_key_name=column_name_4reg_overlap_measure,
-                                          channel_1_number=None,
-                                          channel_2_number=None)
-                    except:
-                        #If the counted number of overlapping regions are not present, but the channel couple ch_coupl_1 at index ixd_2 was quantified, it means that there are
-                        #no regions in the first channels which overlap with regions of the second channel the counted number of times. Add 0 to the collected dictionary
-                        if isinstance(count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1], dict):
-                            modify_dictionary(result_valu_e=0.0,
-                                            dict2modify=measurements_dict,
-                                            root_key_name=column_name_4reg_overlap_measure,
-                                            channel_1_number=None,
-                                            channel_2_number=None)
-                        #If no dictionary has been associated to the channel couple ch_coupl_1 at index ixd_2, it means that no quantification could be done.
-                        #Add np.nan to the output dictionary
-                        else:
-                            modify_dictionary(result_valu_e=count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1],
-                                            dict2modify=measurements_dict,
-                                            root_key_name=column_name_4reg_overlap_measure,
-                                            channel_1_number=None,
-                                            channel_2_number=None)
+        # #Get the higher number of counted overlapping regions
+        # counted_overlapping_region_coll_list = [] #Initialize a collection list
+        # #Iterate through the indexes along analysis axis within count_number_of_overlapping_regions_coll_dict
+        # for ixd_1 in count_number_of_overlapping_regions_coll_dict:
+        #     #Iterate through the channels couple at each index ixd_1
+        #     for ch_coupl in count_number_of_overlapping_regions_coll_dict[ixd_1]:
+        #         #Iterate through the counted overlapping regions, if the channel_couple ch_coupl at index ixd_1 could be quantified
+        #         if isinstance(count_number_of_overlapping_regions_coll_dict[ixd_1][ch_coupl], dict):
+        #             for over_count in count_number_of_overlapping_regions_coll_dict[ixd_1][ch_coupl]:
+        #                 counted_overlapping_region_coll_list.append(over_count)
+        # #Remove duplicate counts from counted_overlapping_region_coll_list and sort number ascending
+        # sorted_unique_counted_overlapping_region_coll_list = sorted(list(set(counted_overlapping_region_coll_list)))
+        # #Iterate through the sorted counted number of overlapping regions
+        # for scor in sorted_unique_counted_overlapping_region_coll_list:
+        #     #Iterate through the indexes along analysis axis within count_number_of_overlapping_regions_coll_dict
+        #     for ixd_2 in count_number_of_overlapping_regions_coll_dict:
+        #         #Iterate through the channels couple at each index ixd_2
+        #         for ch_coupl_1 in count_number_of_overlapping_regions_coll_dict[ixd_2]:
+        #             #form the column name
+        #             column_name_4reg_overlap_measure = f"n_ch_{ch_coupl_1[0]}_regions_overlap_w_{scor}_ch_{ch_coupl_1[1]}_regions"
+        #             #Check if counted number of overlapping regions has been quantified for index ixd_2 and channel couple ch_coupl_1
+        #             try:
+        #                 #If they have been quantified, add them to the output dictionary
+        #                 quantification_result = count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1][scor]
+        #                 modify_dictionary(result_valu_e=quantification_result,
+        #                                   dict2modify=measurements_dict,
+        #                                   root_key_name=column_name_4reg_overlap_measure,
+        #                                   channel_1_number=None,
+        #                                   channel_2_number=None)
+        #             except:
+        #                 #If the counted number of overlapping regions are not present, but the channel couple ch_coupl_1 at index ixd_2 was quantified, it means that there are
+        #                 #no regions in the first channels which overlap with regions of the second channel the counted number of times. Add 0 to the collected dictionary
+        #                 if isinstance(count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1], dict):
+        #                     modify_dictionary(result_valu_e=0.0,
+        #                                     dict2modify=measurements_dict,
+        #                                     root_key_name=column_name_4reg_overlap_measure,
+        #                                     channel_1_number=None,
+        #                                     channel_2_number=None)
+        #                 #If no dictionary has been associated to the channel couple ch_coupl_1 at index ixd_2, it means that no quantification could be done.
+        #                 #Add np.nan to the output dictionary
+        #                 else:
+        #                     modify_dictionary(result_valu_e=count_number_of_overlapping_regions_coll_dict[ixd_2][ch_coupl_1],
+        #                                     dict2modify=measurements_dict,
+        #                                     root_key_name=column_name_4reg_overlap_measure,
+        #                                     channel_1_number=None,
+        #                                     channel_2_number=None)
 
 
     # # #If the analysis axis is not provided          
