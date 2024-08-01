@@ -1250,7 +1250,22 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             modify_dictionary(result_valu_e=min_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='min_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
             modify_dictionary(result_valu_e=max_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='max_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
 
-            
+            #==================================================================
+            #=========  START COMPARATIVE MEASUREMENTS AMONG CHANNELS =========
+            #Iterate trough the channels a second time, to get measurements calculated by comparing two channels
+            for cchh_nn, cchh_nn_array in enumerate(ch_arrays_list):
+
+                #Avoid measuring a channel angainst itself
+                if ch_n != cchh_nn:
+                    print("...")
+                    #===============================================================
+                    #=========  VERIFY IF COMPARATIVE ANALYSIS CAN BE DONE =========
+                    #Get the roi_mask for channel cchh_nn, if it is provided
+                    if hasattr(roi_mask_array, "__len__"):
+                        cchh_nn_roi_mask_array = roi_mask_array_2use_2[cchh_nn]
+                        print("final shape roi mask", cchh_nn_roi_mask_array.shape)
+                    else:
+                        cchh_nn_roi_mask_array= roi_mask_array_2use_2 #which should be meaning None
 
     
     # #Use measurements_dict to form the output dataframe
