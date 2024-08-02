@@ -14,7 +14,7 @@ def listdirNHF(input_directory):
     return [f for f in os.listdir(input_directory) if not f.startswith(".")]
 
 
-def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, roi_pixel_value=255, background_pixel_val=0, output_dtype=np.uint8):
+def form_mask_from_roi(roi_file_path, reference_img, ax_position=None, return_coordinates=False, roi_pixel_value=255, background_pixel_val=0, output_dtype=np.uint8):
     """
     Given:
     - The directory of a .roi or .zip file containing one or multiple ROIs saved from Fiji/ImageJ.
@@ -23,47 +23,94 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
     The function returns a binary array of the same shape as reference, where pixels of the ROIs are assinged value roi_pixel_value (default 255) and the rest of the pixels are
     assigned value background_pixel_val (default 0). The default output dtype is uint8.
 
-    If return_coordinates=True (default is False) the function returns the coordinates of the .roi/.zip file. If the file is a signle roi (extension .roi) the output is a numpy array
-    of sub-numpy-arrays. Each sub-numpy-array is the col_x, row_y coordinates of a pixel of the roi. If the roi file contains multiple rois (extension .zip) the output is a list where
+    If return_coordinates=True (default is False) the function returns the coordinates of the .roi/.zip file. If the file is a single roi (extension .roi) the output is a numpy array
+    of sub-numpy-arrays. Each sub-numpy-array is the col_x, row_y coordinates of a pixel of the roi. If the roi file contains multiple rois (extension .zip) the output is a dict where
     each element is a numpy array of sub-numpy-arrays. Each numpy-array corresponds to an individual roi. Each sub-numpy-array of each numpy array is the col_x, row_y coordinates of a
     pixel of the individual roi.
 
-    NOTES: the function is tested for Imagej/Fiji -generated roi files (extensions .roi or .zip). The function was only tested on 2D images.
+    Inputs:
+    - roi_file_path the complete path of a .roi or .zip file.
+    - reference_img. 2D array or 3D array. The roi contained in the file indicated in roi_file_path must have coordinates which could be allocated in the reference_img.
+    - ax_position. None or int. Default None. If None, reference_img must be a 2D array. If int, reference_img must be a 3D array. If int, specifies the axis to use
+    for the 3D positioning of 2D roi.
+    - return_coordinates. Bool. Optional. Default False. If True, the function returns the coordinates of roi in the file indicated in roi_file_path.
+    - roi_pixel_value. int or float. Optional. Default 255. The value of pixels within the roi in the output array.
+    - background_pixel_value. int or float. Optional. Default 0. The value of the background pixels in the output array.
+    - output_dtype. data type. Optional. Default np.uint8. The data type of the output array.
+
+    Outputs:
+    - if return_coordinates==False. The output is an array of the same shape of reference image, where pixels of the roi in roi_file_path are set to roi_pixel_value
+    and the rest of the pixels are set to background_pixel_val.
+    - if return_coordinates==True. The output is a tuple. In posistion 0 is the array of the same shape of reference image, where pixels of the roi in roi_file_path are set to roi_pixel_value
+    and the rest of the pixels are set to background_pixel_val. In positons 1 is a dictionary.
+        - if ax_position=None. each key is set to 0, as reference_img is a 2D image. Each key is linked to a list.
+            - if roi_file_path is .roi. Each list contain an numpy array of sub-numpy-arrays. Each sub-numpy-array is the col_x, row_y coordinates of a pixel of the roi.
+            - if roi_file_path is .zip. As the roi file contains multiple rois (extension .zip) each element of the list is a numpy array of sub-numpy-arrays. Each numpy-array
+            corresponds to an individual roi. Each sub-numpy-array of each numpy array is the col_x, row_y coordinates of a pixel of the individual roi.
+        - if ax_position=int. each key is the position an roi along the ax_position axis, as reference_img is a 3D image. Each key is linked to a list.
+            - if roi_file_path is .roi. Each list contain an numpy array of sub-numpy-arrays. Each sub-numpy-array is the col_x, row_y coordinates of a pixel of the roi.
+            - if roi_file_path is .zip. As the roi file contains multiple rois (extension .zip) each element of the list is a numpy array of sub-numpy-arrays. Each numpy-array
+            corresponds to an individual roi. Each sub-numpy-array of each numpy array is the col_x, row_y coordinates of a pixel of the individual roi.
+
+    NOTES: the function is tested for Imagej/Fiji -generated roi files (extensions .roi or .zip). The function only works on 2D or 3D images. The function hasn't
+    been extensively tested.
     """
+
+    #Make sure that reference_img is 3D if ax_position is provided, and 2D is ax_position is not provided
+    if ax_position==None:
+        assert len(reference_img.shape)==2, "reference_img must be 2D if no ax_position is provided"
+    else:
+        assert len(reference_img.shape)==3, "reference_img must be 3D if ax_position is provided"
 
     #Open roi file
     roi_file = ImagejRoi.fromfile(roi_file_path)
 
     #Initialize the output array as a zero array of the same shape of reference_img
-    out_img = np.zeros((reference_img.shape[0], reference_img.shape[1])).astype(np.uint8)
+    out_img = np.zeros(reference_img.shape).astype(np.uint8)
+
+    #form a list of 2D arrays with the output array along ax_position, if ax_position is provided
+    if ax_position!=None:
+        out_img_list = [np.squeeze(a) for a in np.split(out_img, indices_or_sections=out_img.shape[ax_position],axis=ax_position)]
+
+    #Initialize an output dictionary to collect coordinates, if return_coordinates is set to True
+    if return_coordinates:
+        output_coords_coll_dict = {}
 
     #Iterate through the coordinates of the roi file and collect col_x and row_y pixels coordinates in separate lists.
-    # Note: if file is a signle roi (extension .roi) roi_file_copy is a list of tuples. Each tuple is the col_x, row_y coordinates of a pixel of the roi.
-    # If the roi file contains multiple rois (extension .zip) the file is a list where each element is a sub-list of tuples. Each sub-list corresponds to an individual roi.
-    # Each tuple of each sub-list is the col_x, row_y coordinates of a pixel of the individual roi.
-
     #If the input file is a collection of rois
     if roi_file_path[-4:]==".zip":
 
-        #Initialize an outputlist to collect coordinates of different rois, if return_coordinates is set to True
-        if return_coordinates:
-            output_coords_coll_list = []
-
         #Iterate through the individual sub-roi
         for sub_roi in roi_file:
-
+            
             #Initialize collection lists for col_x and row_y coordinates
             col_x_list = []
             row_y_list = []
 
-            #Get roi_file_coordinates
+            #Get sub-roi_file_coordinates
             sub_roi_file_coords = sub_roi.coordinates()
+            
+            #Get sub-roi-file position along ax_position, if ax position is provided
+            if ax_position!=None:
+                # Get roi_file position along the ax_position of the reference_img
+                sub_roi_file_position = sub_roi.position
 
-            #Add coordinates to output collection list if return_coordinates is set to True
+            #Add coordinates to output collection dict if return_coordinates is set to True
             if return_coordinates:
-                output_coords_coll_list.append(sub_roi_file_coords)
+                #if ax_position is provided, link each position to the coordinates of the roi in that 2D array
+                if ax_position!=None:
+                    if sub_roi_file_position not in output_coords_coll_dict:
+                        output_coords_coll_dict[sub_roi_file_position]=[sub_roi_file_coords]
+                    else:
+                        output_coords_coll_dict[sub_roi_file_position].append(sub_roi_file_coords)
+                #if ax_position is not provided, link coordinates of each sub-roi to position 0
+                else:
+                    if 0 not in output_coords_coll_dict:
+                        output_coords_coll_dict[0]=[sub_roi_file_coords]
+                    else:
+                        output_coords_coll_dict[0].append(sub_roi_file_coords)
 
-            #Iterate through the coordinates of the individual sub-roi
+            #Iterate through the coordinates of the individual sub-roi and append them to the x and y collection list
             for c in sub_roi_file_coords:
                 col_x_list.append(c[0]-1) #Note: because roi have been generate in ImageJ their coordinate numeration starts from 0, while python starts from 0
                 row_y_list.append(c[1]-1) #Note: because roi have been generate in ImageJ their coordinate numeration starts from 0, while python starts from 0
@@ -76,7 +123,15 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
             yy_rr, xx_cc = polygon(row_y_array, col_x_array)
 
             #Modify the output array
-            out_img[yy_rr, xx_cc]=255
+            #If ax_position is provided, first modify a 2D array of the shape of the array at the correct position along ax_position axis, then substitute
+            #it to the corresponding array in the list of 2D array
+            if ax_position!=None:
+                modified_array = out_img_list[sub_roi_file_position-1].copy()
+                modified_array[yy_rr, xx_cc]=255
+                out_img_list[sub_roi_file_position-1]=modified_array
+            #if ax_position is not provided, just modify the 2D image
+            else:
+                out_img[yy_rr, xx_cc]=255
 
     #If the input file is a single rois
     else:
@@ -86,8 +141,13 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
         
         #Get roi_file_coordinates
         roi_file_coords = roi_file.coordinates()
+
+        #Get sub-roi-file position along ax_position, if ax position is provided
+        if ax_position!=None:
+            # Get roi_file position along the ax_position of the reference_img
+            roi_file_position = roi_file.position
         
-        #Iterate through the coordinates of the roi
+        #Iterate through the coordinates of the individual sub-roi and append them to the x and y collection list
         for c1 in roi_file_coords:
             col_x_list_1.append(c1[0]-1) #Note: because roi have been generate in ImageJ their coordinate numeration starts from 0, while python starts from 0
             row_y_list_1.append(c1[1]-1) #Note: because roi have been generate in ImageJ their coordinate numeration starts from 0, while python starts from 0
@@ -100,18 +160,49 @@ def form_mask_from_roi(roi_file_path, reference_img, return_coordinates=False, r
         yy_rr_1, xx_cc_1 = polygon(row_y_array_1, col_x_array_1)
 
         #Modify the output array
-        out_img[yy_rr_1, xx_cc_1]=255
+        #If ax_position is provided, first modify a 2D array of the shape of the array at the correct position along ax_position axis, then substitute
+        #it to the corresponding array in the list of 2D array
+        if ax_position!=None:
+            modified_array = out_img_list[roi_file_position-1].copy()
+            modified_array[yy_rr_1, xx_cc_1]=255
+            out_img_list[roi_file_position-1]=modified_array
+        
+        #if ax_position is not provided, just modify the 2D image
+        else:
+            out_img[yy_rr_1, xx_cc_1]=255
 
-    #Rescale the output array in the desired range
-    rescaled_out_img = np.where(out_img>0, roi_pixel_value, background_pixel_val).astype(output_dtype)
+        #Add coordinates to output collection dict if return_coordinates is set to True
+        if return_coordinates:
+            #if ax_position is provided, link each position to the coordinates of the roi in that 2D array
+            if ax_position!=None:
+                if roi_file_position not in output_coords_coll_dict:
+                    output_coords_coll_dict[roi_file_position]=[roi_file_coords]
+                else:
+                    output_coords_coll_dict[roi_file_position].append(roi_file_coords)
+            #if ax_position is not provided, link coordinates of each sub-roi to position 0
+            else:
+                if 0 not in output_coords_coll_dict:
+                    output_coords_coll_dict[0]=[roi_file_coords]
+                else:
+                    output_coords_coll_dict[0].append(roi_file_coords)
+
+    #If ax_position is provided, use out_img_list to re-form a 3D array of the same shape of reference_img, by stacking together the 2D arrays along ax_position axis
+    if ax_position!=None:
+        stacked_array = np.stack(out_img_list, axis=ax_position)
+
+        #Rescale the stacked array in the desired range
+        rescaled_out_img = np.where(stacked_array>0, roi_pixel_value, background_pixel_val).astype(output_dtype)
+    #If ax_position is not provided
+    else:
+        #just rescale the output array in the desired range
+        rescaled_out_img = np.where(out_img>0, roi_pixel_value, background_pixel_val).astype(output_dtype)
 
     if return_coordinates:
-        if roi_file_path[-4:]==".zip":
-            return rescaled_out_img, output_coords_coll_list
-        else:
-            return rescaled_out_img, roi_file_coords
+        return rescaled_out_img, output_coords_coll_dict
+    
     else:
         return rescaled_out_img
+
 
 def get_euclidean_distances(coords_1, coords_2, desired_distance='min'):
     """
