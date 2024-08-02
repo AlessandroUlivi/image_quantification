@@ -1642,5 +1642,5 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                                             channel_2_number=None)
 
     #Use measurements_dict to form the output dataframe
-    # output_dataframe = pd.DataFrame.from_dict(measurements_dict)
-    # return output_dataframe
+    output_dataframe = pd.DataFrame.from_dict(measurements_dict)
+    return output_dataframe
