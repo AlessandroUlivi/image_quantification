@@ -1009,7 +1009,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             roi_mask_array_2use_2 = [np.squeeze(v) for v in np.split(roi_mask_array_2use, indices_or_sections=channels_array_copy.shape[channels_axis_2use], axis=channels_axis_2use)]
             # print("roi_mask after channel axis split: ", len(roi_mask_array_2use_2), roi_mask_array_2use_2[0].shape)
         else:
-            roi_mask_array_2use_2 = roi_mask_array_2use_1 #which should be meaning None
+            roi_mask_array_2use_2 = roi_mask_array_2use #which should be meaning None
 
         #Also split on the channel axis the thresholds' arrays
         ch_bin_thresh_2use_2 = split_thresholds_arrays(ch_bin_thresh_2use, split_axis=channels_axis_2use, multi_thresholds=False)
