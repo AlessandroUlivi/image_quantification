@@ -991,10 +991,6 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #If the analysis axis is not provided - NOTE: all the analyses are repeated identical without iteration on the analysis axis
     else:
 
-        print("==="*10)
-        print("---NO analysis of a specific axis---")
-        print("==="*10)
-
         #====================================================================================================
         #=========  INITIALIZE DICTIONARY COLLECTING RESULTS OF count_number_of_overlapping_regions =========
         #The output of count_number_of_overlapping_regions is a dictionary linking the amount of regions in channel-j overlapping to region-i of channel-i to the
@@ -1033,7 +1029,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         #=========  ITERATE ON THE CHANNEL AXIS =========
         # Iterate through the channels
         for ch_n, ch_array in enumerate(ch_arrays_list):
-            print("---", ch_n)
+            # print("---", ch_n)
 
             #==================================================
             #=========  GET ROI IN THE CORRECT FORMAT =========
@@ -1271,7 +1267,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
 
                 #Avoid measuring a channel angainst itself
                 if ch_n != cchh_nn:
-                    print("...")
+                    # print("...")
                     #===============================================================
                     #=========  VERIFY IF COMPARATIVE ANALYSIS CAN BE DONE =========
                     #Get the roi_mask for channel cchh_nn, if it is provided
