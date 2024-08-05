@@ -24,9 +24,10 @@ def form_mask_from_roi(roi_file_path, reference_img, ax_position=None, return_co
     assigned value background_pixel_val (default 0). The default output dtype is uint8.
 
     If return_coordinates=True (default is False) the function returns the coordinates of the .roi/.zip file. If the file is a single roi (extension .roi) the output is a numpy array
-    of sub-numpy-arrays. Each sub-numpy-array is the col_x, row_y coordinates of a pixel of the roi. If the roi file contains multiple rois (extension .zip) the output is a dict where
-    each element is a numpy array of sub-numpy-arrays. Each numpy-array corresponds to an individual roi. Each sub-numpy-array of each numpy array is the col_x, row_y coordinates of a
-    pixel of the individual roi.
+    of sub-numpy-arrays. Each sub-numpy-array is the col_x, row_y coordinates of a pixel of the roi. If the roi file contains multiple rois (extension .zip) the output is a dict. In each
+    key:value pair of the dictionary, the key is a position along the ax_position axis of the reference_img, the value is a is a numpy array of sub-numpy-arrays. Each numpy-array
+    corresponds to an individual roi of the (potentially) multiple present at the specific position of reference_img. Each sub-numpy-array of each numpy array is the col_x, row_y
+    coordinates of a pixel of the individual roi.
 
     Inputs:
     - roi_file_path the complete path of a .roi or .zip file.
