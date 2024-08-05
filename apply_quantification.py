@@ -24,22 +24,22 @@ class sample_quantifier():
         self.roi_exclude = roi_exclude
         self.roi_3D_maintain = roi_3D_maintain
         self.roi_3D_exclude = roi_3D_exclude
-        self.shuffle_times
-        self.no_quantification_valu_e
-        self.channels_binarization_thresholds
-        self.transform_to_label_img
-        self.get_mask_area_val_4zero_regionprops
-        self.count_regions_number_threshold_roi_mask
-        self.n_of_region_4areas_measure
-        self.reg_eucl_dist_within_arr_val_n_regions_nopass
-        self.min_px_over_thresh_common
-        self.measure_pixels_overlap_n_px_thr_1
-        self.measure_pixels_overlap_n_px_thr_2
-        self.count_n_overl_reg_intersection_threshold
-        self.conv_hull_fract_px_thre_arr_1
-        self.conv_hull_fract_px_thre_arr_2
-        self.get_conv_hull_fract_arr1_NOpass_arr2_pass_v
-        self.get_conv_hull_fract_arr2_NOpass_v
+        self.shuffle_times = shuffle_times
+        self.no_quantification_valu_e = no_quantification_valu_e
+        self.channels_binarization_thresholds = channels_binarization_thresholds
+        self.transform_to_label_img = transform_to_label_img
+        self.get_mask_area_val_4zero_regionprops = get_mask_area_val_4zero_regionprops
+        self.count_regions_number_threshold_roi_mask = count_regions_number_threshold_roi_mask
+        self.n_of_region_4areas_measure = n_of_region_4areas_measure
+        self.reg_eucl_dist_within_arr_val_n_regions_nopass = reg_eucl_dist_within_arr_val_n_regions_nopass
+        self.min_px_over_thresh_common = min_px_over_thresh_common
+        self.measure_pixels_overlap_n_px_thr_1 = measure_pixels_overlap_n_px_thr_1
+        self.measure_pixels_overlap_n_px_thr_2 = measure_pixels_overlap_n_px_thr_2
+        self.count_n_overl_reg_intersection_threshold = count_n_overl_reg_intersection_threshold
+        self.conv_hull_fract_px_thre_arr_1 = conv_hull_fract_px_thre_arr_1
+        self.conv_hull_fract_px_thre_arr_2 = conv_hull_fract_px_thre_arr_2
+        self.get_conv_hull_fract_arr1_NOpass_arr2_pass_v = get_conv_hull_fract_arr1_NOpass_arr2_pass_v
+        self.get_conv_hull_fract_arr2_NOpass_v = get_conv_hull_fract_arr2_NOpass_v
     
     def quantify_sample(self):
         #Form a list with the files in sample_input_folder
