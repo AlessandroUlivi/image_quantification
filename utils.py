@@ -394,7 +394,7 @@ def maintain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_
 
     #If only array_mask_to_maintain is provided
     if ((hasattr(array_mask_to_maintain, "__len__")) and not (hasattr(array_mask_to_exclude, "__len__"))):
-        print("only maintain")
+        # print("only maintain")
         #Consider pixels of interest as the pixels in array_mask_to_maintain whose value is >thresholds_maintain, and the rest as background values
         #Set to background value pixels of input_array_copy correspondend by background pixels in array_mask_to_maintain.
         #With regards to the value of the pixels of interest, if output_highval is provided, set them to output_highval val (NOTE: this will binarize the output),
@@ -408,7 +408,7 @@ def maintain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_
 
     #If only array_mask_to_exclude if provided
     elif ((hasattr(array_mask_to_exclude, "__len__")) and not (hasattr(array_mask_to_maintain, "__len__"))):
-        print("only exclude")
+        # print("only exclude")
         #Consider pixels in array_mask_to_axclude whose value is >thresholds_exclude as background pixels, and the rest as pixels of interest
         #Set to background value pixels of input_array_copy correspondend by background pixels in array_mask_to_maintain.
         #With regards to the value of the pixels of interest, if output_highval is provided, set them to output_highval val (NOTE: this will binarize the output),
@@ -422,7 +422,7 @@ def maintain_exclude_image_rois(input_array, array_mask_to_maintain=None, array_
     
     #If both array_mask_to_maintain and array_mask_to_exclude are provided
     elif ((hasattr(array_mask_to_maintain, "__len__")) and (hasattr(array_mask_to_exclude, "__len__"))):
-        print('maintain and exclude')
+        # print('maintain and exclude')
         #Make sure that it is specified how to handle common pixels
         assert common_pixels in ['exclude', 'maintain'], "common_pixels must be either 'maintain' or 'exclude' when both an array to maintain and an array to exclude are provided"
 
