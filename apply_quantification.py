@@ -53,12 +53,19 @@ class sample_quantifier():
         for input_f in list_of_input_files:
             #Open the file
             input_file = tifffile.imread(os.path.join(self.sample_input_folder, input_f))
-            #add file in the collection list
-            collection_of_input_files.append(input_file)
-            #substitute roi_channel_i with the opened file if its name contains roi_structure string
+            #if the opened file name contains roi_structure string
             if self.roi_structure != None:
+                #Substitute the opened file to roi_channel_i
                 if self.roi_structure in input_f:
                     roi_channel_i = input_file.copy()
+                #Otherwise append the opened file to the collection list
+                else:
+                    #add file in the collection list
+                    collection_of_input_files.append(input_file)
+            #append the opened file to the collection list
+            else:
+                #add file in the collection list
+                collection_of_input_files.append(input_file)
         
         #Open roi_maintain if it is provided
         if self.roi_maintain !=None:
