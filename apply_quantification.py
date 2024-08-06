@@ -10,7 +10,7 @@ class sample_quantifier():
     def __init__(self, sample_input_folder, analysis_axis=None, roi_structure=None, roi_maintain=None, roi_exclude=None, roi_3D_maintain=False, roi_3D_exclude=False,
                 shuffle_times=0, no_quantification_valu_e=np.nan, channels_binarization_thresholds=0, transform_to_label_img=False,
                 get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
-                reg_eucl_dist_within_arr_val_n_regions_nopass=1, min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1,
+                reg_eucl_dist_within_arr_val_n_regions_nopass=1, get_convex_hull_min_px_num=2, min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1,
                 measure_pixels_overlap_n_px_thr_2=0, count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3,
                 conv_hull_fract_px_thre_arr_2=3, get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
         """
@@ -32,6 +32,7 @@ class sample_quantifier():
         self.count_regions_number_threshold_roi_mask = count_regions_number_threshold_roi_mask
         self.n_of_region_4areas_measure = n_of_region_4areas_measure
         self.reg_eucl_dist_within_arr_val_n_regions_nopass = reg_eucl_dist_within_arr_val_n_regions_nopass
+        self.get_convex_hull_min_px_num = get_convex_hull_min_px_num
         self.min_px_over_thresh_common = min_px_over_thresh_common
         self.measure_pixels_overlap_n_px_thr_1 = measure_pixels_overlap_n_px_thr_1
         self.measure_pixels_overlap_n_px_thr_2 = measure_pixels_overlap_n_px_thr_2
@@ -176,6 +177,7 @@ class sample_quantifier():
                                                      count_regions_number_threshold_roi_mask=self.count_regions_number_threshold_roi_mask,
                                                      n_of_region_4areas_measure=self.n_of_region_4areas_measure,
                                                      reg_eucl_dist_within_arr_val_n_regions_nopass=self.reg_eucl_dist_within_arr_val_n_regions_nopass,
+                                                     get_convex_hull_min_px_num= self.get_convex_hull_min_px_num,
                                                      min_px_over_thresh_common=self.min_px_over_thresh_common,
                                                      measure_pixels_overlap_n_px_thr_1=self.measure_pixels_overlap_n_px_thr_1,
                                                      measure_pixels_overlap_n_px_thr_2=self.measure_pixels_overlap_n_px_thr_2,
