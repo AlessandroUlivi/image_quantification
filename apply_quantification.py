@@ -7,23 +7,15 @@ from multi_channels_multi_quantifications import quantify_channels
 
 class sample_quantifier():
 
-    def __init__(self, sample_input_folder, analysis_axis=None, roi_structure=None, roi_maintain=None, roi_exclude=None, roi_3D_maintain=False, roi_3D_exclude=False,
+    def __init__(self, analysis_axis=None, roi_structure=None,
                 shuffle_times=0, no_quantification_valu_e=np.nan, channels_binarization_thresholds=0, transform_to_label_img=False,
                 get_mask_area_val_4zero_regionprops=0, count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0,
                 reg_eucl_dist_within_arr_val_n_regions_nopass=1, get_convex_hull_min_px_num=2, min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1,
                 measure_pixels_overlap_n_px_thr_2=0, count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3,
                 conv_hull_fract_px_thre_arr_2=3, get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
-        """
-        files in sample_input_folder must have the same dimensions.
-        If roi are provided, for the moment it only works with 2D or 3D arrays as the opening of the rois assumes their positioning in a 2D or 3D array.
-        """
-        self.sample_input_folder = sample_input_folder
+        
         self.analysis_axis = analysis_axis
         self.roi_structure = roi_structure
-        self.roi_maintain = roi_maintain
-        self.roi_exclude = roi_exclude
-        self.roi_3D_maintain = roi_3D_maintain
-        self.roi_3D_exclude = roi_3D_exclude
         self.shuffle_times = shuffle_times
         self.no_quantification_valu_e = no_quantification_valu_e
         self.channels_binarization_thresholds = channels_binarization_thresholds
@@ -42,9 +34,13 @@ class sample_quantifier():
         self.get_conv_hull_fract_arr1_NOpass_arr2_pass_v = get_conv_hull_fract_arr1_NOpass_arr2_pass_v
         self.get_conv_hull_fract_arr2_NOpass_v = get_conv_hull_fract_arr2_NOpass_v
     
-    def quantify_sample(self):
+    def quantify_sample(self, sample_input_folder, roi_maintain=None, roi_exclude=None, roi_3D_maintain=False, roi_3D_exclude=False):
+        """
+        files in sample_input_folder must have the same dimensions.
+        If roi are provided, for the moment it only works with 2D or 3D arrays as the opening of the rois assumes their positioning in a 2D or 3D array.
+        """
         #Form a list with the files in sample_input_folder
-        list_of_input_files = listdirNHF(self.sample_input_folder)
+        list_of_input_files = listdirNHF(sample_input_folder)
 
         #Open files in sample_input_folder and collect them in a list - identify the file to use as roi if roi_structure is provided
         collection_of_input_files = []
@@ -53,7 +49,7 @@ class sample_quantifier():
         #Iterate through the input files
         for input_f in list_of_input_files:
             #Open the file
-            input_file = tifffile.imread(os.path.join(self.sample_input_folder, input_f))
+            input_file = tifffile.imread(os.path.join(sample_input_folder, input_f))
             #if the opened file name contains roi_structure string
             if self.roi_structure != None:
                 #Substitute the opened file to roi_channel_i
@@ -69,14 +65,14 @@ class sample_quantifier():
                 collection_of_input_files.append(input_file)
         
         #Open roi_maintain if it is provided
-        if self.roi_maintain !=None:
+        if roi_maintain !=None:
             #Use the first file of the collection list of files in the input folder as initial reference image
             reference_img_i = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i
-            if self.roi_3D_maintain==False:
+            if roi_3D_maintain==False:
                 reference_image = [np.squeeze(a) for a in np.split(reference_img_i, indices_or_sections=reference_img_i.shape[self.analysis_axis],axis=self.analysis_axis)][0]
                 #Open the roi_file and transform it to a numpy array
-                roi_2_maintain_i = form_mask_from_roi(self.roi_maintain,
+                roi_2_maintain_i = form_mask_from_roi(roi_maintain,
                                                         reference_img=reference_image,
                                                         ax_position=None,
                                                         return_coordinates=False,
@@ -89,7 +85,7 @@ class sample_quantifier():
             else:
                 reference_image = reference_img_i.copy()
                 #Open the roi_file and transform it to a numpy array
-                roi_2_maintain = form_mask_from_roi(self.roi_maintain,
+                roi_2_maintain = form_mask_from_roi(roi_maintain,
                                                     reference_img=reference_image,
                                                     ax_position=self.analysis_axis,
                                                     return_coordinates=False,
@@ -98,14 +94,14 @@ class sample_quantifier():
                                                     output_dtype=np.uint8)
         
         #Open roi_exclude if it is provided
-        if self.roi_exclude !=None:
+        if roi_exclude !=None:
             #Use the first file of the collection list of files in the input folder as initial reference image
             reference_img_i_excl = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i_excl
-            if self.roi_3D_exclude==False:
+            if roi_3D_exclude==False:
                 reference_image_excl = [np.squeeze(b) for b in np.split(reference_img_i_excl, indices_or_sections=reference_img_i.shape[self.analysis_axis],axis=self.analysis_axis)][0]
                 #Open the roi_file and transform it to a numpy array
-                roi_2_exclude_i = form_mask_from_roi(self.roi_exclude,
+                roi_2_exclude_i = form_mask_from_roi(roi_exclude,
                                                         reference_img=reference_image_excl,
                                                         ax_position=None,
                                                         return_coordinates=False,
@@ -117,7 +113,7 @@ class sample_quantifier():
             else:
                 reference_image_excl = reference_img_i_excl.copy()
                 #Open the roi_file and transform it to a numpy array
-                roi_2_exclude = form_mask_from_roi(self.roi_exclude,
+                roi_2_exclude = form_mask_from_roi(roi_exclude,
                                                     reference_img=reference_image_excl,
                                                     ax_position=self.analysis_axis,
                                                     return_coordinates=False,
@@ -126,7 +122,7 @@ class sample_quantifier():
                                                     output_dtype=np.uint8)
         
         #Combine roi to maintain and roi to exclude in a unique array
-        if self.roi_maintain !=None or self.roi_exclude !=None:
+        if roi_maintain !=None or roi_exclude !=None:
             #If no roi_structure is provided, initialize and empty array to be used for the combination of the rois
             if self.roi_structure == None:
                 zeros_array = np.zeros(collection_of_input_files[0].shape)
