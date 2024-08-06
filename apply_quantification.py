@@ -60,6 +60,7 @@ class sample_quantifier():
                 else:
                     #add file in the collection list
                     collection_of_input_files.append(input_file)
+                    collection_of_input_files_names.append(input_f)
             #append the opened file to the collection list
             else:
                 #add file in the collection list
