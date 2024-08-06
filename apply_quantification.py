@@ -44,6 +44,7 @@ class sample_quantifier():
 
         #Open files in sample_input_folder and collect them in a list - identify the file to use as roi if roi_structure is provided
         collection_of_input_files = []
+        collection_of_input_files_names = []
         #Initialize the roi_channel as None
         roi_channel_i = None
         #Iterate through the input files
@@ -63,6 +64,7 @@ class sample_quantifier():
             else:
                 #add file in the collection list
                 collection_of_input_files.append(input_file)
+                collection_of_input_files_names.append(input_f)
         
         #Open roi_maintain if it is provided
         if roi_maintain !=None:
@@ -183,9 +185,9 @@ class sample_quantifier():
                                                      get_conv_hull_fract_arr1_NOpass_arr2_pass_v=self.get_conv_hull_fract_arr1_NOpass_arr2_pass_v,
                                                      get_conv_hull_fract_arr2_NOpass_v=self.get_conv_hull_fract_arr2_NOpass_v)
 
-        return channels_quantifications, list_of_input_files, multi_channel_array
+        return channels_quantifications, collection_of_input_files_names, multi_channel_array
     
-    def change_columns_names(self, channels_new_names, channels_quantifications, list_of_input_files):
+    def change_columns_names(self, channels_new_names, channels_quantifications, collection_of_input_files_names):
         #Initialize a list to collect the new names for the columns
         new_column_names = []
 
@@ -194,11 +196,11 @@ class sample_quantifier():
 
         #Iterate through the list of files. Note: the list of files contains the files in order as they are opened by the listdirNHF function in utils.py
         #Because this function is used in quantify_sample (above) this is the order of the files passed to quantify_channels (within quantify_samples). Thus
-        #The order of the channels numbering corresponds to the order of the files in the list list_of_input_files
-        for c, f in enumerate(list_of_input_files):
+        #The order of the channels numbering corresponds to the order of the files in the list collection_of_input_files_names
+        for c, f in enumerate(collection_of_input_files_names):
             #Iterate through the list of channels_new_names
             for c_n_n in channels_new_names:
-                #If the string c_n_n is in the name of the file in list_of_input_files
+                #If the string c_n_n is in the name of the file in collection_of_input_files_names
                 if c_n_n in f:
                     #Re-form the string of the channel as it is saved in the columns name of the channels_quantifications dataframe
                     channel_initial_name = 'ch_'+str(c)
