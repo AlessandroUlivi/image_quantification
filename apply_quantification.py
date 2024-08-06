@@ -183,7 +183,7 @@ class sample_quantifier():
                                                      get_conv_hull_fract_arr1_NOpass_arr2_pass_v=self.get_conv_hull_fract_arr1_NOpass_arr2_pass_v,
                                                      get_conv_hull_fract_arr2_NOpass_v=self.get_conv_hull_fract_arr2_NOpass_v)
 
-        return channels_quantifications, list_of_input_files
+        return channels_quantifications, list_of_input_files, multi_channel_array
     
     def change_columns_names(self, channels_new_names, channels_quantifications, list_of_input_files):
         #Initialize a list to collect the new names for the columns
