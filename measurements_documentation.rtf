@@ -1,0 +1,159 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red193\green193\blue193;}
+{\*\expandedcolortbl;;\cssrgb\c80000\c80000\c80000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww14160\viewh10460\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Last modified (yyyy/mm/dd): 2024/08/06\
+Author: Alessandro Ulivi (ale.ulivi@gmail.com)\
+\
+CONVENTIONS:\
+- channel. It refers to individual files which are quantified. For example, if the binary mask of structure A and the binary mask of structure B are quantified, each binary mask is a channel.\
+\
+- channel i. The channel under analysis for a certain measurement.\
+\
+- channel j. When two channels are analysed, for example because they are compared for a certain measurement, the second channel is called channel j.\
+\
+- frame n. When channel i is analysed along an axis, frame n is the sub-image whitin channel i which is analysed. For example, if channel i is a timecourse of structure A, frame n is the individual timepoint.\
+\
+- frame m. Same as frame n, but for channel j, when channel i is compared to channel j.  \
+\
+- Region. Any portion of a binary mask which is fully surrounded by background pixels and, thus, not connected to other portions of the mask. The extraction of regions is based on the skimage.measure.label function (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label), refer also to this documentation. NOTE: there is no threshold in terms of pixel number to define a region, thus a single pixel is a region. When this is a problem, a highpass threshold should be introduced before inputing the channel to the quantification, so that it has no regions smaller than the highpass threshold.\
+\
+- Region a + [arabic number]. The regions of channel i.\
+\
+- Region b + [roman number]. The regions of channel j.\
+\
+\
+PARAMETERS\
+- highpass_n_regions = 0. Refer to \
+- min_px_over_thresh_common = 0. Refer to the beginning of comparative analyses between channel i and channel j.\
+- n_px_thr_1=0 nad n_px_thr_2=0. Refer to \
+- intersection_threshold=0. Refer to .
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 - The parameter px_thre_arr_2 can be used for setting a higher highpass thresholds to do the measurement. The measurement is done if the number of pixels in channel j is >px_thre_arr_2. If less than 3 pixels are present in channel i the val_4_arr1_NOpassthres_arr2_passthres is returned. The parameter px_thre_arr_1 can be used for setting a higher highpass thresholds to do the measurement. val_4_arr1_NOpassthres_arr2_passthres is returned if the number of pixels in channel I is <=px_thre_arr_1.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+\
+\
+\
+MEASUREMENTS\
+- channel_area. The total number of pixels of channel i segmented mask.\
+\
+- count region. The total number of regions in channel i segmented mask.\
+\
+- mean region area. The mean area of the regions in channel i segmented mask.\
+\
+- median region area. The median area of the regions in channel i segmented mask.\
+\
+- stdv region area. The standard deviation of the areas of the regions in channel i segmented mask.\
+\
+- sem region area. The standard error of the means of the regions in channel i segmented mask.\
+\
+- min region area. The smallest area among the areas of the regions in channel i segmented mask.\
+\
+- max region area. The largest area among the areas of the regions in channel i segmented mask.\
+\
+- number region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports how many distances are calculated for channel i . It is 0 if channel i has 0 regions, it is 1 if channel i has 2 regions, it can have different values depending on the regions topology if channel i  has more than 2 regions.\
+\
+- mean region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the mean of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 - median region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the median of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).\
+\
+- stdv region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard deviation of these minimum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).\
+\
+- sem region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard error of the means of these minimum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).\
+\
+- min region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the smallest of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).\
+\
+- max region min distance. Per each region a1 of channel i, the minimum distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the longest of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).\
+\
+- number region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports how many distances are calculated for channel i . It is 0 if channel i has 0 regions, it is 1 if channel i has 2 regions, it can have different values depending on the region topology if channel i  has more than 2 regions.\
+\
+- mean region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the mean of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- median region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the median of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- stdv region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard deviation of these maximum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- sem region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard error of the means of these maximum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- min region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the smallest of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- max region max distance. Per each region a1 of channel i, the maximum distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the longest of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- number region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports how many distances are calculated for channel i . It is 0 if channel i has 0 regions, it is 1 if channel i has 2 regions, it corresponds to number of regions in channel i if channel i  has more than 2 regions.\
+\
+- mean region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the mean of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- median region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the median of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- stdv region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard deviation of these mean distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- sem region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard error of the means of these mean distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- min region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the smallest of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+- max region mean distance. Per each region a1 of channel i, the mean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the longest of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done it >highpass_n_regions are present).\
+\
+THE FOLLOWING MEASUREMENTS ARE COMPARATIVE MEASUREMENTS BETWEEN CHANNELS. The parameter min_px_over_thresh_common can be used to set a highpass threshold for doing the analyses. Analysis will be done only if both channel i and channel j areas are >min_px_over_thresh_common.\
+\
+- channel overlap. The fraction of pixels of the binary mask of channel i, which are concomitantly present in the binary mask of channel j. It is only calculated if channel i has at least 1 pixel (to avoid a 0 division). The parameters n_px_thr_1 and n_px_thr_2 can be used, independently, to set a highpass threshold for the number of pixels in binary masks of, respectively, channel i and j, for doing the analysis. The measurement is done only if both channel i number of pixels > n_px_thr_1 and channel j number of pixels is > n_px_thr_2.\
+\
+- channel overlap shuffle. The same analysis of channel overlap, but  done after randomly shuffling the position of the pixels of both channel i and channel j. NOTE: if ROIs are passed to parameters roi_mask_arr_1 and roi_mask_arr_2_against, the shuffling will only be restricted to the portion of the channel i and j defined by, respectively roi_mask_arr_1 and roi_mask_arr_2_against. For example, if roi_mask_arr_1 and roi_mask_arr_2_against are identical and correspond to the embryo cortex, only the pixels of the embryo cortex are shuffled while the imaging background is left intact.\
+\
+- mean region min distance. Per each region a1 of channel i, the minimum distance with the pooled regions of channel j is calculated. This parameter reports the mean of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- median region min distance. Per each region a1 of channel i, the minimum distance with the pooled regions of channel j is calculated. This parameter reports the median of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- stdv region min distance. Per each region a1 of channel i, the minimum distance with the pooled regions of channel j is calculated. This parameter reports the standard deviation of these minimum distances. It is only calculated if at least 3 distances are measured.\
+\
+- sem region min distance. Per each region a1 of channel i, the minimum distance with the pooled regions of channel j is calculated. This parameter reports the standard error of the means of these minimum distances. It is only calculated if at least 3 distances are measured.\
+\
+- min region min distance. Per each region a1 of channel i, the minimum distance with the pooled regions of channel j is calculated. This parameter reports the shortest of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- max region min distance. Per each region a1 of channel i, the minimum distance with the pooled regions of channel j is calculated. This parameter reports the longest of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- mean region max distance. Per each region a1 of channel i, the maximum distance with the pooled regions of channel j is calculated. This parameter reports the mean of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- median region max distance. Per each region a1 of channel i, the maximum distance with the pooled regions of channel j is calculated. This parameter reports the median of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- stdv region max distance. Per each region a1 of channel i, the maximum distance with the pooled regions of channel j is calculated. This parameter reports the standard deviation of these maximum distances. It is only calculated if at least 3 distances are measured.\
+\
+- sem region max distance. Per each region a1 of channel i, the maximum distance with the pooled regions of channel j is calculated. This parameter reports the standard error of the means of these maximum distances. It is only calculated if at least 3 distances are measured.\
+\
+- min region max distance. Per each region a1 of channel i, the maximum distance with the pooled regions of channel j is calculated. This parameter reports the shortest of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- max region max distance. Per each region a1 of channel i, the maximum distance with the pooled regions of channel j is calculated. This parameter reports the longest of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- mean region mean distance. Per each region a1 of channel i, the mean distance with the pooled regions of channel j is calculated. This parameter reports the mean of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- median region mean distance. Per each region a1 of channel i, the mean distance with the pooled regions of channel j is calculated. This parameter reports the median of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- stdv region mean distance. Per each region a1 of channel i, the mean distance with the pooled regions of channel j is calculated. This parameter reports the standard deviation of these mean distances. It is only calculated if at least 3 distances are measured.\
+\
+- sem region mean distance. Per each region a1 of channel i, the mean distance with the pooled regions of channel j is calculated. This parameter reports the standard error of the means of these mean distances. It is only calculated if at least 3 distances are measured.\
+\
+- min region mean distance. Per each region a1 of channel i, the mean distance with the pooled regions of channel j is calculated. This parameter reports the shortest of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- max region mean distance. Per each region a1 of channel i, the mean distance with the pooled regions of channel j is calculated. This parameter reports the longest of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j.\
+\
+- number of overlapping regions. The number of regions in channel i which have a certain number of overlapping regions in channel j. For example, when the quantification for 3_number_of_overlapping_regions is 2, it means that 2 regions of channel i (regions a1 and region a2) have 3 overlapping regions in channel j (region bI, bII and bIII). When the quantification for 4_number_of_overlapping_regions is 1, it means that only 1 region of channel i (regions a3) has 4 overlapping regions in channel j (region bII, bIII, bIV and bV). Note that while channel j regions can be shared among channel i regions, channels i regions are only quantified once. The quantification is only done if at least 1 region is present in channel i, while if no regions are present in channel j all regions of channel i are classified as having 0 overlapping regions in channel j. The parameter intersection_threshold sets a highpass filter to define region overlap. Two regions are considered overlapping if they share >intersection_threshold number of pixels.\
+\
+- convex hull fraction. The fraction between the area of the convex hull of channel i and the area of the convex hull of channel j: area_channel_i_convex_hull/area_channel_j_convex_hull. It is only calculated it at least 3 pixels are present channel j. The parameter px_thre_arr_2 can be used for setting a higher highpass thresholds to do the measurement. The measurement is done if the number of pixels in channel j is >px_thre_arr_2. If less than 3 pixels are present in channel i the val_4_arr1_NOpassthres_arr2_passthres is returned. The parameter px_thre_arr_1 can be used for setting a higher highpass thresholds to do the measurement. val_4_arr1_NOpassthres_arr2_passthres is returned if the number of pixels in channel I is <=px_thre_arr_1.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\
+\
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+\
+}
