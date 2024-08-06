@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import sem
 from co_localization_measurements import measure_pixels_overlap, measure_regions_euclidean_distances, count_number_of_overlapping_regions
 from counting_measurements import count_regions_number
-from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask
+from geometric_measurements import get_mask_area, get_areas_of_regions_in_mask, get_covex_hull_from_mask
 from topological_measurements import get_convex_hull_fraction, measure_regions_euclidean_distances_within_array
 from utils import match_arrays_dimensions
 
@@ -17,7 +17,7 @@ from utils import match_arrays_dimensions
 
 def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, analysis_axis=None, shuffle_times=0, no_quantification_valu_e=np.nan,
                       channels_binarization_thresholds=0, transform_to_label_img=False, get_mask_area_val_4zero_regionprops=0,
-                      count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0, reg_eucl_dist_within_arr_val_n_regions_nopass=1,
+                      count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0, reg_eucl_dist_within_arr_val_n_regions_nopass=1, get_convex_hull_min_px_num=2,
                       min_px_over_thresh_common=-1, measure_pixels_overlap_n_px_thr_1=1, measure_pixels_overlap_n_px_thr_2=0,
                       count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3, conv_hull_fract_px_thre_arr_2=3,
                       get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
@@ -257,6 +257,10 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #Use the provided value otherwise
     reg_eucl_dist_within_arr_val_n_regions_nopass_2use = set_thresholds_2use(reg_eucl_dist_within_arr_val_n_regions_nopass, channels_stac_k=channels_array_copy)
 
+    #Set to 2 the highpass threshold for calculating the convex hull of a channel, if get_convex_hull_min_px_num is not provided.
+    #Use the provided value otherwise
+    get_convex_hull_min_px_num_2use = set_thresholds_2use(get_convex_hull_min_px_num, channels_stac_k=channels_array_copy)
+
     #Set to 0 the min number of pixels for proceeding with measurements, if min_px_over_thresh_common is not provided. Use the provided thresholds otherwise
     min_px_over_thresh_common_2use = set_thresholds_2use(min_px_over_thresh_common, channels_stac_k=channels_array_copy)
     
@@ -286,7 +290,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
     #=========  INITIALIZE THE OUTPUT =========
     #Initialize a dictionary to be used to form the output datafram
     measurements_dict = {}
-
+    
     #==================================================
     #=========  USE ANALYSIS AXIS IF PROVIDED =========
     #If analysis axis is provided:
@@ -310,6 +314,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         threshold_roi_mask_2use_1 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=analysis_axis, multi_thresholds=False)
         n_of_region_4areas_measure_2use_1 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=analysis_axis, multi_thresholds=False)
         reg_eucl_dist_within_arr_val_n_regions_nopass_2use_1 = split_thresholds_arrays(reg_eucl_dist_within_arr_val_n_regions_nopass_2use, split_axis=analysis_axis, multi_thresholds=False)
+        get_convex_hull_min_px_num_2use_1 = split_thresholds_arrays(get_convex_hull_min_px_num_2use, split_axis=analysis_axis, multi_thresholds=False)
         min_px_over_thresh_common_2use_1 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_1_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=analysis_axis, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_2_2use_1 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=analysis_axis, multi_thresholds=False)
@@ -360,6 +365,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2 = split_thresholds_arrays(reg_eucl_dist_within_arr_val_n_regions_nopass_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
+            get_convex_hull_min_px_num_2use_2 = split_thresholds_arrays(get_convex_hull_min_px_num_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
             measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use_1[ixd], split_axis=channels_axis_2use, multi_thresholds=False)
@@ -599,6 +605,30 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                 modify_dictionary(result_valu_e=sem_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='sem_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
                 modify_dictionary(result_valu_e=min_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='min_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
                 modify_dictionary(result_valu_e=max_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='max_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
+                
+                
+                #=============================================
+                #=========  MEASURE CONVEX HULL AREA =========
+                ch_n_min_px_num = get_threshold_from_list(get_convex_hull_min_px_num_2use_2[ch_n],
+                                                            multi_value_array=False,
+                                                            multi_value_axis=-1,
+                                                            get_a_single_value=True)
+                #Get the convex hull
+                ch_n_convex_hull, ch_n_convex_hull_coords = get_covex_hull_from_mask(ch_array,
+                                                                                     roi_mask=ch_n_roi_mask_array,
+                                                                                     threshold_4arr=ch_n_ixd_binarization_threshold,
+                                                                                     threshold_4roi=ch_n_ixd_threshold_roi_mask,
+                                                                                     min_px_num=ch_n_min_px_num,
+                                                                                     value_4no_quantification=None)
+                #The result of get_covex_hull_from_mask is the whole convex hull. The area/volume have to be extracted
+                if ch_n_convex_hull !=None:
+                    ch_n_convex_hull_volume = ch_n_convex_hull.volume
+                else:
+                    ch_n_convex_hull_volume = no_quantification_valu_e
+                
+                #============================================
+                #========= UPDATE OUTPUT DICTIONARY =========
+                modify_dictionary(result_valu_e=ch_n_convex_hull_volume, dict2modify=measurements_dict, root_key_name='convex_hull_volume', channel_1_number=ch_n, channel_2_number=None)
 
                 #==================================================================
                 #=========  START COMPARATIVE MEASUREMENTS AMONG CHANNELS =========
@@ -1018,6 +1048,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         threshold_roi_mask_2use_2 = split_thresholds_arrays(threshold_roi_mask_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         n_of_region_4areas_measure_2use_2 = split_thresholds_arrays(n_of_region_4areas_measure_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         reg_eucl_dist_within_arr_val_n_regions_nopass_2use_2 = split_thresholds_arrays(reg_eucl_dist_within_arr_val_n_regions_nopass_2use, split_axis=channels_axis_2use, multi_thresholds=False)
+        get_convex_hull_min_px_num_2use_2 = split_thresholds_arrays(get_convex_hull_min_px_num_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         min_px_over_thresh_common_2use_2 = split_thresholds_arrays(min_px_over_thresh_common_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_1_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_1_2use, split_axis=channels_axis_2use, multi_thresholds=False)
         measure_pixels_overlap_n_px_thr_2_2use_2 = split_thresholds_arrays(measure_pixels_overlap_n_px_thr_2_2use, split_axis=channels_axis_2use, multi_thresholds=False)
@@ -1260,6 +1291,29 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
             modify_dictionary(result_valu_e=min_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='min_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
             modify_dictionary(result_valu_e=max_ch_n_regions_mean_distances, dict2modify=measurements_dict, root_key_name='max_region_mean_distances', channel_1_number=ch_n, channel_2_number=None)
 
+            #=============================================
+            #=========  MEASURE CONVEX HULL AREA =========
+            ch_n_min_px_num = get_threshold_from_list(get_convex_hull_min_px_num_2use_2[ch_n],
+                                                        multi_value_array=False,
+                                                        multi_value_axis=-1,
+                                                        get_a_single_value=True)
+            #Get the convex hull
+            ch_n_convex_hull, ch_n_convex_hull_coords = get_covex_hull_from_mask(ch_array,
+                                                                                    roi_mask=ch_n_roi_mask_array,
+                                                                                    threshold_4arr=ch_n_ixd_binarization_threshold,
+                                                                                    threshold_4roi=ch_n_ixd_threshold_roi_mask,
+                                                                                    min_px_num=ch_n_min_px_num,
+                                                                                    value_4no_quantification=None)
+            #The result of get_covex_hull_from_mask is the whole convex hull. The area/volume have to be extracted
+            if ch_n_convex_hull !=None:
+                ch_n_convex_hull_volume = ch_n_convex_hull.volume
+            else:
+                ch_n_convex_hull_volume = no_quantification_valu_e
+                
+            #============================================
+            #========= UPDATE OUTPUT DICTIONARY =========
+            modify_dictionary(result_valu_e=ch_n_convex_hull_volume, dict2modify=measurements_dict, root_key_name='convex_hull_volume', channel_1_number=ch_n, channel_2_number=None)
+            
             #==================================================================
             #=========  START COMPARATIVE MEASUREMENTS AMONG CHANNELS =========
             #Iterate trough the channels a second time, to get measurements calculated by comparing two channels
