@@ -188,9 +188,10 @@ class sample_quantifier():
 
         return channels_quantifications, collection_of_input_files_names, multi_channel_array
     
-    def change_columns_names(self, channels_new_names, channels_quantifications, collection_of_input_files_names):
-        #Initialize a list to collect the new names for the columns
-        new_column_names = []
+    def change_columns_names(self, channels_new_names, channels_quantifications, collection_of_input_files_names, iteration_axis=None, new_name_iteration_axis=None):
+        if iteration_axis!=None:
+            if new_name_iteration_axis==None:
+                print("WARNING! it is indicated an iteration axis but no new name is provided, the name will be maintained")
 
         #Initialize a dictionary to map channels to their new name
         channels_names_mapping_dict = {}
@@ -207,6 +208,55 @@ class sample_quantifier():
                     channel_initial_name = 'ch_'+str(c)
                     #Link the channel initial string to the c_n_n string in channels_names_mapping_dict
                     channels_names_mapping_dict[channel_initial_name]=c_n_n
+        
+        #Initialize a list to collect the new names for the columns
+        new_column_names = []
+
+        #Get columns names
+        channels_quantifications_columns = channels_quantifications.columns.copy()
+
+        #Iterate through the dictionary mapping channels to their new names
+        for ch in channels_names_mapping_dict:
+
+            #Initialize a list to collect columns changed names for individual channels
+            channels_quantifications_new_columns = []
+
+            #Iterate through the columns names
+            for clm in enumerate(channels_quantifications_columns):
+
+                #If an iteration axis is provided, check if the column name fits that of the iteration axis
+                if clm == 'axis_'+str(iteration_axis+1): #Note, the +1 compensate for the channels which are created in position 0 when forming the channel array to analyse in quantify_sample (above)
+                    #Check if a new name is given for the iteration axis
+                    if new_name_iteration_axis!=None:
+                        #Avoid adding the name multiple times
+                        if new_name_iteration_axis not in channels_quantifications_new_columns:
+                            #Add the new name in the collection list for the iterating channel
+                            channels_quantifications_new_columns.append(new_name_iteration_axis)
+                    #If no new name is given, just report the old name
+                    else:
+                        #Avoid adding the name multiple times
+                        if clm not in channels_quantifications_new_columns:
+                            #Add the old name in the collection list for the iterating channel
+                            channels_quantifications_new_columns.appen(clm)
+
+                #If the channel iterating is in the column name
+                if ch in clm:
+                    
+                    #Change channel to the new name in the column name
+                    column_new_name = clm.replace(ch, channels_names_mapping_dict[ch])
+
+                    #Append the new name in the collection list for the iterating channel
+                    channels_quantifications_new_columns.append(column_new_name)
+                
+                #If the channel iterating is not in the column name
+                else:
+                    #Append the initial column name in the collection list for the iterating channel
+                    channels_quantifications_new_columns.append(clm)
+
+            #Replace the initial columns names with the result of the iteration for the channel
+            channels_quantifications_columns_copy = channels_quantifications_new_columns
+        
+        #Substitute the columns names in the input dictionary with the new column names
 
         return channels_names_mapping_dict
 
