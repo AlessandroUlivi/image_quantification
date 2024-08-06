@@ -111,38 +111,49 @@ def get_areas_of_regions_in_mask(label_img, roi__mask=None, transform_to_label_i
     return output_list
 
 
-def get_covex_hull_from_mask(input_mask, roi_mask=None, threshold_4mask=0):
+def get_covex_hull_from_mask(input_arr, roi_mask=None, threshold_4arr=0, threshold_4roi=0, min_px_num=2, value_4no_quantification=None):
     """
     Given:
-    - a binary mask defining a region of interst. It is assumed that the region of intest are pixels whose value is >threshold_4mask (default 0).
+    - a array on which to define a region of interst of more than min_px_num of pixels (defaul 2). It is assumed that the region of intest are pixels whose value is >threshold_4arr (default 0).
     
     It returns:
     - position 0, the minimum convex hull for the region of interest. Refer to https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html for the output.
-    - position 1, the coordinates of the pixels of interest in input_mask. Pixels of interest are assumed to be all pixels in input_mask whose value is >threshold_4mask (default 0).
+    - position 1, the coordinates of the pixels of interest in input_arr. Pixels of interest are assumed to be all pixels in input_arr whose value is >threshold_4mask (default 0).
 
-    The indeces of the coordinates of the vertices of the convex hull within the coordinates list (output-1), are accessible from output-0 as output-0.vertices (if input_mask is 2D,
+    The indeces of the coordinates of the vertices of the convex hull within the coordinates list (output-1), are accessible from output-0 as output-0.vertices (if input_arr is 2D,
     their are in counterclockwise order).
-    The area of the the convex hull (perimeter if input_mask is 2D) is accessible as output-0.areas.
-    The volume of the convex hull (area if input_mask is 2D) is accessible as output-0.volume.
+    The area of the the convex hull (perimeter if input_arr is 2D) is accessible as output-0.areas.
+    The volume of the convex hull (area if input_arr is 2D) is accessible as output-0.volume.
 
-    If roi_mask is provided (binary array of the same shape of input_mask), the analysis is restricted to the region of interest. The region of interst is
-    assumed to correspond to the positive pixels in roi_mask.
+    If roi_mask is provided (binary array of the same shape of input_arr), the analysis is restricted to the region of interest. The region of interst is
+    assumed to correspond to the pixels in roi_mask whose value is >threshold_4roi (default 0).
+
+    If less than or equal to min_px_num are present in the region of interest, a tuple is returned with value_4no_quantification both in position 0 and position 1.
     """
-    #Copy input_mask, threshold it using threshold_4mask. Set its values to 1 and 0, where 1 are pixels of interest, 0 the background.
-    input_mask_01 = np.where(input_mask>threshold_4mask, 1,0)
+    #Make sure min_px_num is at least 2 
+    assert min_px_num>=2, "at least 3 pixels must be present to create a convex hull"
 
-    #If roi_mask is provided, copy it and use it to set to 0 pixels in input_mask_01 which are corresponded by background pixels in roi_mask
+    #Copy input_arr, threshold it using threshold_4arr. Set its values to 1 and 0, where 1 are pixels of interest, 0 the background.
+    input_arr_01 = np.where(input_arr>threshold_4arr,1,0)
+    
+    #If roi_mask is provided, copy it and use it to set to 0 pixels in input_arr_01 which are corresponded by background pixels in roi_mask
     if hasattr(roi_mask, "__len__"):
         #Copy roi_mask
         roi_mask_copy = roi_mask.copy()
 
         #Set to 0 pixels in binary input mask which are corresponded by background pixels in roi_mask
-        segmented_input_mask = np.where(roi_mask_copy>0,input_mask_01,0)
+        segmented_input_arr = np.where(roi_mask_copy>threshold_4roi,input_arr_01,0)
     else:
-        segmented_input_mask = input_mask_01
+        segmented_input_arr = input_arr_01
     
-    #Get the coordinates of the pixels of interest in segmented_input_mask
-    mask_pixels_coords = np.argwhere(segmented_input_mask>0)
-    
-    return ConvexHull(mask_pixels_coords), mask_pixels_coords
+    #Continue the analysis if there are more than min_px_num pixels of interest
+    if np.sum(segmented_input_arr)>min_px_num:
+
+        #Get the coordinates of the pixels of interest in segmented_input_arr
+        arr_pixels_coords = np.argwhere(segmented_input_arr>0)
+        
+        return ConvexHull(arr_pixels_coords), arr_pixels_coords
+
+    else:
+        return value_4no_quantification, value_4no_quantification
 
