@@ -368,12 +368,12 @@ class sample_quantifier():
                 roi_maintain_for_f = None
                 roi_exclude_for_f = None
             
-            # #Get the result measurements and the order of the analysed samples for the sample f
-            # f_result_measurements, f_samples_order, f_multi_channel_array = self.quantify_sample(f_directory,
-            #                                                                                      roi_maintain=roi_maintain_for_f,
-            #                                                                                      roi_exclude=roi_exclude_for_f,
-            #                                                                                      roi_3D_maintain=roi_3D__maintain,
-            #                                                                                      roi_3D_exclude=roi_3D__exclude,
-            #                                                                                      roi_position_axis=roi_position__axis)
+            #Get the result measurements and the order of the analysed samples for the sample f
+            f_result_measurements, f_samples_order, f_multi_channel_array = self.quantify_sample(f_directory,
+                                                                                                 roi_maintain=roi_maintain_for_f,
+                                                                                                 roi_exclude=roi_exclude_for_f,
+                                                                                                 roi_3D_maintain=roi_3D__maintain,
+                                                                                                 roi_3D_exclude=roi_3D__exclude,
+                                                                                                 roi_position_axis=roi_position__axis)
 
         
