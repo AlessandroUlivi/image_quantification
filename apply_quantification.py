@@ -194,6 +194,9 @@ class sample_quantifier():
             if new_name_iteration_axis==None:
                 print("WARNING! it is indicated an iteration axis but no new name is provided, the name will be maintained")
 
+        #Copy channels_quantifications_df
+        channels_quantifications_df_copy = channels_quantifications_df.copy()
+
         #Initialize a dictionary to map channels to their new name
         channels_names_mapping_dict = {}
 
@@ -211,7 +214,7 @@ class sample_quantifier():
                     channels_names_mapping_dict[channel_initial_name]=c_n_n
 
         #Get columns names
-        channels_quantifications_df_columns = channels_quantifications_df.columns.copy()
+        channels_quantifications_df_columns = channels_quantifications_df_copy.columns
 
         #Initialize a dictionary to map name changes
         new_column_names_map = {}
