@@ -208,53 +208,54 @@ class sample_quantifier():
                     channel_initial_name = 'ch_'+str(c)
                     #Link the channel initial string to the c_n_n string in channels_names_mapping_dict
                     channels_names_mapping_dict[channel_initial_name]=c_n_n
-        
-        #Initialize a list to collect the new names for the columns
-        new_column_names = []
 
         #Get columns names
         channels_quantifications_columns = channels_quantifications.columns.copy()
 
+        #Initialize a dictionary to map name changes
+        new_column_names_map = {}
+
         #Iterate through the dictionary mapping channels to their new names
         for ch in channels_names_mapping_dict:
-
-            #Initialize a list to collect columns changed names for individual channels
-            channels_quantifications_new_columns = []
 
             #Iterate through the columns names
             for clm in enumerate(channels_quantifications_columns):
 
                 #If an iteration axis is provided, check if the column name fits that of the iteration axis
-                if clm == 'axis_'+str(iteration_axis+1): #Note, the +1 compensate for the channels which are created in position 0 when forming the channel array to analyse in quantify_sample (above)
+                if clm == 'axis_'+str(iteration_axis+1): #Note, the +1 compensates for the channels which are created in position 0 when forming the channel array to analyse in quantify_sample (see above)
                     #Check if a new name is given for the iteration axis
                     if new_name_iteration_axis!=None:
-                        #Avoid adding the name multiple times
-                        if new_name_iteration_axis not in channels_quantifications_new_columns:
-                            #Add the new name in the collection list for the iterating channel
-                            channels_quantifications_new_columns.append(new_name_iteration_axis)
+                        new_column_names_map[clm]=new_name_iteration_axis
                     #If no new name is given, just report the old name
                     else:
-                        #Avoid adding the name multiple times
-                        if clm not in channels_quantifications_new_columns:
-                            #Add the old name in the collection list for the iterating channel
-                            channels_quantifications_new_columns.appen(clm)
+                        new_column_names_map[clm]=clm
 
-                #If the channel iterating is in the column name
+                #If the channel name is in the column name
                 if ch in clm:
-                    
-                    #Change channel to the new name in the column name
-                    column_new_name = clm.replace(ch, channels_names_mapping_dict[ch])
 
-                    #Append the new name in the collection list for the iterating channel
-                    channels_quantifications_new_columns.append(column_new_name)
+                    #Because some column names have multi channels (compatative measurements), firs check if the column name had alredy been changed for a channel
+                    if clm in new_column_names_map:
+
+                        #If the column name had already been changed for a channel, replace the new channel in the already changed name
+                        column_new_name = new_column_names_map[clm].replace(ch, channels_names_mapping_dict[ch])
+
+                    #If it is the first time that the column name is changed
+                    else:
+
+                        #Replace the channel string in the initial column name
+                        column_new_name = clm.replace(ch, channels_names_mapping_dict[ch])
+
+                    #Update the dictionary mapping channels to their new names
+                    new_column_names_map[clm]=column_new_name
                 
-                #If the channel iterating is not in the column name
+                #If the channel name is not in the dictionary
                 else:
-                    #Append the initial column name in the collection list for the iterating channel
-                    channels_quantifications_new_columns.append(clm)
+                    
+                    #Add the column name, without modification, only if it is the first iteration through the column (to avoid overwriting of changes made in former iterations)
+                    if clm not in new_column_names_map:
 
-            #Replace the initial columns names with the result of the iteration for the channel
-            channels_quantifications_columns_copy = channels_quantifications_new_columns
+                        new_column_names_map[clm]=clm
+
         
         #Substitute the columns names in the input dictionary with the new column names
 
