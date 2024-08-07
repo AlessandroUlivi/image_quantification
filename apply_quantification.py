@@ -339,8 +339,8 @@ class sample_quantifier():
             return None
 
 
-    def batch_quantification(self, root_input_folder, root_output_folder, channels_new_names,
-                             root_folder_roi=None, new_name_iteration_axis=None, roi_3D__maintain=False,
+    def batch_quantification(self, root_input_folder, root_output_folder, channels_new__names,
+                             root_folder_roi=None, new_name_iteration__axis=None, roi_3D__maintain=False,
                              roi_3D__exclude=False, roi_position__axis=None):
         
         #Create a list of the folders in root_input_folder
@@ -375,5 +375,11 @@ class sample_quantifier():
                                                                                                  roi_3D_maintain=roi_3D__maintain,
                                                                                                  roi_3D_exclude=roi_3D__exclude,
                                                                                                  roi_position_axis=roi_position__axis)
-
+            #Change the names of the columns in the quantification dataframe
+            f_results_measurements_new_col = self.change_columns_names(channels_new_names=channels_new__names,
+                                                                       channels_quantifications_df=f_result_measurements,
+                                                                       collection_of_input_files_names=f_samples_order,
+                                                                       iteration_axis=self.analysis_axis,
+                                                                       new_name_iteration_axis=new_name_iteration__axis,
+                                                                       return_column_names_map_dict=False)
         
