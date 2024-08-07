@@ -188,7 +188,7 @@ class sample_quantifier():
 
         return channels_quantifications, collection_of_input_files_names, multi_channel_array
     
-    def change_columns_names(self, channels_new_names, channels_quantifications, collection_of_input_files_names, iteration_axis=None, new_name_iteration_axis=None,
+    def change_columns_names(self, channels_new_names, channels_quantifications_df, collection_of_input_files_names, iteration_axis=None, new_name_iteration_axis=None,
                              return_column_names_map_dict=False):
         if iteration_axis!=None:
             if new_name_iteration_axis==None:
@@ -205,13 +205,13 @@ class sample_quantifier():
             for c_n_n in channels_new_names:
                 #If the string c_n_n is in the name of the file in collection_of_input_files_names
                 if c_n_n in f:
-                    #Re-form the string of the channel as it is saved in the columns name of the channels_quantifications dataframe
+                    #Re-form the string of the channel as it is saved in the columns name of the channels_quantifications_df dataframe (refer to quantify_channels in multi_channels_multi_quantifications.py)
                     channel_initial_name = 'ch_'+str(c)
                     #Link the channel initial string to the c_n_n string in channels_names_mapping_dict
                     channels_names_mapping_dict[channel_initial_name]=c_n_n
 
         #Get columns names
-        channels_quantifications_columns = channels_quantifications.columns.copy()
+        channels_quantifications_df_columns = channels_quantifications_df.columns.copy()
 
         #Initialize a dictionary to map name changes
         new_column_names_map = {}
@@ -220,7 +220,7 @@ class sample_quantifier():
         for ch in channels_names_mapping_dict:
 
             #Iterate through the columns names
-            for clm in channels_quantifications_columns:
+            for clm in channels_quantifications_df_columns:
 
                 #If an iteration axis is provided, check if the column name fits that of the iteration axis
                 if clm == 'axis_'+str(iteration_axis+1): #Note, the +1 compensates for the channels which are created in position 0 when forming the channel array to analyse in quantify_sample (see above)
@@ -258,6 +258,7 @@ class sample_quantifier():
 
         
         #Substitute the columns names in the input dictionary with the new column names
+
 
         if return_column_names_map_dict:
             return new_column_names_map
