@@ -314,14 +314,66 @@ class sample_quantifier():
         else:
             return new_col_channels_quantifications_df
 
+    def get_roi_files(self, root_roi_folder, sample_name_2_match):
+        
+        #Form the directory for the sample_name_2_match in root_roi_folder
+        sample_roi_directory = os.path.join(root_roi_folder, sample_name_2_match)
+
+        #If the directory exist
+        if os.path.exists(sample_roi_directory):
+
+            #List the files inside the directory - NOTE: it is expected a single file!
+            roi_file_list = listdirNHF(sample_roi_directory)
+
+            #Print a warning if no file is present in the folder
+            if len(roi_file_list)==0:
+                print(f"WARNING! For sample {sample_name_2_match} no file is present in either roi_maintain or roi_exclude")
+                return None
+            
+            #If a file is present, return a full directory to the file
+            else:
+                return os.path.join(sample_roi_directory,roi_file_list[0])
+
+        #Return None if the directory does not exist
+        else:
+            return None
+
 
     def batch_quantification(self, root_input_folder, root_output_folder, channels_new_names,
-                             root_folder_roi=None, new_name_iteration_axis=None, roi_3D_maintain=False,
-                             roi_3D_exclude=False, roi_position_axis=None):
+                             root_folder_roi=None, new_name_iteration_axis=None, roi_3D__maintain=False,
+                             roi_3D__exclude=False, roi_position__axis=None):
         
         #Create a list of the folders in root_input_folder
         list_of_samples = listdirNHF(root_input_folder)
 
-        return
+        #Iterate through the folders in list_of_samples
+        for f in list_of_samples:
+            print("---", f)
+            #Join folder to the root directory
+            f_directory = os.path.join(root_input_folder, f)
+
+            #Create the directory a matching folder in root_output_folder
+            output_folder = os.path.join(root_output_folder, f)
+
+            #Create output_folder, if it does not exist
+            if not os.path.exists(output_folder):
+                os.makedirs(output_folder)
+            
+            # #Fish the ROIs files for the sample at f, if root_folder_roi exists
+            # if root_folder_roi!=None:
+            #     roi_maintain_for_f = self.get_roi_files(os.path.join(root_folder_roi, "roi_maintain"), f)
+            #     roi_exclude_for_f = self.get_roi_files(os.path.join(root_folder_roi, "roi_exclude"), f)
+            # else:
+            #     #Link roi_maintain_for_f and roi_exclude_for_f to None
+            #     roi_maintain_for_f = None
+            #     roi_exclude_for_f = None
+            
+            # #Get the result measurements and the order of the analysed samples for the sample f
+            # f_result_measurements, f_samples_order, f_multi_channel_array = self.quantify_sample(f_directory,
+            #                                                                                      roi_maintain=roi_maintain_for_f,
+            #                                                                                      roi_exclude=roi_exclude_for_f,
+            #                                                                                      roi_3D_maintain=roi_3D__maintain,
+            #                                                                                      roi_3D_exclude=roi_3D__exclude,
+            #                                                                                      roi_position_axis=roi_position__axis)
 
         
