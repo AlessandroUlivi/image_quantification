@@ -353,11 +353,11 @@ class sample_quantifier():
             f_directory = os.path.join(root_input_folder, f)
 
             #Create the directory a matching folder in root_output_folder
-            output_folder = os.path.join(root_output_folder, f)
+            f_output_folder = os.path.join(root_output_folder, f)
 
             #Create output_folder, if it does not exist
-            if not os.path.exists(output_folder):
-                os.makedirs(output_folder)
+            if not os.path.exists(f_output_folder):
+                os.makedirs(f_output_folder)
             
             #Fish the ROIs files for the sample at f, if root_folder_roi exists
             if root_folder_roi!=None:
@@ -382,4 +382,10 @@ class sample_quantifier():
                                                                        iteration_axis=self.analysis_axis,
                                                                        new_name_iteration_axis=new_name_iteration__axis,
                                                                        return_column_names_map_dict=False)
+            
+            #Form the saving name of the output dataframe
+            output_df_saving_name = f+"_raw_measurements.csv"
+
+            #Save the result in the output folder
+            f_results_measurements_new_col.to_csv(os.path.join(f_output_folder, output_df_saving_name), index=False)
         
