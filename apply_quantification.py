@@ -34,7 +34,7 @@ class sample_quantifier():
         self.get_conv_hull_fract_arr1_NOpass_arr2_pass_v = get_conv_hull_fract_arr1_NOpass_arr2_pass_v
         self.get_conv_hull_fract_arr2_NOpass_v = get_conv_hull_fract_arr2_NOpass_v
     
-    def quantify_sample(self, sample_input_folder, roi_maintain=None, roi_exclude=None, roi_3D_maintain=False, roi_3D_exclude=False):
+    def quantify_sample(self, sample_input_folder, roi_maintain=None, roi_exclude=None, roi_3D_maintain=False, roi_3D_exclude=False, roi_position_axis=None):
         """
         files in sample_input_folder must have the same dimensions.
         If roi are provided, for the moment it only works with 2D or 3D arrays as the opening of the rois assumes their positioning in a 2D or 3D array.
@@ -73,7 +73,20 @@ class sample_quantifier():
             reference_img_i = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i
             if roi_3D_maintain==False:
-                reference_image = [np.squeeze(a) for a in np.split(reference_img_i, indices_or_sections=reference_img_i.shape[self.analysis_axis],axis=self.analysis_axis)][0]
+                #If the files to analyse are 2D, just use reference_img_i to open the roi file
+                if len(reference_img_i.shape)==2:
+                    reference_image = reference_img_i
+                #If the files to analyse are 3D
+                else:
+                    #If an axis is provided to position rois (roi_position_axis), use it to get a 2D image out of the reference_img_i
+                    if roi_position_axis != None:
+                        reference_image = [np.squeeze(a) for a in np.split(reference_img_i, indices_or_sections=reference_img_i.shape[roi_position_axis],axis=roi_position_axis)][0]
+                    #If no roi_position_axis but an analysis axis is provided, use the analysis axis to get a 2D image out of the reference_img_i
+                    elif self.analysis_axis:
+                        reference_image = [np.squeeze(b) for b in np.split(reference_img_i, indices_or_sections=reference_img_i.shape[self.analysis_axis],axis=self.analysis_axis)][0]
+                    #If none of the options above are valid, raise a value error
+                    else:
+                        raise ValueError("can't allocate a non 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
                 #Open the roi_file and transform it to a numpy array
                 roi_2_maintain_i = form_mask_from_roi(roi_maintain,
                                                         reference_img=reference_image,
@@ -102,7 +115,22 @@ class sample_quantifier():
             reference_img_i_excl = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i_excl
             if roi_3D_exclude==False:
-                reference_image_excl = [np.squeeze(b) for b in np.split(reference_img_i_excl, indices_or_sections=reference_img_i.shape[self.analysis_axis],axis=self.analysis_axis)][0]
+
+                #If the files to analyse are 2D, just use reference_img_i_excl to open the roi file
+                if len(reference_img_i_excl.shape)==2:
+                    reference_image_excl = reference_img_i_excl
+                #If the files to analyse are 3D
+                else:
+                    #If an axis is provided to position rois (roi_position_axis), use it to get a 2D image out of the reference_img_i
+                    if roi_position_axis != None:
+                        reference_image_excl = [np.squeeze(c) for c in np.split(reference_img_i_excl, indices_or_sections=reference_img_i_excl.shape[roi_position_axis],axis=roi_position_axis)][0]
+                    #If no roi_position_axis but an analysis axis is provided, use the analysis axis to get a 2D image out of the reference_img_i
+                    elif self.analysis_axis:
+                        reference_image_excl = [np.squeeze(d) for d in np.split(reference_img_i_excl, indices_or_sections=reference_img_i_excl.shape[self.analysis_axis],axis=self.analysis_axis)][0]
+                    #If none of the options above are valid, raise a value error
+                    else:
+                        raise ValueError("can't allocate a non 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
+                
                 #Open the roi_file and transform it to a numpy array
                 roi_2_exclude_i = form_mask_from_roi(roi_exclude,
                                                         reference_img=reference_image_excl,
