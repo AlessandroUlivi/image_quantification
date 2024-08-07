@@ -188,7 +188,8 @@ class sample_quantifier():
 
         return channels_quantifications, collection_of_input_files_names, multi_channel_array
     
-    def change_columns_names(self, channels_new_names, channels_quantifications, collection_of_input_files_names, iteration_axis=None, new_name_iteration_axis=None):
+    def change_columns_names(self, channels_new_names, channels_quantifications, collection_of_input_files_names, iteration_axis=None, new_name_iteration_axis=None,
+                             return_column_names_map_dict=False):
         if iteration_axis!=None:
             if new_name_iteration_axis==None:
                 print("WARNING! it is indicated an iteration axis but no new name is provided, the name will be maintained")
@@ -259,7 +260,11 @@ class sample_quantifier():
         
         #Substitute the columns names in the input dictionary with the new column names
 
-        return channels_names_mapping_dict
+        if return_column_names_map_dict:
+            return channels_names_mapping_dict
+        
+        else:
+            return
 
 
     def batch_quantification(self, root_folder_channels, root_folder_roi=None, roi_3D_maintain=False, roi_3D_exclude=False):
