@@ -260,14 +260,14 @@ class sample_quantifier():
                         new_column_names_map[clm]=clm
 
         
-        #Substitute the columns names in the input dictionary with the new column names
-
+        #Substitute the columns names in the channels_quantifications_df_copy with the new column names
+        new_col_channels_quantifications_df = channels_quantifications_df_copy.rename(columns=new_column_names_map)
 
         if return_column_names_map_dict:
-            return new_column_names_map
+            return new_col_channels_quantifications_df, new_column_names_map
         
         else:
-            return
+            return new_col_channels_quantifications_df
 
 
     def batch_quantification(self, root_folder_channels, root_folder_roi=None, roi_3D_maintain=False, roi_3D_exclude=False):
