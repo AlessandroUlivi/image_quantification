@@ -112,7 +112,7 @@ class sample_quantifier():
                                                         background_pixel_val=0,
                                                         output_dtype=np.uint8)
                 #Match the roi to the dimension of the first file of the collection list of files in the input folder as initial reference image
-                roi_2_exclude = match_arrays_dimensions(roi_2_exclude_i, reference_img_i)
+                roi_2_exclude = match_arrays_dimensions(roi_2_exclude_i, reference_img_i_excl)
             else:
                 reference_image_excl = reference_img_i_excl.copy()
                 #Open the roi_file and transform it to a numpy array
