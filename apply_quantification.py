@@ -389,3 +389,5 @@ class sample_quantifier():
             #Save the result in the output folder
             f_results_measurements_new_col.to_csv(os.path.join(f_output_folder, output_df_saving_name), index=False)
         
+        print("FINISHED!")
+        
