@@ -82,11 +82,11 @@ class sample_quantifier():
                     if roi_position_axis != None:
                         reference_image = [np.squeeze(a) for a in np.split(reference_img_i, indices_or_sections=reference_img_i.shape[roi_position_axis],axis=roi_position_axis)][0]
                     #If no roi_position_axis but an analysis axis is provided, use the analysis axis to get a 2D image out of the reference_img_i
-                    elif self.analysis_axis:
+                    elif self.analysis_axis!=None:
                         reference_image = [np.squeeze(b) for b in np.split(reference_img_i, indices_or_sections=reference_img_i.shape[self.analysis_axis],axis=self.analysis_axis)][0]
                     #If none of the options above are valid, raise a value error
                     else:
-                        raise ValueError("can't allocate a non 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
+                        raise ValueError("can't allocate a 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
                 #Open the roi_file and transform it to a numpy array
                 roi_2_maintain_i = form_mask_from_roi(roi_maintain,
                                                         reference_img=reference_image,
@@ -100,10 +100,18 @@ class sample_quantifier():
                 roi_2_maintain = match_arrays_dimensions(roi_2_maintain_i, reference_img_i)
             else:
                 reference_image = reference_img_i.copy()
+                #Use roi_position_axis if provided, else use analysis axis, for allocating roi along their axis
+                if roi_position_axis != None:
+                    roi_maintain_axis = roi_position_axis
+                elif self.analysis_axis!=None:
+                    roi_maintain_axis = self.analysis_axis
+                else:
+                    raise ValueError("can't allocate a 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
+
                 #Open the roi_file and transform it to a numpy array
                 roi_2_maintain = form_mask_from_roi(roi_maintain,
                                                     reference_img=reference_image,
-                                                    ax_position=self.analysis_axis,
+                                                    ax_position=roi_maintain_axis,
                                                     return_coordinates=False,
                                                     roi_pixel_value=255,
                                                     background_pixel_val=0,
@@ -125,11 +133,11 @@ class sample_quantifier():
                     if roi_position_axis != None:
                         reference_image_excl = [np.squeeze(c) for c in np.split(reference_img_i_excl, indices_or_sections=reference_img_i_excl.shape[roi_position_axis],axis=roi_position_axis)][0]
                     #If no roi_position_axis but an analysis axis is provided, use the analysis axis to get a 2D image out of the reference_img_i
-                    elif self.analysis_axis:
+                    elif self.analysis_axis!=None:
                         reference_image_excl = [np.squeeze(d) for d in np.split(reference_img_i_excl, indices_or_sections=reference_img_i_excl.shape[self.analysis_axis],axis=self.analysis_axis)][0]
                     #If none of the options above are valid, raise a value error
                     else:
-                        raise ValueError("can't allocate a non 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
+                        raise ValueError("can't allocate a 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
                 
                 #Open the roi_file and transform it to a numpy array
                 roi_2_exclude_i = form_mask_from_roi(roi_exclude,
@@ -143,10 +151,19 @@ class sample_quantifier():
                 roi_2_exclude = match_arrays_dimensions(roi_2_exclude_i, reference_img_i_excl)
             else:
                 reference_image_excl = reference_img_i_excl.copy()
+
+                #Use roi_position_axis if provided, else use analysis axis, for allocating roi along their axis
+                if roi_position_axis != None:
+                    roi_exclude_axis = roi_position_axis
+                elif self.analysis_axis!=None:
+                    roi_exclude_axis = self.analysis_axis
+                else:
+                    raise ValueError("can't allocate a 3D roi file in a 3D image if neither roi_position_axis nor analysis_axis are indicated")
+                
                 #Open the roi_file and transform it to a numpy array
                 roi_2_exclude = form_mask_from_roi(roi_exclude,
                                                     reference_img=reference_image_excl,
-                                                    ax_position=self.analysis_axis,
+                                                    ax_position=roi_exclude_axis,
                                                     return_coordinates=False,
                                                     roi_pixel_value=255,
                                                     background_pixel_val=0,
@@ -190,7 +207,7 @@ class sample_quantifier():
             quantification_axis = self.analysis_axis+1
         else:
             quantification_axis = self.analysis_axis
-        
+
         #Quantify channels
         channels_quantifications = quantify_channels(channels_array=multi_channel_array,
                                                      channels_axis=0,
