@@ -359,14 +359,14 @@ class sample_quantifier():
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
             
-            # #Fish the ROIs files for the sample at f, if root_folder_roi exists
-            # if root_folder_roi!=None:
-            #     roi_maintain_for_f = self.get_roi_files(os.path.join(root_folder_roi, "roi_maintain"), f)
-            #     roi_exclude_for_f = self.get_roi_files(os.path.join(root_folder_roi, "roi_exclude"), f)
-            # else:
-            #     #Link roi_maintain_for_f and roi_exclude_for_f to None
-            #     roi_maintain_for_f = None
-            #     roi_exclude_for_f = None
+            #Fish the ROIs files for the sample at f, if root_folder_roi exists
+            if root_folder_roi!=None:
+                roi_maintain_for_f = self.get_roi_files(os.path.join(root_folder_roi, "roi_maintain"), f)
+                roi_exclude_for_f = self.get_roi_files(os.path.join(root_folder_roi, "roi_exclude"), f)
+            else:
+                #Link roi_maintain_for_f and roi_exclude_for_f to None
+                roi_maintain_for_f = None
+                roi_exclude_for_f = None
             
             # #Get the result measurements and the order of the analysed samples for the sample f
             # f_result_measurements, f_samples_order, f_multi_channel_array = self.quantify_sample(f_directory,
