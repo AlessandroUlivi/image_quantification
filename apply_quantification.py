@@ -162,11 +162,14 @@ class sample_quantifier():
             quantification_axis = self.analysis_axis+1
         else:
             quantification_axis = self.analysis_axis
-
+        print(multi_channel_array.shape)
+        print(multi_channel_array[:,0:4,:,:].shape)
+        print(roi_channel.shape)
+        print(roi_channel[0:4,:,:].shape)
         #Quantify channels
-        channels_quantifications = quantify_channels(channels_array=multi_channel_array,
+        channels_quantifications = quantify_channels(channels_array=multi_channel_array[:,0:4,:,:],
                                                      channels_axis=0,
-                                                     roi_mask_array=roi_channel,
+                                                     roi_mask_array=roi_channel[0:4,:,:],
                                                      analysis_axis=quantification_axis,
                                                      shuffle_times=self.shuffle_times,
                                                      no_quantification_valu_e=self.no_quantification_valu_e,
@@ -220,12 +223,13 @@ class sample_quantifier():
         for ch in channels_names_mapping_dict:
 
             #Iterate through the columns names
-            for clm in enumerate(channels_quantifications_columns):
+            for clm in channels_quantifications_columns:
 
                 #If an iteration axis is provided, check if the column name fits that of the iteration axis
                 if clm == 'axis_'+str(iteration_axis+1): #Note, the +1 compensates for the channels which are created in position 0 when forming the channel array to analyse in quantify_sample (see above)
                     #Check if a new name is given for the iteration axis
                     if new_name_iteration_axis!=None:
+                        
                         new_column_names_map[clm]=new_name_iteration_axis
                     #If no new name is given, just report the old name
                     else:
@@ -233,7 +237,7 @@ class sample_quantifier():
 
                 #If the channel name is in the column name
                 if ch in clm:
-
+                    
                     #Because some column names have multi channels (compatative measurements), firs check if the column name had alredy been changed for a channel
                     if clm in new_column_names_map:
 
@@ -251,17 +255,15 @@ class sample_quantifier():
                 
                 #If the channel name is not in the dictionary
                 else:
-                    
                     #Add the column name, without modification, only if it is the first iteration through the column (to avoid overwriting of changes made in former iterations)
                     if clm not in new_column_names_map:
-
                         new_column_names_map[clm]=clm
 
         
         #Substitute the columns names in the input dictionary with the new column names
 
         if return_column_names_map_dict:
-            return channels_names_mapping_dict
+            return new_column_names_map
         
         else:
             return
