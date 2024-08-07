@@ -315,9 +315,13 @@ class sample_quantifier():
             return new_col_channels_quantifications_df
 
 
-    def batch_quantification(self, root_folder_channels, root_folder_roi=None, roi_3D_maintain=False, roi_3D_exclude=False):
-        return
-
+    def batch_quantification(self, root_input_folder, root_output_folder, channels_new_names,
+                             root_folder_roi=None, new_name_iteration_axis=None, roi_3D_maintain=False,
+                             roi_3D_exclude=False, roi_position_axis=None):
         
+        #Create a list of the folders in root_input_folder
+        list_of_samples = listdirNHF(root_input_folder)
+
+        return
 
         
