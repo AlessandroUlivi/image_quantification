@@ -144,7 +144,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
         - if input_thresholds is ndarray. The output is input_thresholds. NOTE: if multiple thresholds are reported and input_thresholds is ndarray, the multiple threshold values
         must be indicated on axis -1.
         """
-        if isinstance(input_thresholds, int) or isinstance(input_thresholds, float):
+        if isinstance(input_thresholds, int) or isinstance(input_thresholds, float) or isinstance(input_thresholds, bool):
             return np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds,input_thresholds)
         elif isinstance(input_thresholds, tuple) or isinstance(input_thresholds, tuple):
             return np.stack([np.where(np.zeros(channels_stac_k.shape)==0, input_thresholds[k],input_thresholds[k]) for k in range(len(input_thresholds))], axis=-1)
