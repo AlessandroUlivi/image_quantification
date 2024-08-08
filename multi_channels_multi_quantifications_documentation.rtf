@@ -1,0 +1,180 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red193\green193\blue193;}
+{\*\expandedcolortbl;;\cssrgb\c80000\c80000\c80000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww24740\viewh12940\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Last modified (yyyy/mm/dd): 2024/08/08\
+Author: Alessandro Ulivi (ale.ulivi@gmail.com)\
+\
+CONVENTIONS:\
+- channel. It refers to individual files which are quantified. For example, if the binary mask of structure A and the binary mask of structure B are quantified, each binary mask is a channel.\
+\
+- channel i. The channel under analysis for a certain measurement.\
+\
+- channel j. When two channels are analysed, for example because they are compared for a certain measurement, the second channel is called channel j.\
+\
+- frame n. When channel i is analysed along an axis, frame n is the sub-image within channel i which is analysed. For example, if channel i is a timecourse of structure A, frame n is the individual timepoint.\
+\
+- frame m. Same as frame n, but for channel j, when channel i is compared to channel j.  \
+\
+- Region. Any portion of a binary mask which is fully surrounded by background pixels and, thus, not connected to other portions of the mask. The extraction of regions is based on the skimage.measure.label function (https://scikit-image.org/docs/stable/api/skimage.measure.html#skimage.measure.label), refer also to this documentation. NOTE: there is no threshold in terms of pixel number to define a region, thus a single pixel is a region. When this is a problem, a highpass threshold should be introduced before inputing the channel to the quantification, so that it has no regions smaller than the highpass threshold.\
+\
+- Region a + [arabic number]. The regions of channel i.\
+\
+- Region b + [roman number]. The regions of channel j.\
+\
+\
+\
+PARAMETERS VALUES\
+- n_of_region_4areas_measurement=0. Refers to mean_regions_area_[channel], median_regions_area_[channel], stdv_regions_area_[channel], sem_regions_area_[channel], min_regions_area_[channel], max_region_area_[channel].\
+\
+- highpass_n_regions = 0. Refers to mean_region_min_distances_[channel], median_region_min_distances_[channel], stdv_region_min_distances_[channel],  sem_region_min_distances_[channel], min_region_min_distances_[channel], max_region_min_distances_[channel], mean_region_max_distances_[channel], median_region_max_distances_[channel], stdv_region_max_distances_[channel],  sem_region_max_distances_[channel], min_region_max_distances_[channel], max_region_max_distances_[channel], mean_region_mean_distances_[channel], median_region_mean_distances_[channel], stdv_region_mean_distances_[channel],  sem_region_mean_distances_[channel], min_region_mean_distances_[channel], max_region_mean_distances_[channel]. Set by input reg_eucl_dist_within_arr_val_n_regions_nopass in quantify_channels within multi_channels_multi_quantifications.py.\
+\
+- min_px_num=2. Refer to convex_hull_volume_[channel]. Set by get_convex_hull_min_px_num in quantify_channels within multi_channels_multi_quantifications.py.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 \
+- min_px_over_thresh_common = 0. Refer to the beginning of comparative analyses between channel i and channel j. \
+\
+- n_px_thr_1=0 and n_px_thr_2=0. Refer to pixels_overlap_observed_[channel i]_[channel j] and pixels_overlap_shuffle_[channel i]_[channel j]_iter_[q]. Set by inputs measure_pixels_overlap_n_px_thr_1 and  measure_pixels_overlap_n_px_thr_2 in quantify_channels within multi_channels_multi_quantifications.py.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\cf2 \outl0\strokewidth0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 - px_thre_arr_1=3 and px_thre_arr_2=3. Refers to convex_hull_fraction_[channel i]_[channel j]. Set by conv_hull_fract_px_thre_arr_1 and conv_hull_fract_px_thre_arr_2 in quantify_channels within multi_channels_multi_quantifications.py.\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 - intersection_threshold=0. Refer to n_[channel I]_regions_overlap_w_[n]_[channel j]_regions. Set by count_n_overl_reg_intersection_threshold in quantify_channels within multi_channels_multi_quantifications.py.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \
+\cf2 \outl0\strokewidth0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \
+\
+MEASUREMENTS\
+- area_[channel]. The total number of pixels of channel i segmented mask. Unit=pixels.\
+\
+- region_number_[channel]. The total number of regions in channel i segmented mask.\
+\
+- mean_regions_area_[channel]. The mean area of the regions in channel i segmented mask. It is only calculated if at least a region is present in channel i segmented mask. The parameter n_of_region_4areas_measurement can be used to set a higher highpass threshold for the measurement. The measurement is done if >n_of_region_4areas_measurement are present. Unit=pixels.\
+\
+- median_regions_area_[channel]. The median area of the regions in channel i segmented mask. It is only calculated if at least a region is present in channel i segmented mask. The parameter n_of_region_4areas_measurement can be used to set a higher highpass threshold for the measurement. The measurement is done if >n_of_region_4areas_measurement are present. Unit=pixels.\
+\
+- stdv_regions_area_[channel]. The standard deviation of the areas of the regions in channel i segmented mask. It is only calculated if at least a region is present in channel i segmented mask. The parameter n_of_region_4areas_measurement can be used to set a higher highpass threshold for the measurement. The measurement is done if >n_of_region_4areas_measurement are present. Unit=pixels.\
+\
+- sem_regions_area_[channel]. The standard error of the means of the regions in channel i segmented mask. It is only calculated if at least a region is present in channel i segmented mask. The parameter n_of_region_4areas_measurement can be used to set a higher highpass threshold for the measurement. The measurement is done if >n_of_region_4areas_measurement are present. Unit=pixels.\
+\
+- min_regions_area_[channel]. The smallest area among the areas of the regions in channel i segmented mask. It is only calculated if at least a region is present in channel i segmented mask. The parameter n_of_region_4areas_measurement can be used to set a higher highpass threshold for the measurement. The measurement is done if >n_of_region_4areas_measurement are present. Unit=pixels.\
+\
+- max_region_area_[channel]. The largest area among the areas of the regions in channel i segmented mask. It is only calculated if at least a region is present in channel i segmented mask. The parameter n_of_region_4areas_measurement can be used to set a higher highpass threshold for the measurement. The measurement is done if >n_of_region_4areas_measurement are present. Unit=pixels.\
+\
+- number_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports how many distances are calculated for channel i . It is 0 if channel i has 0 regions, it is 1 if channel i has 2 regions, it can have different values depending on the regions topology if channel i  has more than 2 regions.\
+\
+- mean_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the mean of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- median_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the median of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- stdv_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard deviation of these minimum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- sem_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard error of the means of these minimum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- min_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the smallest of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- max_region_min_distances_[channel]. Per each region a1 of channel i, the minimum euclidean distance with the pooled remaining regions of channel i is calculated. When the minimum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the longest of these minimum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- number_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports how many distances are calculated for channel i . It is 0 if channel i has 0 regions, it is 1 if channel i has 2 regions, it can have different values depending on the region topology if channel i  has more than 2 regions. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- mean_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the mean of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present).  Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- median_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the median of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- stdv_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard deviation of these maximum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- sem_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard error of the means of these maximum distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- min_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the smallest of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- max_region_max_distances_[channel]. Per each region a1 of channel i, the maximum euclidean distance with the pooled remaining regions of channel i is calculated. When the maximum distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the longest of these maximum distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- number_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports how many distances are calculated for channel i . It is 0 if channel i has 0 regions, it is 1 if channel i has 2 regions, it corresponds to number of regions in channel i if channel i  has more than 2 regions. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- mean_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the mean of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- median_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the median of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- stdv_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard deviation of these mean distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- sem_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the standard error of the means of these mean distances. It is only calculated if at least 3 distances are calculated in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- min_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the smallest of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- max_region_mean_distances_[channel]. Per each region a1 of channel i, the mean euclidean distance with the pooled remaining regions of channel i is calculated. When the mean distance between region a1 and region a2 is identical, for example because only 2 regions are present in channel i , the distance is calculated only once. This parameter reports the longest of these mean distances. It is only calculated if at least 2 regions are present in channel i. The parameter highpass_n_regions can be used to increase the minimum number of regions required to do the measurement (measurement is done if >highpass_n_regions are present). Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- convex_hull_volume_[channel]. The volume of the convex hull (https://en.wikipedia.org/wiki/Convex_hull) which can be obtained with the pixels of channel i segmented mask. The measurement is done only if channel i segmented mask has more than 2 pixels. The parameter min_px_num can be used to increase the highpass threshold for doing the quantification (quantification is done if number of pixels of channel i segmented mask is >min_px_num). The name \'93volume\'94 follows scipy convention (https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html) which is used for calculating the convex hull. The volume reduces to area if channel i segmented mask is 2D. Unit=pixels.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \
+\
+THE FOLLOWING MEASUREMENTS ARE COMPARATIVE MEASUREMENTS BETWEEN CHANNELS. The parameter min_px_over_thresh_common can be used to set a highpass threshold for doing the analyses. Analysis will be done only if both area_channel_i and area_channel_j are >min_px_over_thresh_common.\
+\
+- pixels_overlap_observed_[channel i]_[channel j]. The fraction of pixels of the binary mask of channel i, which are concomitantly present in the binary mask of channel j. It is only calculated if channel i has at least 1 pixel (to avoid a 0 division). The parameters n_px_thr_1 and n_px_thr_2 can be used, independently, to set a highpass threshold for the number of pixels in binary masks of, respectively, channel i and j, for doing the analysis. The measurement is done only if both channel i number of pixels > n_px_thr_1 and channel j number of pixels is > n_px_thr_2.\
+\
+- pixels_overlap_shuffle_[channel i]_[channel j]_iter_[q]. The same analysis of pixels_overlap_observed_[channel i]_[channel j], but  done after randomly shuffling the position of the pixels of both channel i and channel j. NOTE: if ROIs are passed to parameters roi_mask_arr_1 and roi_mask_arr_2_against, the shuffling will only be restricted to the portion of the channel i and j defined by, respectively roi_mask_arr_1 and roi_mask_arr_2_against. For example, if roi_mask_arr_1 and roi_mask_arr_2_against are identical and correspond to the embryo cortex, only the pixels of the embryo cortex are shuffled while the imaging background is left intact. The measurement is iterated q times and per each iteration q the measurement is saved.\
+\
+- mean_min_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the minimum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the mean of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- median_min_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the minimum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the median of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- stdv_min_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the minimum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the standard deviation of these minimum distances. It is only calculated if at least 3 distances are measured. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- sem_min_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the minimum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the standard error of the means of these minimum distances. It is only calculated if at least 3 distances are measured. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- min_min_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the minimum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the shortest of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- max_min_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the minimum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the longest of these minimum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- mean_max_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the maximum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the mean of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- median_max_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the maximum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the median of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- stdv_max_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the maximum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the standard deviation of these maximum distances. It is only calculated if at least 3 distances are measured. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- sem_max_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the maximum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the standard error of the means of these maximum distances. It is only calculated if at least 3 distances are measured. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- min_max_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the maximum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the shortest of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- max_max_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the maximum euclidean distance with the pooled regions of channel j is calculated. This parameter reports the longest of these maximum distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- mean_mean_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the mean euclidean distance with the pooled regions of channel j is calculated. This parameter reports the mean of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- median_mean_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the mean euclidean distance with the pooled regions of channel j is calculated. This parameter reports the median of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- stdv_mean_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the mean euclidean distance with the pooled regions of channel j is calculated. This parameter reports the standard deviation of these mean distances. It is only calculated if at least 3 distances are measured. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- sem_mean_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the mean euclidean distance with the pooled regions of channel j is calculated. This parameter reports the standard error of the means of these mean distances. It is only calculated if at least 3 distances are measured. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- min_mean_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the mean euclidean distance with the pooled regions of channel j is calculated. This parameter reports the shortest of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- max_mean_distance_regions_[channel i]_[channel j]. Per each region a1 of channel i, the mean euclidean distance with the pooled regions of channel j is calculated. This parameter reports the longest of these mean distances. It is only calculated if at least 1 region is present in channel i and at least 1 region is present in channel j. Unit=pixels (NOTE: isometric pixels are assumed).\
+\
+- convex_hull_fraction_[channel i]_[channel j]. The fraction between the volume of the convex hull of channel i and the volume of the convex hull of channel j: convex_hull_volume_channel_i/convex_hull_volume_channel_j. It is only calculated it at least 3 pixels are present channel j. The parameter px_thre_arr_2 can be used for setting a higher highpass thresholds to do the measurement. The measurement is done if the number of pixels in channel j is >px_thre_arr_2. If less than 3 pixels are present in channel i the val_4_arr1_NOpassthres_arr2_passthres is returned. The parameter px_thre_arr_1 can be used for setting a higher highpass thresholds to do the measurement. val_4_arr1_NOpassthres_arr2_passthres is returned if the number of pixels in channel I is <=px_thre_arr_1. The name \'93volume\'94 follows scipy convention (https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html) which is used for calculating the convex hull. The volume reduces to area if channel i  and channel j segmented masks are 2D. Unit=pixels.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 - n_[channel I]_regions_overlap_w_[n]_[channel j]_regions. The number of regions in channel i which have a certain number [n] of overlapping regions in channel j. For example, when the quantification for n_channel_i_regions_overlap_w_3_channel_j_regions is 2, it means that 2 regions of channel i (regions a1 and region a2) have 3 overlapping regions in channel j (region bI, bII and bIII). When the quantification for n_channel_i_regions_overlap_w_4_channel_j_regions is 1, it means that only 1 region of channel i (regions a3) has 4 overlapping regions in channel j (region bII, bIII, bIV and bV). Note that while channel j regions can be shared among channel i regions, channels i regions are only quantified once. The quantification is only done if at least 1 region is present in channel i, while if no regions are present in channel j all regions of channel i are classified as having 0 overlapping regions in channel j. The parameter intersection_threshold sets a highpass filter to define region overlap. Two regions are considered overlapping if they share >intersection_threshold number of pixels.
+\f1 \cf2 \expnd0\expndtw0\kerning0
+\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0 \cf0 \kerning1\expnd0\expndtw0 \
+\
+}
