@@ -22,14 +22,7 @@ def quantify_channels(channels_array, channels_axis=0, roi_mask_array=None, anal
                       count_n_overl_reg_intersection_threshold=None, conv_hull_fract_px_thre_arr_1=3, conv_hull_fract_px_thre_arr_2=3,
                       get_conv_hull_fract_arr1_NOpass_arr2_pass_v=0.0, get_conv_hull_fract_arr2_NOpass_v=np.nan):
     """
-    seems to work with 3 limitations: 1) when providing the thresholds they array cannot contain axis of size 1. 2) when channel_axis/analysis_axis is in position 0 it can't
-    be indicated using negative number indexing (for example -10). 3) If a custom array of thresholds is provided and multiple thresholds are required (e.g. for comparison
-    functions, the multiple thresholds must be in position -1)
-    - roi_mask_array can be different for the channels. At least 1 axis mutch match channels_arrays. The matching axis must be in the correct position.
-    - min_px_over_thresh_common. the number of o pixels both channels must pass to continue with paired measurements.
-    NOTE than when a tuple or a list is passed as a threshold this is interpreted as a multi-threshold, not as individual thresholds for the different channels.
-    NOTE WELL THAT transform_to_label_img=False.
-    NOTE get_conv_hull_fract_arr1_NOpass_arr2_pass_v and get_conv_hull_fract_arr2_NOpass_v can't be changed tailored on the specific channel and array of analysis axis.
+    The full documentation is in file multi_channels_multi_quantifications_documentations.rtf
     """
     #=========================================
     #=========  SUPPORTING FUNCTIONS =========
