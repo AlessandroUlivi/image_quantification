@@ -69,6 +69,7 @@ class sample_quantifier():
         
         #Open roi_maintain if it is provided
         if roi_maintain !=None:
+            print("this should not be done!")
             #Use the first file of the collection list of files in the input folder as initial reference image
             reference_img_i = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i
@@ -117,8 +118,13 @@ class sample_quantifier():
                                                     background_pixel_val=0,
                                                     output_dtype=np.uint8)
         
+        #Associate roi_2_maintain to None if no roi_maintain is None
+        else:
+            roi_2_maintain = None
+
         #Open roi_exclude if it is provided
         if roi_exclude !=None:
+            print("but there is a roi to exclude...")
             #Use the first file of the collection list of files in the input folder as initial reference image
             reference_img_i_excl = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i_excl
@@ -169,6 +175,10 @@ class sample_quantifier():
                                                     background_pixel_val=0,
                                                     output_dtype=np.uint8)
         
+        #Associate roi_2_exclude to None, if roi_exclude is None
+        else:
+            roi_2_exclude = None
+
         #Combine roi to maintain and roi to exclude in a unique array
         if roi_maintain !=None or roi_exclude !=None:
             #If no roi_structure is provided, initialize and empty array to be used for the combination of the rois
