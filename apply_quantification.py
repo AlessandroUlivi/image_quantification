@@ -124,12 +124,10 @@ class sample_quantifier():
 
         #Open roi_exclude if it is provided
         if roi_exclude !=None:
-            print("but there is a roi to exclude...")
             #Use the first file of the collection list of files in the input folder as initial reference image
             reference_img_i_excl = collection_of_input_files[0]
             #Get a 2D reference image using analysis_axis if roi_3D is False, else use the entire reference_img_i_excl
             if roi_3D_exclude==False:
-
                 #If the files to analyse are 2D, just use reference_img_i_excl to open the roi file
                 if len(reference_img_i_excl.shape)==2:
                     reference_image_excl = reference_img_i_excl
@@ -211,7 +209,7 @@ class sample_quantifier():
         
         #Stack all the files in the input directory in a single array on axis 0. Axis 0 becomes my channel_axis
         multi_channel_array = np.stack(collection_of_input_files, axis=0)
-
+        
         #Define the analysis axis - because structures in the input array are stacked together on axis 0, if analysis axis is provided, it must be increased of 1 unit
         if self.analysis_axis != None:
             quantification_axis = self.analysis_axis+1
@@ -377,7 +375,7 @@ class sample_quantifier():
                 #Link roi_maintain_for_f and roi_exclude_for_f to None
                 roi_maintain_for_f = None
                 roi_exclude_for_f = None
-            
+
             #Get the result measurements and the order of the analysed samples for the sample f
             f_result_measurements, f_samples_order, f_multi_channel_array = self.quantify_sample(f_directory,
                                                                                                  roi_maintain=roi_maintain_for_f,
