@@ -215,8 +215,9 @@ class sample_quantifier():
             quantification_axis = self.analysis_axis+1
         else:
             quantification_axis = self.analysis_axis
-
-        #Quantify channels
+        print(multi_channel_array.shape)
+        print(roi_channel.shape)
+        # #Quantify channels
         channels_quantifications = quantify_channels(channels_array=multi_channel_array,
                                                      channels_axis=0,
                                                      roi_mask_array=roi_channel,
