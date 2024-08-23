@@ -20,9 +20,7 @@ def quantify_single_channel(channels_array, roi_mask_array=None, analysis_axis=N
                       count_regions_number_threshold_roi_mask=0, n_of_region_4areas_measure=0, reg_eucl_dist_within_arr_val_n_regions_nopass=1,
                       get_convex_hull_min_px_num=2):
     """
-    The full documentation is in file... for the moment there is no file. Sorry. It was created from multi_channels_multi_quantifications.py.
-    That documentations surely can help.
-    NOTE WELL THAT THE USE OF THE PRESENT FUNCTION WHEN NO ANALYSIS AXIS IS PROVIDED HASN'T BEEN TESTED!!!
+    The full documentation is in file single_channel_multi_quantifications_documentation.rtf.
     """
     #=========================================
     #=========  SUPPORTING FUNCTIONS =========

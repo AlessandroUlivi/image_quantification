@@ -39,6 +39,9 @@ class sample_quantifier():
         """
         files in sample_input_folder must have the same dimensions.
         If roi are provided, for the moment it only works with 2D or 3D arrays as the opening of the rois assumes their positioning in a 2D or 3D array.
+
+        This code has been throughly tested for the quantification of multi-channel files. The quantification of single-channel files has been tested to work properly
+        but it did not go through the quantification of multiple files, with different formats, from different people.
         """
         #Form a list with the files in sample_input_folder
         list_of_input_files = listdirNHF(sample_input_folder)
